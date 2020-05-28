@@ -1,0 +1,48 @@
+In archive /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/esp-idf/main/libmain.a:
+
+main.c.obj:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .literal.app_main 000000a0  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .text         00000000  00000000  00000000  000000d4  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .data         00000000  00000000  00000000  000000d4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  3 .bss          00000000  00000000  00000000  000000d4  2**0
+                  ALLOC
+  4 .text.event_handler 00000007  00000000  00000000  000000d4  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  5 .rodata.str1.4 000000f3  00000000  00000000  000000dc  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  6 .rodata       00000060  00000000  00000000  000001d0  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  7 .text.app_main 000001ab  00000000  00000000  00000230  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  8 .rodata.__func__$7631 00000009  00000000  00000000  000003dc  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  9 .debug_frame  00000040  00000000  00000000  000003e8  2**2
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 10 .debug_info   00001c4b  00000000  00000000  00000428  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 11 .debug_abbrev 0000026d  00000000  00000000  00002073  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_loc    00000112  00000000  00000000  000022e0  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 13 .debug_aranges 00000028  00000000  00000000  000023f2  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 14 .debug_ranges 00000018  00000000  00000000  0000241a  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 15 .debug_line   00000460  00000000  00000000  00002432  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 16 .debug_str    0000184e  00000000  00000000  00002892  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 17 .comment      0000003b  00000000  00000000  000040e0  2**0
+                  CONTENTS, READONLY
+ 18 .xtensa.info  00000038  00000000  00000000  0000411b  2**0
+                  CONTENTS, READONLY
+ 19 .xt.lit       00000008  00000000  00000000  00004153  2**0
+                  CONTENTS, RELOC, READONLY
+ 20 .xt.prop      00000078  00000000  00000000  0000415b  2**0
+                  CONTENTS, RELOC, READONLY

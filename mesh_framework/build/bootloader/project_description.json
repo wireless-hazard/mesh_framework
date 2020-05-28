@@ -1,0 +1,18 @@
+{
+    "project_name":       "bootloader",
+    "project_path":       "/home/magno/esp-idf/components/bootloader/subproject",
+    "build_dir":          "/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader",
+    "config_file":        "/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/sdkconfig",
+    "config_defaults":    "",
+    "app_elf":            "bootloader.elf",
+    "app_bin":            "bootloader.bin",
+    "git_revision":       "v3.3.1",
+    "phy_data_partition": "",
+    "monitor_baud" : "115200",
+    "config_environment" : {
+        "COMPONENT_KCONFIGS" : " /home/magno/esp-idf/components/efuse/Kconfig /home/magno/esp-idf/components/esp32/Kconfig /home/magno/esp-idf/components/log/Kconfig /home/magno/esp-idf/components/spi_flash/Kconfig",
+        "COMPONENT_KCONFIGS_PROJBUILD" : " /home/magno/esp-idf/components/bootloader/Kconfig.projbuild /home/magno/esp-idf/components/esptool_py/Kconfig.projbuild /home/magno/esp-idf/components/partition_table/Kconfig.projbuild"
+    },
+    "build_components" : [ "soc", "esp32", "log", "bootloader", "spi_flash", "micro-ecc", "efuse", "bootloader_support", "main", "esptool_py", "partition_table" ],
+    "build_component_paths" : [ "/home/magno/esp-idf/components/soc", "/home/magno/esp-idf/components/esp32", "/home/magno/esp-idf/components/log", "/home/magno/esp-idf/components/bootloader", "/home/magno/esp-idf/components/spi_flash", "/home/magno/esp-idf/components/micro-ecc", "/home/magno/esp-idf/components/efuse", "/home/magno/esp-idf/components/bootloader_support", "/home/magno/esp-idf/components/bootloader/subproject/main", "/home/magno/esp-idf/components/esptool_py", "/home/magno/esp-idf/components/partition_table" ]
+}

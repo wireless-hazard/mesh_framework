@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/CMakeFiles/bootloader
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/CMakeFiles/bootloader.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/CMakeFiles/bootloader-complete.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
