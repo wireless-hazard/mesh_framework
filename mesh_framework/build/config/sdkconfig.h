@@ -31,6 +31,7 @@
 #define CONFIG_MONITOR_BAUD 115200
 #define CONFIG_ESP_WIFI_SSID "myssid"
 #define CONFIG_ESP_WIFI_PASSWORD "mypassword"
+#define CONFIG_MESH_ID "sijdofaisdf"
 #define CONFIG_PARTITION_TABLE_SINGLE_APP 1
 #define CONFIG_PARTITION_TABLE_CUSTOM_FILENAME "partitions.csv"
 #define CONFIG_PARTITION_TABLE_FILENAME "partitions_singleapp.csv"

@@ -12,3 +12,8 @@ config ESP_WIFI_PASSWORD
     help
 	WiFi password (WPA or WPA2) for the example to use.
 endmenu
+
+menu "Mesh Configuration"
+config MESH_ID
+    string "MESH_ID"
+endmenu

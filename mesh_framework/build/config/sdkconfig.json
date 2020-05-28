@@ -357,6 +357,7 @@
     "MDNS_MAX_SERVICES": 10,
     "MEMMAP_TRACEMEM": false,
     "MEMMAP_TRACEMEM_TWOBANKS": false,
+    "MESH_ID": "sijdofaisdf",
     "MONITOR_BAUD": 115200,
     "MONITOR_BAUD_115200B": true,
     "MONITOR_BAUD_230400B": false,

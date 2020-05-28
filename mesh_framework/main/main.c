@@ -5,6 +5,7 @@
 #include "esp_event_loop.h"
 #include "nvs_flash.h"
 #include "driver/gpio.h"
+#include "mesh_framework.h"
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
@@ -37,6 +38,9 @@ void app_main(void)
         gpio_set_level(GPIO_NUM_4, level);
         level = !level;
         vTaskDelay(300 / portTICK_PERIOD_MS);
+    int a = 5;
+    int b = 7;
+    meshf_add(&a,b);
     }
 }
 

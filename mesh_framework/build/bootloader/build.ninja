@@ -79,8 +79,6 @@ build CMakeFiles/bootloader.elf.dir/dummy_main_src.c.obj: C_COMPILER__bootloader
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader
   OBJECT_DIR = CMakeFiles/bootloader.elf.dir
   OBJECT_FILE_DIR = CMakeFiles/bootloader.elf.dir
-  TARGET_COMPILE_PDB = CMakeFiles/bootloader.elf.dir/
-  TARGET_PDB = bootloader.elf.pdb
 
 # =============================================================================
 # Link build statements for EXECUTABLE target bootloader.elf
@@ -96,9 +94,8 @@ build bootloader.elf: C_EXECUTABLE_LINKER__bootloader.2eelf CMakeFiles/bootloade
   OBJECT_DIR = CMakeFiles/bootloader.elf.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = CMakeFiles/bootloader.elf.dir/
   TARGET_FILE = bootloader.elf
-  TARGET_PDB = bootloader.elf.pdb
+  TARGET_PDB = bootloader.elf.dbg
 
 #############################################
 # Utility command for flash
@@ -243,7 +240,7 @@ build mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-configure: CUSTOM_COMMAND m
 #############################################
 # Custom command for mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-build
 
-build mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-build kconfig_bin/mconf-idf: CUSTOM_COMMAND mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-configure /home/magno/esp-idf/tools/kconfig/conf.c /home/magno/esp-idf/tools/kconfig/confdata.c /home/magno/esp-idf/tools/kconfig/expr.c /home/magno/esp-idf/tools/kconfig/gconf.c /home/magno/esp-idf/tools/kconfig/images.c /home/magno/esp-idf/tools/kconfig/kxgettext.c /home/magno/esp-idf/tools/kconfig/mconf.c /home/magno/esp-idf/tools/kconfig/menu.c /home/magno/esp-idf/tools/kconfig/nconf.c /home/magno/esp-idf/tools/kconfig/nconf.gui.c /home/magno/esp-idf/tools/kconfig/symbol.c /home/magno/esp-idf/tools/kconfig/util.c /home/magno/esp-idf/tools/kconfig/Makefile /home/magno/esp-idf/tools/cmake/kconfig.cmake
+build mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-build kconfig_bin/mconf-idf: CUSTOM_COMMAND mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-configure /home/magno/esp-idf/tools/kconfig/conf.c /home/magno/esp-idf/tools/kconfig/confdata.c /home/magno/esp-idf/tools/kconfig/expr.c /home/magno/esp-idf/tools/kconfig/gconf.c /home/magno/esp-idf/tools/kconfig/images.c /home/magno/esp-idf/tools/kconfig/kxgettext.c /home/magno/esp-idf/tools/kconfig/mconf.c /home/magno/esp-idf/tools/kconfig/menu.c /home/magno/esp-idf/tools/kconfig/nconf.c /home/magno/esp-idf/tools/kconfig/nconf.gui.c /home/magno/esp-idf/tools/kconfig/symbol.c /home/magno/esp-idf/tools/kconfig/util.c /home/magno/esp-idf/tools/kconfig/zconf.hash.c /home/magno/esp-idf/tools/kconfig/zconf.lex.c /home/magno/esp-idf/tools/kconfig/zconf.tab.c /home/magno/esp-idf/tools/kconfig/Makefile /home/magno/esp-idf/tools/cmake/kconfig.cmake
   COMMAND = cd /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader/kconfig_bin && make -f /home/magno/esp-idf/tools/kconfig/Makefile mconf-idf && /usr/bin/cmake -E touch /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-build
   DESC = Performing build step for 'mconf-idf'
   restat = 1
@@ -369,8 +366,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/cpu_util.c.obj: C_COMPI
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/gpio_periph.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/gpio_periph.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/gpio_periph.c.obj.d
@@ -378,8 +373,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/gpio_periph.c.obj: C_CO
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_clk.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_clk.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_clk.c.obj.d
@@ -387,8 +380,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_clk.c.obj: C_COMPIL
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_clk_init.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_clk_init.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_clk_init.c.obj.d
@@ -396,8 +387,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_clk_init.c.obj: C_C
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_init.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_init.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_init.c.obj.d
@@ -405,8 +394,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_init.c.obj: C_COMPI
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_periph.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_periph.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_periph.c.obj.d
@@ -414,8 +401,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_periph.c.obj: C_COM
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_pm.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_pm.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_pm.c.obj.d
@@ -423,8 +408,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_pm.c.obj: C_COMPILE
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_sleep.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_sleep.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_sleep.c.obj.d
@@ -432,8 +415,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_sleep.c.obj: C_COMP
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_time.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_time.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_time.c.obj.d
@@ -441,8 +422,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_time.c.obj: C_COMPI
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_wdt.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/rtc_wdt.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_wdt.c.obj.d
@@ -450,8 +429,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/rtc_wdt.c.obj: C_COMPIL
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/sdio_slave_periph.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/sdio_slave_periph.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/sdio_slave_periph.c.obj.d
@@ -459,8 +436,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/sdio_slave_periph.c.obj
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/sdmmc_periph.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/sdmmc_periph.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/sdmmc_periph.c.obj.d
@@ -468,8 +443,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/sdmmc_periph.c.obj: C_C
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/soc_memory_layout.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/soc_memory_layout.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/soc_memory_layout.c.obj.d
@@ -477,8 +450,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/soc_memory_layout.c.obj
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/spi_periph.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/esp32/spi_periph.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/spi_periph.c.obj.d
@@ -486,8 +457,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32/spi_periph.c.obj: C_COM
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 build esp-idf/soc/CMakeFiles/idf_component_soc.dir/src/memory_layout_utils.c.obj: C_COMPILER__idf_component_soc /home/magno/esp-idf/components/soc/src/memory_layout_utils.c || cmake_object_order_depends_target_idf_component_soc
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/soc/CMakeFiles/idf_component_soc.dir/src/memory_layout_utils.c.obj.d
@@ -495,8 +464,6 @@ build esp-idf/soc/CMakeFiles/idf_component_soc.dir/src/memory_layout_utils.c.obj
   INCLUDES = -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   OBJECT_FILE_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir/src
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_soc
@@ -510,9 +477,8 @@ build esp-idf/soc/libsoc.a: C_STATIC_LIBRARY_LINKER__idf_component_soc esp-idf/s
   OBJECT_DIR = esp-idf/soc/CMakeFiles/idf_component_soc.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/soc/CMakeFiles/idf_component_soc.dir/idf_component_soc.pdb
   TARGET_FILE = esp-idf/soc/libsoc.a
-  TARGET_PDB = esp-idf/soc/libsoc.pdb
+  TARGET_PDB = soc.a.dbg
 
 #############################################
 # Utility command for idf_component_soc_sections_info
@@ -594,8 +560,6 @@ build esp-idf/log/CMakeFiles/idf_component_log.dir/log.c.obj: C_COMPILER__idf_co
   INCLUDES = -I/home/magno/esp-idf/components/log/include -Iconfig -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/log/CMakeFiles/idf_component_log.dir
   OBJECT_FILE_DIR = esp-idf/log/CMakeFiles/idf_component_log.dir
-  TARGET_COMPILE_PDB = esp-idf/log/CMakeFiles/idf_component_log.dir/idf_component_log.pdb
-  TARGET_PDB = esp-idf/log/liblog.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_log
@@ -609,9 +573,8 @@ build esp-idf/log/liblog.a: C_STATIC_LIBRARY_LINKER__idf_component_log esp-idf/l
   OBJECT_DIR = esp-idf/log/CMakeFiles/idf_component_log.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/log/CMakeFiles/idf_component_log.dir/idf_component_log.pdb
   TARGET_FILE = esp-idf/log/liblog.a
-  TARGET_PDB = esp-idf/log/liblog.pdb
+  TARGET_PDB = log.a.dbg
 
 #############################################
 # Utility command for idf_component_log_sections_info
@@ -693,8 +656,6 @@ build esp-idf/spi_flash/CMakeFiles/idf_component_spi_flash.dir/spi_flash_rom_pat
   INCLUDES = -I/home/magno/esp-idf/components/spi_flash/include -Iconfig -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/spi_flash/CMakeFiles/idf_component_spi_flash.dir
   OBJECT_FILE_DIR = esp-idf/spi_flash/CMakeFiles/idf_component_spi_flash.dir
-  TARGET_COMPILE_PDB = esp-idf/spi_flash/CMakeFiles/idf_component_spi_flash.dir/idf_component_spi_flash.pdb
-  TARGET_PDB = esp-idf/spi_flash/libspi_flash.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_spi_flash
@@ -708,9 +669,8 @@ build esp-idf/spi_flash/libspi_flash.a: C_STATIC_LIBRARY_LINKER__idf_component_s
   OBJECT_DIR = esp-idf/spi_flash/CMakeFiles/idf_component_spi_flash.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/spi_flash/CMakeFiles/idf_component_spi_flash.dir/idf_component_spi_flash.pdb
   TARGET_FILE = esp-idf/spi_flash/libspi_flash.a
-  TARGET_PDB = esp-idf/spi_flash/libspi_flash.pdb
+  TARGET_PDB = spi_flash.a.dbg
 
 #############################################
 # Utility command for idf_component_spi_flash_sections_info
@@ -768,8 +728,6 @@ build esp-idf/micro-ecc/CMakeFiles/idf_component_micro-ecc.dir/micro-ecc/uECC.c.
   INCLUDES = -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -Iconfig -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/micro-ecc/CMakeFiles/idf_component_micro-ecc.dir
   OBJECT_FILE_DIR = esp-idf/micro-ecc/CMakeFiles/idf_component_micro-ecc.dir/micro-ecc
-  TARGET_COMPILE_PDB = esp-idf/micro-ecc/CMakeFiles/idf_component_micro-ecc.dir/idf_component_micro-ecc.pdb
-  TARGET_PDB = esp-idf/micro-ecc/libmicro-ecc.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_micro-ecc
@@ -783,9 +741,8 @@ build esp-idf/micro-ecc/libmicro-ecc.a: C_STATIC_LIBRARY_LINKER__idf_component_m
   OBJECT_DIR = esp-idf/micro-ecc/CMakeFiles/idf_component_micro-ecc.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/micro-ecc/CMakeFiles/idf_component_micro-ecc.dir/idf_component_micro-ecc.pdb
   TARGET_FILE = esp-idf/micro-ecc/libmicro-ecc.a
-  TARGET_PDB = esp-idf/micro-ecc/libmicro-ecc.pdb
+  TARGET_PDB = micro-ecc.a.dbg
 
 #############################################
 # Utility command for idf_component_micro-ecc_sections_info
@@ -833,8 +790,6 @@ build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/esp32/esp_efuse_table.c.o
   INCLUDES = -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -Iconfig -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir
   OBJECT_FILE_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/esp32
-  TARGET_COMPILE_PDB = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/idf_component_efuse.pdb
-  TARGET_PDB = esp-idf/efuse/libefuse.pdb
 build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_api.c.obj: C_COMPILER__idf_component_efuse /home/magno/esp-idf/components/efuse/src/esp_efuse_api.c || cmake_object_order_depends_target_idf_component_efuse
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_api.c.obj.d
@@ -842,8 +797,6 @@ build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_api.c.obj: 
   INCLUDES = -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -Iconfig -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir
   OBJECT_FILE_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src
-  TARGET_COMPILE_PDB = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/idf_component_efuse.pdb
-  TARGET_PDB = esp-idf/efuse/libefuse.pdb
 build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_fields.c.obj: C_COMPILER__idf_component_efuse /home/magno/esp-idf/components/efuse/src/esp_efuse_fields.c || cmake_object_order_depends_target_idf_component_efuse
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_fields.c.obj.d
@@ -851,8 +804,6 @@ build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_fields.c.ob
   INCLUDES = -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -Iconfig -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir
   OBJECT_FILE_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src
-  TARGET_COMPILE_PDB = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/idf_component_efuse.pdb
-  TARGET_PDB = esp-idf/efuse/libefuse.pdb
 build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_utility.c.obj: C_COMPILER__idf_component_efuse /home/magno/esp-idf/components/efuse/src/esp_efuse_utility.c || cmake_object_order_depends_target_idf_component_efuse
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_utility.c.obj.d
@@ -860,8 +811,6 @@ build esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src/esp_efuse_utility.c.o
   INCLUDES = -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -Iconfig -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir
   OBJECT_FILE_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/src
-  TARGET_COMPILE_PDB = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/idf_component_efuse.pdb
-  TARGET_PDB = esp-idf/efuse/libefuse.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_efuse
@@ -875,9 +824,8 @@ build esp-idf/efuse/libefuse.a: C_STATIC_LIBRARY_LINKER__idf_component_efuse esp
   OBJECT_DIR = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/efuse/CMakeFiles/idf_component_efuse.dir/idf_component_efuse.pdb
   TARGET_FILE = esp-idf/efuse/libefuse.a
-  TARGET_PDB = esp-idf/efuse/libefuse.pdb
+  TARGET_PDB = efuse.a.dbg
 
 #############################################
 # Utility command for idf_component_efuse_sections_info
@@ -983,8 +931,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_common.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_common.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_common.c.obj.d
@@ -992,8 +938,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_flash.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_flash.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_flash.c.obj.d
@@ -1001,8 +945,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_flash_config.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_flash_config.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_flash_config.c.obj.d
@@ -1010,8 +952,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_random.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_random.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_random.c.obj.d
@@ -1019,8 +959,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_sha.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_sha.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_sha.c.obj.d
@@ -1028,8 +966,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_utility.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_utility.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_utility.c.obj.d
@@ -1037,8 +973,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/esp_image_format.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/esp_image_format.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/esp_image_format.c.obj.d
@@ -1046,8 +980,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/flash_encrypt.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/flash_encrypt.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/flash_encrypt.c.obj.d
@@ -1055,8 +987,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/flash_partitions.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/flash_partitions.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/flash_partitions.c.obj.d
@@ -1064,8 +994,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/flash_qio_mode.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/flash_qio_mode.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/flash_qio_mode.c.obj.d
@@ -1073,8 +1001,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/secure_boot.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/secure_boot.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/secure_boot.c.obj.d
@@ -1082,8 +1008,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/secure_boot_signatures.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/secure_boot_signatures.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/secure_boot_signatures.c.obj.d
@@ -1091,8 +1015,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_init.c.obj: C_COMPILER__idf_component_bootloader_support /home/magno/esp-idf/components/bootloader_support/src/bootloader_init.c || cmake_object_order_depends_target_idf_component_bootloader_support
   DEFINES = -DBOOTLOADER_BUILD=1 -DESP_PLATFORM -DGCC_NOT_5_2_0=0 -DHAVE_CONFIG_H -DIDF_VER=\"v3.3.1\"
   DEP_FILE = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src/bootloader_init.c.obj.d
@@ -1100,8 +1022,6 @@ build esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   INCLUDES = -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -Iconfig -I/home/magno/esp-idf/components/spi_flash/include -I/home/magno/esp-idf/components/micro-ecc/micro-ecc -I/home/magno/esp-idf/components/efuse/include -I/home/magno/esp-idf/components/efuse/esp32/include -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   OBJECT_FILE_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/src
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_bootloader_support
@@ -1115,9 +1035,8 @@ build esp-idf/bootloader_support/libbootloader_support.a: C_STATIC_LIBRARY_LINKE
   OBJECT_DIR = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/bootloader_support/CMakeFiles/idf_component_bootloader_support.dir/idf_component_bootloader_support.pdb
   TARGET_FILE = esp-idf/bootloader_support/libbootloader_support.a
-  TARGET_PDB = esp-idf/bootloader_support/libbootloader_support.pdb
+  TARGET_PDB = bootloader_support.a.dbg
 
 #############################################
 # Utility command for idf_component_bootloader_support_sections_info
@@ -1175,8 +1094,6 @@ build esp-idf/main/CMakeFiles/idf_component_main.dir/bootloader_start.c.obj: C_C
   INCLUDES = -Iconfig -I/home/magno/esp-idf/components/bootloader_support/include -I/home/magno/esp-idf/components/bootloader_support/include_bootloader -I/home/magno/esp-idf/components/log/include -I/home/magno/esp-idf/components/esp32/include -I/home/magno/esp-idf/components/soc/esp32/include -I/home/magno/esp-idf/components/soc/include
   OBJECT_DIR = esp-idf/main/CMakeFiles/idf_component_main.dir
   OBJECT_FILE_DIR = esp-idf/main/CMakeFiles/idf_component_main.dir
-  TARGET_COMPILE_PDB = esp-idf/main/CMakeFiles/idf_component_main.dir/idf_component_main.pdb
-  TARGET_PDB = esp-idf/main/libmain.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target idf_component_main
@@ -1190,9 +1107,8 @@ build esp-idf/main/libmain.a: C_STATIC_LIBRARY_LINKER__idf_component_main esp-id
   OBJECT_DIR = esp-idf/main/CMakeFiles/idf_component_main.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = esp-idf/main/CMakeFiles/idf_component_main.dir/idf_component_main.pdb
   TARGET_FILE = esp-idf/main/libmain.a
-  TARGET_PDB = esp-idf/main/libmain.pdb
+  TARGET_PDB = main.a.dbg
 
 #############################################
 # Utility command for idf_component_main_sections_info
@@ -1380,13 +1296,13 @@ default all
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/sdkconfig /home/magno/esp-idf/.git/HEAD /home/magno/esp-idf/.git/modules/components/asio/asio/HEAD /home/magno/esp-idf/.git/modules/components/aws_iot/aws-iot-device-sdk-embedded-C/HEAD /home/magno/esp-idf/.git/modules/components/bt/lib/HEAD /home/magno/esp-idf/.git/modules/components/coap/libcoap/HEAD /home/magno/esp-idf/.git/modules/components/esp32/lib/HEAD /home/magno/esp-idf/.git/modules/components/esptool_py/esptool/HEAD /home/magno/esp-idf/.git/modules/components/expat/expat/HEAD /home/magno/esp-idf/.git/modules/components/json/cJSON/HEAD /home/magno/esp-idf/.git/modules/components/libsodium/libsodium/HEAD /home/magno/esp-idf/.git/modules/components/lwip/lwip/HEAD /home/magno/esp-idf/.git/modules/components/mbedtls/mbedtls/HEAD /home/magno/esp-idf/.git/modules/components/micro-ecc/micro-ecc/HEAD /home/magno/esp-idf/.git/modules/components/mqtt/esp-mqtt/HEAD /home/magno/esp-idf/.git/modules/components/nghttp/nghttp2/HEAD /home/magno/esp-idf/.git/modules/components/nimble/nimble/HEAD /home/magno/esp-idf/.git/modules/components/protobuf-c/protobuf-c/HEAD /home/magno/esp-idf/.git/modules/components/spiffs/spiffs/HEAD /home/magno/esp-idf/.git/modules/components/unity/unity/HEAD /home/magno/esp-idf/.git/modules/examples/build_system/cmake/import_lib/main/lib/tinyxml2/HEAD /home/magno/esp-idf/CMakeLists.txt /home/magno/esp-idf/components/asio/asio/.git /home/magno/esp-idf/components/aws_iot/aws-iot-device-sdk-embedded-C/.git /home/magno/esp-idf/components/bootloader/CMakeLists.txt /home/magno/esp-idf/components/bootloader/Kconfig.projbuild /home/magno/esp-idf/components/bootloader/project_include.cmake /home/magno/esp-idf/components/bootloader/subproject/CMakeLists.txt /home/magno/esp-idf/components/bootloader/subproject/main/CMakeLists.txt /home/magno/esp-idf/components/bootloader_support/CMakeLists.txt /home/magno/esp-idf/components/bt/lib/.git /home/magno/esp-idf/components/coap/libcoap/.git /home/magno/esp-idf/components/efuse/CMakeLists.txt /home/magno/esp-idf/components/efuse/Kconfig /home/magno/esp-idf/components/efuse/esp32/sources.cmake /home/magno/esp-idf/components/esp32/CMakeLists.txt /home/magno/esp-idf/components/esp32/Kconfig /home/magno/esp-idf/components/esp32/lib/.git /home/magno/esp-idf/components/esp32/project_include.cmake /home/magno/esp-idf/components/esptool_py/CMakeLists.txt /home/magno/esp-idf/components/esptool_py/Kconfig.projbuild /home/magno/esp-idf/components/esptool_py/esptool/.git /home/magno/esp-idf/components/esptool_py/flash_app_args.in /home/magno/esp-idf/components/esptool_py/flash_bootloader_args.in /home/magno/esp-idf/components/esptool_py/flash_partition_table_args.in /home/magno/esp-idf/components/esptool_py/flash_project_args.in /home/magno/esp-idf/components/esptool_py/flasher_args.json.in /home/magno/esp-idf/components/esptool_py/project_include.cmake /home/magno/esp-idf/components/expat/expat/.git /home/magno/esp-idf/components/json/cJSON/.git /home/magno/esp-idf/components/libsodium/libsodium/.git /home/magno/esp-idf/components/log/CMakeLists.txt /home/magno/esp-idf/components/log/Kconfig /home/magno/esp-idf/components/lwip/lwip/.git /home/magno/esp-idf/components/mbedtls/mbedtls/.git /home/magno/esp-idf/components/micro-ecc/CMakeLists.txt /home/magno/esp-idf/components/micro-ecc/micro-ecc/.git /home/magno/esp-idf/components/mqtt/esp-mqtt/.git /home/magno/esp-idf/components/nghttp/nghttp2/.git /home/magno/esp-idf/components/nimble/nimble/.git /home/magno/esp-idf/components/partition_table/CMakeLists.txt /home/magno/esp-idf/components/partition_table/Kconfig.projbuild /home/magno/esp-idf/components/partition_table/project_include.cmake /home/magno/esp-idf/components/protobuf-c/protobuf-c/.git /home/magno/esp-idf/components/soc/CMakeLists.txt /home/magno/esp-idf/components/soc/esp32/sources.cmake /home/magno/esp-idf/components/spi_flash/CMakeLists.txt /home/magno/esp-idf/components/spi_flash/Kconfig /home/magno/esp-idf/components/spiffs/spiffs/.git /home/magno/esp-idf/components/unity/unity/.git /home/magno/esp-idf/examples/build_system/cmake/import_lib/main/lib/tinyxml2/.git /home/magno/esp-idf/tools/cmake/component_utils.cmake /home/magno/esp-idf/tools/cmake/components.cmake /home/magno/esp-idf/tools/cmake/crosstool_version_check.cmake /home/magno/esp-idf/tools/cmake/git_submodules.cmake /home/magno/esp-idf/tools/cmake/idf_functions.cmake /home/magno/esp-idf/tools/cmake/kconfig.cmake /home/magno/esp-idf/tools/cmake/ldgen.cmake /home/magno/esp-idf/tools/cmake/project.cmake /home/magno/esp-idf/tools/cmake/project_description.json.in /home/magno/esp-idf/tools/cmake/targets.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake.in /home/magno/esp-idf/tools/cmake/toolchain-esp32.cmake /home/magno/esp-idf/tools/cmake/utilities.cmake /home/magno/esp-idf/tools/kconfig_new/confgen.py /home/magno/esp-idf/tools/kconfig_new/kconfiglib.py /usr/share/cmake-3.10/Modules/CMakeASMCompiler.cmake.in /usr/share/cmake-3.10/Modules/CMakeASMInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCCompiler.cmake.in /usr/share/cmake-3.10/Modules/CMakeCCompilerABI.c /usr/share/cmake-3.10/Modules/CMakeCInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCXXCompiler.cmake.in /usr/share/cmake-3.10/Modules/CMakeCXXCompilerABI.cpp /usr/share/cmake-3.10/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.10/Modules/CMakeCompilerIdDetection.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineASMCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCXXCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompileFeatures.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompilerABI.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompilerId.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineSystem.cmake /usr/share/cmake-3.10/Modules/CMakeFindBinUtils.cmake /usr/share/cmake-3.10/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.10/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.10/Modules/CMakeNinjaFindMake.cmake /usr/share/cmake-3.10/Modules/CMakeParseImplicitLinkInfo.cmake /usr/share/cmake-3.10/Modules/CMakeSystem.cmake.in /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.10/Modules/CMakeTestASMCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeTestCCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeTestCXXCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeTestCompilerCommon.cmake /usr/share/cmake-3.10/Modules/Compiler/ADSP-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/ARMCC-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/AppleClang-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Borland-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.10/Modules/Compiler/Clang-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /usr/share/cmake-3.10/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Cray-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GHS-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-ASM.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C-FeatureTests.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX-FeatureTests.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-FindBinUtils.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU.cmake /usr/share/cmake-3.10/Modules/Compiler/HP-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/IAR-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /usr/share/cmake-3.10/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /usr/share/cmake-3.10/Modules/Compiler/Intel-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/MIPSpro-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/MSVC-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/PGI-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/PathScale-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SCO-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/TI-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Watcom-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/XL-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/zOS-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/ExternalProject.cmake /usr/share/cmake-3.10/Modules/FindGit.cmake /usr/share/cmake-3.10/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.10/Modules/FindPackageMessage.cmake /usr/share/cmake-3.10/Modules/Internal/FeatureTesting.cmake /usr/share/cmake-3.10/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.10.2/CMakeASMCompiler.cmake CMakeFiles/3.10.2/CMakeCCompiler.cmake CMakeFiles/3.10.2/CMakeCXXCompiler.cmake CMakeFiles/3.10.2/CMakeSystem.cmake CMakeFiles/feature_tests.c CMakeFiles/feature_tests.cxx CMakeFiles/git-data/grabRef.cmake component_depends.cmake config/sdkconfig.cmake config/sdkconfig.h mconf-idf-prefix/tmp/mconf-idf-cfgcmd.txt.in
+build build.ninja: RERUN_CMAKE | /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/sdkconfig /home/magno/esp-idf/.git/HEAD /home/magno/esp-idf/.git/modules/components/asio/asio/HEAD /home/magno/esp-idf/.git/modules/components/aws_iot/aws-iot-device-sdk-embedded-C/HEAD /home/magno/esp-idf/.git/modules/components/bt/lib/HEAD /home/magno/esp-idf/.git/modules/components/coap/libcoap/HEAD /home/magno/esp-idf/.git/modules/components/esp32/lib/HEAD /home/magno/esp-idf/.git/modules/components/esptool_py/esptool/HEAD /home/magno/esp-idf/.git/modules/components/expat/expat/HEAD /home/magno/esp-idf/.git/modules/components/json/cJSON/HEAD /home/magno/esp-idf/.git/modules/components/libsodium/libsodium/HEAD /home/magno/esp-idf/.git/modules/components/lwip/lwip/HEAD /home/magno/esp-idf/.git/modules/components/mbedtls/mbedtls/HEAD /home/magno/esp-idf/.git/modules/components/micro-ecc/micro-ecc/HEAD /home/magno/esp-idf/.git/modules/components/mqtt/esp-mqtt/HEAD /home/magno/esp-idf/.git/modules/components/nghttp/nghttp2/HEAD /home/magno/esp-idf/.git/modules/components/nimble/nimble/HEAD /home/magno/esp-idf/.git/modules/components/protobuf-c/protobuf-c/HEAD /home/magno/esp-idf/.git/modules/components/spiffs/spiffs/HEAD /home/magno/esp-idf/.git/modules/components/unity/unity/HEAD /home/magno/esp-idf/.git/modules/examples/build_system/cmake/import_lib/main/lib/tinyxml2/HEAD /home/magno/esp-idf/CMakeLists.txt /home/magno/esp-idf/components/asio/asio/.git /home/magno/esp-idf/components/aws_iot/aws-iot-device-sdk-embedded-C/.git /home/magno/esp-idf/components/bootloader/CMakeLists.txt /home/magno/esp-idf/components/bootloader/Kconfig.projbuild /home/magno/esp-idf/components/bootloader/project_include.cmake /home/magno/esp-idf/components/bootloader/subproject/CMakeLists.txt /home/magno/esp-idf/components/bootloader/subproject/main/CMakeLists.txt /home/magno/esp-idf/components/bootloader_support/CMakeLists.txt /home/magno/esp-idf/components/bt/lib/.git /home/magno/esp-idf/components/coap/libcoap/.git /home/magno/esp-idf/components/efuse/CMakeLists.txt /home/magno/esp-idf/components/efuse/Kconfig /home/magno/esp-idf/components/efuse/esp32/sources.cmake /home/magno/esp-idf/components/esp32/CMakeLists.txt /home/magno/esp-idf/components/esp32/Kconfig /home/magno/esp-idf/components/esp32/lib/.git /home/magno/esp-idf/components/esp32/project_include.cmake /home/magno/esp-idf/components/esptool_py/CMakeLists.txt /home/magno/esp-idf/components/esptool_py/Kconfig.projbuild /home/magno/esp-idf/components/esptool_py/esptool/.git /home/magno/esp-idf/components/esptool_py/flash_app_args.in /home/magno/esp-idf/components/esptool_py/flash_bootloader_args.in /home/magno/esp-idf/components/esptool_py/flash_partition_table_args.in /home/magno/esp-idf/components/esptool_py/flash_project_args.in /home/magno/esp-idf/components/esptool_py/flasher_args.json.in /home/magno/esp-idf/components/esptool_py/project_include.cmake /home/magno/esp-idf/components/expat/expat/.git /home/magno/esp-idf/components/json/cJSON/.git /home/magno/esp-idf/components/libsodium/libsodium/.git /home/magno/esp-idf/components/log/CMakeLists.txt /home/magno/esp-idf/components/log/Kconfig /home/magno/esp-idf/components/lwip/lwip/.git /home/magno/esp-idf/components/mbedtls/mbedtls/.git /home/magno/esp-idf/components/micro-ecc/CMakeLists.txt /home/magno/esp-idf/components/micro-ecc/micro-ecc/.git /home/magno/esp-idf/components/mqtt/esp-mqtt/.git /home/magno/esp-idf/components/nghttp/nghttp2/.git /home/magno/esp-idf/components/nimble/nimble/.git /home/magno/esp-idf/components/partition_table/CMakeLists.txt /home/magno/esp-idf/components/partition_table/Kconfig.projbuild /home/magno/esp-idf/components/partition_table/project_include.cmake /home/magno/esp-idf/components/protobuf-c/protobuf-c/.git /home/magno/esp-idf/components/soc/CMakeLists.txt /home/magno/esp-idf/components/soc/esp32/sources.cmake /home/magno/esp-idf/components/spi_flash/CMakeLists.txt /home/magno/esp-idf/components/spi_flash/Kconfig /home/magno/esp-idf/components/spiffs/spiffs/.git /home/magno/esp-idf/components/unity/unity/.git /home/magno/esp-idf/examples/build_system/cmake/import_lib/main/lib/tinyxml2/.git /home/magno/esp-idf/tools/cmake/component_utils.cmake /home/magno/esp-idf/tools/cmake/components.cmake /home/magno/esp-idf/tools/cmake/crosstool_version_check.cmake /home/magno/esp-idf/tools/cmake/git_submodules.cmake /home/magno/esp-idf/tools/cmake/idf_functions.cmake /home/magno/esp-idf/tools/cmake/kconfig.cmake /home/magno/esp-idf/tools/cmake/ldgen.cmake /home/magno/esp-idf/tools/cmake/project.cmake /home/magno/esp-idf/tools/cmake/project_description.json.in /home/magno/esp-idf/tools/cmake/targets.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake.in /home/magno/esp-idf/tools/cmake/toolchain-esp32.cmake /home/magno/esp-idf/tools/cmake/utilities.cmake /home/magno/esp-idf/tools/kconfig_new/confgen.py /home/magno/esp-idf/tools/kconfig_new/kconfiglib.py /usr/share/cmake-3.10/Modules/CMakeASMInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.10/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.10/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.10/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-ASM.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU.cmake /usr/share/cmake-3.10/Modules/ExternalProject.cmake /usr/share/cmake-3.10/Modules/FindGit.cmake /usr/share/cmake-3.10/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.10/Modules/FindPackageMessage.cmake /usr/share/cmake-3.10/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.10.2/CMakeASMCompiler.cmake CMakeFiles/3.10.2/CMakeCCompiler.cmake CMakeFiles/3.10.2/CMakeCXXCompiler.cmake CMakeFiles/3.10.2/CMakeSystem.cmake CMakeFiles/git-data/grabRef.cmake component_depends.cmake config/sdkconfig.cmake config/sdkconfig.h mconf-idf-prefix/tmp/mconf-idf-cfgcmd.txt.in
   pool = console
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/sdkconfig /home/magno/esp-idf/.git/HEAD /home/magno/esp-idf/.git/modules/components/asio/asio/HEAD /home/magno/esp-idf/.git/modules/components/aws_iot/aws-iot-device-sdk-embedded-C/HEAD /home/magno/esp-idf/.git/modules/components/bt/lib/HEAD /home/magno/esp-idf/.git/modules/components/coap/libcoap/HEAD /home/magno/esp-idf/.git/modules/components/esp32/lib/HEAD /home/magno/esp-idf/.git/modules/components/esptool_py/esptool/HEAD /home/magno/esp-idf/.git/modules/components/expat/expat/HEAD /home/magno/esp-idf/.git/modules/components/json/cJSON/HEAD /home/magno/esp-idf/.git/modules/components/libsodium/libsodium/HEAD /home/magno/esp-idf/.git/modules/components/lwip/lwip/HEAD /home/magno/esp-idf/.git/modules/components/mbedtls/mbedtls/HEAD /home/magno/esp-idf/.git/modules/components/micro-ecc/micro-ecc/HEAD /home/magno/esp-idf/.git/modules/components/mqtt/esp-mqtt/HEAD /home/magno/esp-idf/.git/modules/components/nghttp/nghttp2/HEAD /home/magno/esp-idf/.git/modules/components/nimble/nimble/HEAD /home/magno/esp-idf/.git/modules/components/protobuf-c/protobuf-c/HEAD /home/magno/esp-idf/.git/modules/components/spiffs/spiffs/HEAD /home/magno/esp-idf/.git/modules/components/unity/unity/HEAD /home/magno/esp-idf/.git/modules/examples/build_system/cmake/import_lib/main/lib/tinyxml2/HEAD /home/magno/esp-idf/CMakeLists.txt /home/magno/esp-idf/components/asio/asio/.git /home/magno/esp-idf/components/aws_iot/aws-iot-device-sdk-embedded-C/.git /home/magno/esp-idf/components/bootloader/CMakeLists.txt /home/magno/esp-idf/components/bootloader/Kconfig.projbuild /home/magno/esp-idf/components/bootloader/project_include.cmake /home/magno/esp-idf/components/bootloader/subproject/CMakeLists.txt /home/magno/esp-idf/components/bootloader/subproject/main/CMakeLists.txt /home/magno/esp-idf/components/bootloader_support/CMakeLists.txt /home/magno/esp-idf/components/bt/lib/.git /home/magno/esp-idf/components/coap/libcoap/.git /home/magno/esp-idf/components/efuse/CMakeLists.txt /home/magno/esp-idf/components/efuse/Kconfig /home/magno/esp-idf/components/efuse/esp32/sources.cmake /home/magno/esp-idf/components/esp32/CMakeLists.txt /home/magno/esp-idf/components/esp32/Kconfig /home/magno/esp-idf/components/esp32/lib/.git /home/magno/esp-idf/components/esp32/project_include.cmake /home/magno/esp-idf/components/esptool_py/CMakeLists.txt /home/magno/esp-idf/components/esptool_py/Kconfig.projbuild /home/magno/esp-idf/components/esptool_py/esptool/.git /home/magno/esp-idf/components/esptool_py/flash_app_args.in /home/magno/esp-idf/components/esptool_py/flash_bootloader_args.in /home/magno/esp-idf/components/esptool_py/flash_partition_table_args.in /home/magno/esp-idf/components/esptool_py/flash_project_args.in /home/magno/esp-idf/components/esptool_py/flasher_args.json.in /home/magno/esp-idf/components/esptool_py/project_include.cmake /home/magno/esp-idf/components/expat/expat/.git /home/magno/esp-idf/components/json/cJSON/.git /home/magno/esp-idf/components/libsodium/libsodium/.git /home/magno/esp-idf/components/log/CMakeLists.txt /home/magno/esp-idf/components/log/Kconfig /home/magno/esp-idf/components/lwip/lwip/.git /home/magno/esp-idf/components/mbedtls/mbedtls/.git /home/magno/esp-idf/components/micro-ecc/CMakeLists.txt /home/magno/esp-idf/components/micro-ecc/micro-ecc/.git /home/magno/esp-idf/components/mqtt/esp-mqtt/.git /home/magno/esp-idf/components/nghttp/nghttp2/.git /home/magno/esp-idf/components/nimble/nimble/.git /home/magno/esp-idf/components/partition_table/CMakeLists.txt /home/magno/esp-idf/components/partition_table/Kconfig.projbuild /home/magno/esp-idf/components/partition_table/project_include.cmake /home/magno/esp-idf/components/protobuf-c/protobuf-c/.git /home/magno/esp-idf/components/soc/CMakeLists.txt /home/magno/esp-idf/components/soc/esp32/sources.cmake /home/magno/esp-idf/components/spi_flash/CMakeLists.txt /home/magno/esp-idf/components/spi_flash/Kconfig /home/magno/esp-idf/components/spiffs/spiffs/.git /home/magno/esp-idf/components/unity/unity/.git /home/magno/esp-idf/examples/build_system/cmake/import_lib/main/lib/tinyxml2/.git /home/magno/esp-idf/tools/cmake/component_utils.cmake /home/magno/esp-idf/tools/cmake/components.cmake /home/magno/esp-idf/tools/cmake/crosstool_version_check.cmake /home/magno/esp-idf/tools/cmake/git_submodules.cmake /home/magno/esp-idf/tools/cmake/idf_functions.cmake /home/magno/esp-idf/tools/cmake/kconfig.cmake /home/magno/esp-idf/tools/cmake/ldgen.cmake /home/magno/esp-idf/tools/cmake/project.cmake /home/magno/esp-idf/tools/cmake/project_description.json.in /home/magno/esp-idf/tools/cmake/targets.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake.in /home/magno/esp-idf/tools/cmake/toolchain-esp32.cmake /home/magno/esp-idf/tools/cmake/utilities.cmake /home/magno/esp-idf/tools/kconfig_new/confgen.py /home/magno/esp-idf/tools/kconfig_new/kconfiglib.py /usr/share/cmake-3.10/Modules/CMakeASMCompiler.cmake.in /usr/share/cmake-3.10/Modules/CMakeASMInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCCompiler.cmake.in /usr/share/cmake-3.10/Modules/CMakeCCompilerABI.c /usr/share/cmake-3.10/Modules/CMakeCInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCXXCompiler.cmake.in /usr/share/cmake-3.10/Modules/CMakeCXXCompilerABI.cpp /usr/share/cmake-3.10/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.10/Modules/CMakeCompilerIdDetection.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineASMCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCXXCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompileFeatures.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompilerABI.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineCompilerId.cmake /usr/share/cmake-3.10/Modules/CMakeDetermineSystem.cmake /usr/share/cmake-3.10/Modules/CMakeFindBinUtils.cmake /usr/share/cmake-3.10/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.10/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.10/Modules/CMakeNinjaFindMake.cmake /usr/share/cmake-3.10/Modules/CMakeParseImplicitLinkInfo.cmake /usr/share/cmake-3.10/Modules/CMakeSystem.cmake.in /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.10/Modules/CMakeTestASMCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeTestCCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeTestCXXCompiler.cmake /usr/share/cmake-3.10/Modules/CMakeTestCompilerCommon.cmake /usr/share/cmake-3.10/Modules/Compiler/ADSP-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/ARMCC-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/AppleClang-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Borland-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.10/Modules/Compiler/Clang-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /usr/share/cmake-3.10/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Cray-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GHS-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-ASM.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C-FeatureTests.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX-FeatureTests.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-FindBinUtils.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU.cmake /usr/share/cmake-3.10/Modules/Compiler/HP-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/IAR-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /usr/share/cmake-3.10/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /usr/share/cmake-3.10/Modules/Compiler/Intel-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/MIPSpro-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/MSVC-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/PGI-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/PathScale-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SCO-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/TI-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/Watcom-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/XL-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/zOS-C-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /usr/share/cmake-3.10/Modules/ExternalProject.cmake /usr/share/cmake-3.10/Modules/FindGit.cmake /usr/share/cmake-3.10/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.10/Modules/FindPackageMessage.cmake /usr/share/cmake-3.10/Modules/Internal/FeatureTesting.cmake /usr/share/cmake-3.10/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.10.2/CMakeASMCompiler.cmake CMakeFiles/3.10.2/CMakeCCompiler.cmake CMakeFiles/3.10.2/CMakeCXXCompiler.cmake CMakeFiles/3.10.2/CMakeSystem.cmake CMakeFiles/feature_tests.c CMakeFiles/feature_tests.cxx CMakeFiles/git-data/grabRef.cmake component_depends.cmake config/sdkconfig.cmake config/sdkconfig.h mconf-idf-prefix/tmp/mconf-idf-cfgcmd.txt.in: phony
+build /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/sdkconfig /home/magno/esp-idf/.git/HEAD /home/magno/esp-idf/.git/modules/components/asio/asio/HEAD /home/magno/esp-idf/.git/modules/components/aws_iot/aws-iot-device-sdk-embedded-C/HEAD /home/magno/esp-idf/.git/modules/components/bt/lib/HEAD /home/magno/esp-idf/.git/modules/components/coap/libcoap/HEAD /home/magno/esp-idf/.git/modules/components/esp32/lib/HEAD /home/magno/esp-idf/.git/modules/components/esptool_py/esptool/HEAD /home/magno/esp-idf/.git/modules/components/expat/expat/HEAD /home/magno/esp-idf/.git/modules/components/json/cJSON/HEAD /home/magno/esp-idf/.git/modules/components/libsodium/libsodium/HEAD /home/magno/esp-idf/.git/modules/components/lwip/lwip/HEAD /home/magno/esp-idf/.git/modules/components/mbedtls/mbedtls/HEAD /home/magno/esp-idf/.git/modules/components/micro-ecc/micro-ecc/HEAD /home/magno/esp-idf/.git/modules/components/mqtt/esp-mqtt/HEAD /home/magno/esp-idf/.git/modules/components/nghttp/nghttp2/HEAD /home/magno/esp-idf/.git/modules/components/nimble/nimble/HEAD /home/magno/esp-idf/.git/modules/components/protobuf-c/protobuf-c/HEAD /home/magno/esp-idf/.git/modules/components/spiffs/spiffs/HEAD /home/magno/esp-idf/.git/modules/components/unity/unity/HEAD /home/magno/esp-idf/.git/modules/examples/build_system/cmake/import_lib/main/lib/tinyxml2/HEAD /home/magno/esp-idf/CMakeLists.txt /home/magno/esp-idf/components/asio/asio/.git /home/magno/esp-idf/components/aws_iot/aws-iot-device-sdk-embedded-C/.git /home/magno/esp-idf/components/bootloader/CMakeLists.txt /home/magno/esp-idf/components/bootloader/Kconfig.projbuild /home/magno/esp-idf/components/bootloader/project_include.cmake /home/magno/esp-idf/components/bootloader/subproject/CMakeLists.txt /home/magno/esp-idf/components/bootloader/subproject/main/CMakeLists.txt /home/magno/esp-idf/components/bootloader_support/CMakeLists.txt /home/magno/esp-idf/components/bt/lib/.git /home/magno/esp-idf/components/coap/libcoap/.git /home/magno/esp-idf/components/efuse/CMakeLists.txt /home/magno/esp-idf/components/efuse/Kconfig /home/magno/esp-idf/components/efuse/esp32/sources.cmake /home/magno/esp-idf/components/esp32/CMakeLists.txt /home/magno/esp-idf/components/esp32/Kconfig /home/magno/esp-idf/components/esp32/lib/.git /home/magno/esp-idf/components/esp32/project_include.cmake /home/magno/esp-idf/components/esptool_py/CMakeLists.txt /home/magno/esp-idf/components/esptool_py/Kconfig.projbuild /home/magno/esp-idf/components/esptool_py/esptool/.git /home/magno/esp-idf/components/esptool_py/flash_app_args.in /home/magno/esp-idf/components/esptool_py/flash_bootloader_args.in /home/magno/esp-idf/components/esptool_py/flash_partition_table_args.in /home/magno/esp-idf/components/esptool_py/flash_project_args.in /home/magno/esp-idf/components/esptool_py/flasher_args.json.in /home/magno/esp-idf/components/esptool_py/project_include.cmake /home/magno/esp-idf/components/expat/expat/.git /home/magno/esp-idf/components/json/cJSON/.git /home/magno/esp-idf/components/libsodium/libsodium/.git /home/magno/esp-idf/components/log/CMakeLists.txt /home/magno/esp-idf/components/log/Kconfig /home/magno/esp-idf/components/lwip/lwip/.git /home/magno/esp-idf/components/mbedtls/mbedtls/.git /home/magno/esp-idf/components/micro-ecc/CMakeLists.txt /home/magno/esp-idf/components/micro-ecc/micro-ecc/.git /home/magno/esp-idf/components/mqtt/esp-mqtt/.git /home/magno/esp-idf/components/nghttp/nghttp2/.git /home/magno/esp-idf/components/nimble/nimble/.git /home/magno/esp-idf/components/partition_table/CMakeLists.txt /home/magno/esp-idf/components/partition_table/Kconfig.projbuild /home/magno/esp-idf/components/partition_table/project_include.cmake /home/magno/esp-idf/components/protobuf-c/protobuf-c/.git /home/magno/esp-idf/components/soc/CMakeLists.txt /home/magno/esp-idf/components/soc/esp32/sources.cmake /home/magno/esp-idf/components/spi_flash/CMakeLists.txt /home/magno/esp-idf/components/spi_flash/Kconfig /home/magno/esp-idf/components/spiffs/spiffs/.git /home/magno/esp-idf/components/unity/unity/.git /home/magno/esp-idf/examples/build_system/cmake/import_lib/main/lib/tinyxml2/.git /home/magno/esp-idf/tools/cmake/component_utils.cmake /home/magno/esp-idf/tools/cmake/components.cmake /home/magno/esp-idf/tools/cmake/crosstool_version_check.cmake /home/magno/esp-idf/tools/cmake/git_submodules.cmake /home/magno/esp-idf/tools/cmake/idf_functions.cmake /home/magno/esp-idf/tools/cmake/kconfig.cmake /home/magno/esp-idf/tools/cmake/ldgen.cmake /home/magno/esp-idf/tools/cmake/project.cmake /home/magno/esp-idf/tools/cmake/project_description.json.in /home/magno/esp-idf/tools/cmake/targets.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake /home/magno/esp-idf/tools/cmake/third_party/GetGitRevisionDescription.cmake.in /home/magno/esp-idf/tools/cmake/toolchain-esp32.cmake /home/magno/esp-idf/tools/cmake/utilities.cmake /home/magno/esp-idf/tools/kconfig_new/confgen.py /home/magno/esp-idf/tools/kconfig_new/kconfiglib.py /usr/share/cmake-3.10/Modules/CMakeASMInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.10/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.10/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.10/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.10/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.10/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-ASM.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.10/Modules/Compiler/GNU.cmake /usr/share/cmake-3.10/Modules/ExternalProject.cmake /usr/share/cmake-3.10/Modules/FindGit.cmake /usr/share/cmake-3.10/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.10/Modules/FindPackageMessage.cmake /usr/share/cmake-3.10/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.10.2/CMakeASMCompiler.cmake CMakeFiles/3.10.2/CMakeCCompiler.cmake CMakeFiles/3.10.2/CMakeCXXCompiler.cmake CMakeFiles/3.10.2/CMakeSystem.cmake CMakeFiles/git-data/grabRef.cmake component_depends.cmake config/sdkconfig.cmake config/sdkconfig.h mconf-idf-prefix/tmp/mconf-idf-cfgcmd.txt.in: phony
 
 #############################################
 # Clean all the built files.

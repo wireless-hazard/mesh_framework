@@ -1200,6 +1200,24 @@
     {
         "children": [
             {
+                "children": [],
+                "depends_on": null,
+                "help": null,
+                "id": "MESH_ID",
+                "name": "MESH_ID",
+                "range": null,
+                "title": "MESH_ID",
+                "type": "string"
+            }
+        ],
+        "depends_on": null,
+        "id": "mesh-configuration",
+        "title": "Mesh Configuration",
+        "type": "menu"
+    },
+    {
+        "children": [
+            {
                 "children": [
                     {
                         "children": [],

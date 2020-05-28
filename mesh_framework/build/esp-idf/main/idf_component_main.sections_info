@@ -1,48 +1,83 @@
 In archive /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/esp-idf/main/libmain.a:
 
+mesh_framework.c.obj:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000000  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000034  2**0
+                  ALLOC
+  3 .text.meshf_add 0000000b  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  4 .debug_frame  00000028  00000000  00000000  00000040  2**2
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+  5 .debug_info   00000061  00000000  00000000  00000068  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+  6 .debug_abbrev 00000060  00000000  00000000  000000c9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_loc    00000021  00000000  00000000  00000129  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+  8 .debug_aranges 00000020  00000000  00000000  0000014a  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+  9 .debug_ranges 00000010  00000000  00000000  0000016a  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 10 .debug_line   0000004d  00000000  00000000  0000017a  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 11 .debug_str    000000dd  00000000  00000000  000001c7  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .comment      0000003b  00000000  00000000  000002a4  2**0
+                  CONTENTS, READONLY
+ 13 .xtensa.info  00000038  00000000  00000000  000002df  2**0
+                  CONTENTS, READONLY
+ 14 .xt.prop      00000024  00000000  00000000  00000317  2**0
+                  CONTENTS, RELOC, READONLY
+
 main.c.obj:     file format elf32-xtensa-le
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .literal.app_main 000000a0  00000000  00000000  00000034  2**2
+  0 .literal.app_main 000000a4  00000000  00000000  00000034  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  1 .text         00000000  00000000  00000000  000000d4  2**0
+  1 .text         00000000  00000000  00000000  000000d8  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .data         00000000  00000000  00000000  000000d4  2**0
+  2 .data         00000000  00000000  00000000  000000d8  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  3 .bss          00000000  00000000  00000000  000000d4  2**0
+  3 .bss          00000000  00000000  00000000  000000d8  2**0
                   ALLOC
-  4 .text.event_handler 00000007  00000000  00000000  000000d4  2**2
+  4 .text.event_handler 00000007  00000000  00000000  000000d8  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  5 .rodata.str1.4 000000f3  00000000  00000000  000000dc  2**2
+  5 .rodata.str1.4 000000f3  00000000  00000000  000000e0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  6 .rodata       00000060  00000000  00000000  000001d0  2**2
+  6 .rodata       00000060  00000000  00000000  000001d4  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  7 .text.app_main 000001ab  00000000  00000000  00000230  2**2
+  7 .text.app_main 000001bb  00000000  00000000  00000234  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  8 .rodata.__func__$7631 00000009  00000000  00000000  000003dc  2**2
+  8 .rodata.__func__$7634 00000009  00000000  00000000  000003f0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  9 .debug_frame  00000040  00000000  00000000  000003e8  2**2
+  9 .debug_frame  00000040  00000000  00000000  000003fc  2**2
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 10 .debug_info   00001c4b  00000000  00000000  00000428  2**0
+ 10 .debug_info   00001c90  00000000  00000000  0000043c  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 11 .debug_abbrev 0000026d  00000000  00000000  00002073  2**0
+ 11 .debug_abbrev 0000027c  00000000  00000000  000020cc  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_loc    00000112  00000000  00000000  000022e0  2**0
+ 12 .debug_loc    00000112  00000000  00000000  00002348  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 13 .debug_aranges 00000028  00000000  00000000  000023f2  2**0
+ 13 .debug_aranges 00000028  00000000  00000000  0000245a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 14 .debug_ranges 00000018  00000000  00000000  0000241a  2**0
+ 14 .debug_ranges 00000018  00000000  00000000  00002482  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 15 .debug_line   00000460  00000000  00000000  00002432  2**0
+ 15 .debug_line   00000498  00000000  00000000  0000249a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 16 .debug_str    0000184e  00000000  00000000  00002892  2**0
+ 16 .debug_str    00001858  00000000  00000000  00002932  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .comment      0000003b  00000000  00000000  000040e0  2**0
+ 17 .comment      0000003b  00000000  00000000  0000418a  2**0
                   CONTENTS, READONLY
- 18 .xtensa.info  00000038  00000000  00000000  0000411b  2**0
+ 18 .xtensa.info  00000038  00000000  00000000  000041c5  2**0
                   CONTENTS, READONLY
- 19 .xt.lit       00000008  00000000  00000000  00004153  2**0
+ 19 .xt.lit       00000008  00000000  00000000  000041fd  2**0
                   CONTENTS, RELOC, READONLY
- 20 .xt.prop      00000078  00000000  00000000  0000415b  2**0
+ 20 .xt.prop      00000078  00000000  00000000  00004205  2**0
                   CONTENTS, RELOC, READONLY
