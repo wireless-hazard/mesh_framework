@@ -1,5 +1,5 @@
 # put here your custom config value
-menu "Example Configuration"
+menu "Mesh Configuration"
 config ESP_WIFI_SSID
     string "WiFi SSID"
     default "myssid"
@@ -11,9 +11,14 @@ config ESP_WIFI_PASSWORD
     default "mypassword"
     help
 	WiFi password (WPA or WPA2) for the example to use.
-endmenu
 
-menu "Mesh Configuration"
-config MESH_ID
-    string "MESH_ID"
+config MAX_STA_CONN
+    int "Maximum number of clients connected"
+    default 2
+
+config AP_MODE
+    string "Wifi mode = STA or AP"
+    default "AP"
+    help
+    Operation mode being station or access point
 endmenu

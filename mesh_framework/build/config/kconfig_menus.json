@@ -1190,23 +1190,25 @@
                 "range": null,
                 "title": "WiFi Password",
                 "type": "string"
-            }
-        ],
-        "depends_on": null,
-        "id": "example-configuration",
-        "title": "Example Configuration",
-        "type": "menu"
-    },
-    {
-        "children": [
+            },
             {
                 "children": [],
                 "depends_on": null,
                 "help": null,
-                "id": "MESH_ID",
-                "name": "MESH_ID",
+                "id": "MAX_STA_CONN",
+                "name": "MAX_STA_CONN",
                 "range": null,
-                "title": "MESH_ID",
+                "title": "Maximum number of clients connected",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "Operation mode being station or access point\n",
+                "id": "AP_MODE",
+                "name": "AP_MODE",
+                "range": null,
+                "title": "Wifi mode = STA or AP",
                 "type": "string"
             }
         ],
