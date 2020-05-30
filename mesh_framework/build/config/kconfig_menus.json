@@ -1174,9 +1174,9 @@
             {
                 "children": [],
                 "depends_on": null,
-                "help": "SSID (network name) for the example to connect to.\n",
-                "id": "ESP_WIFI_SSID",
-                "name": "ESP_WIFI_SSID",
+                "help": "SSID (network name) for Root node connect to.\n",
+                "id": "ROUTER_SSID",
+                "name": "ROUTER_SSID",
                 "range": null,
                 "title": "WiFi SSID",
                 "type": "string"
@@ -1184,9 +1184,9 @@
             {
                 "children": [],
                 "depends_on": null,
-                "help": "WiFi password (WPA or WPA2) for the example to use.\n",
-                "id": "ESP_WIFI_PASSWORD",
-                "name": "ESP_WIFI_PASSWORD",
+                "help": null,
+                "id": "ROUTER_PASSWORD",
+                "name": "ROUTER_PASSWORD",
                 "range": null,
                 "title": "WiFi Password",
                 "type": "string"
@@ -1195,21 +1195,21 @@
                 "children": [],
                 "depends_on": null,
                 "help": null,
-                "id": "MAX_STA_CONN",
-                "name": "MAX_STA_CONN",
+                "id": "MAX_CLIENTS",
+                "name": "MAX_CLIENTS",
                 "range": null,
-                "title": "Maximum number of clients connected",
+                "title": "Maximum number of connect clients",
                 "type": "int"
             },
             {
                 "children": [],
                 "depends_on": null,
-                "help": "Operation mode being station or access point\n",
-                "id": "AP_MODE",
-                "name": "AP_MODE",
+                "help": "Maximum number of layers in the mesh network.\n",
+                "id": "MAX_LAYERS",
+                "name": "MAX_LAYERS",
                 "range": null,
-                "title": "Wifi mode = STA or AP",
-                "type": "string"
+                "title": "Max Mesh Layers",
+                "type": "int"
             }
         ],
         "depends_on": null,

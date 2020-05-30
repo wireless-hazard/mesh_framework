@@ -1,3 +1,2 @@
-esp_err_t event_handler(void *ctx, system_event_t *event);
+void mesh_event_handler(mesh_event_t evento);
 void meshf_init();
-void meshf_connect();

@@ -1,43 +1,30 @@
 #include <string.h>
+#include "esp_system.h"
+#include "esp_log.h"
+#include "nvs_flash.h"
+#include "esp_wifi.h"
+#include "esp_event_loop.h"
+#include "esp_mesh.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "esp_event_loop.h"
-#include "esp_log.h"
-#include "nvs_flash.h"
-
-#include "lwip/err.h"
-#include "lwip/sys.h"
+#include "lwip/sockets.h"
 #include "mesh_framework.h"
 
-#define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
-#define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
-#define EXAMPLE_MAX_STA_CONN       CONFIG_MAX_STA_CONN
-#define WIFI_MODE_SET 			   CONFIG_AP_MODE
+#define MAX_LAYERS CONFIG_MAX_LAYERS
+#define WIFI_CHANNEL 0
+#define ROUTER_SSID CONFIG_ROUTER_SSID
+#define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
+#define MAX_CLIENTS CONFIG_MAX_CLIENTS
+ 
+static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 
-static const char *TAG = "wifi softAP";
-
-esp_err_t event_handler(void *ctx, system_event_t *event){
-    switch(event->event_id) {
-    case SYSTEM_EVENT_AP_STACONNECTED:
-        ESP_LOGI(TAG, "station:"MACSTR" join, AID=%d",
-                 MAC2STR(event->event_info.sta_connected.mac),
-                 event->event_info.sta_connected.aid);
-        break;
-    case SYSTEM_EVENT_AP_STADISCONNECTED:
-        ESP_LOGI(TAG, "station:"MACSTR"leave, AID=%d",
-                 MAC2STR(event->event_info.sta_disconnected.mac),
-                 event->event_info.sta_disconnected.aid);
-        break;
-    default:
-        break;
-    }
-    return ESP_OK;
+void mesh_event_handler(mesh_event_t evento){
+	
 }
 
-void meshf_init(){ 
+void meshf_init(){
+
 	//Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -46,44 +33,38 @@ void meshf_init(){
     }
     ESP_ERROR_CHECK(ret);
 
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
+	tcpip_adapter_init(); //Inicializa as estruturas de dados TCP/LwIP e cria a tarefa principal LwIP
+		
+	ESP_ERROR_CHECK(esp_event_loop_init(NULL,NULL)); //Lida com os eventos AINDA NAO IMPLEMENTADOS
+	
+	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT(); //
+	esp_wifi_init(&cfg); //Inicia o Wifi com os seus parametros padroes
+	
+	ESP_ERROR_CHECK(tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA));//Desliga o cliente dhcp
+	ESP_ERROR_CHECK(tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP));//Desliga o servidor dhcp
+	
+	ESP_ERROR_CHECK(esp_wifi_start());
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
-
-    if (strcmp(WIFI_MODE_SET,"STA") == 0){
-    	wifi_config_t sta_config = {
-        	.sta = {
-            	.ssid = CONFIG_ESP_WIFI_SSID,
-            	.password = CONFIG_ESP_WIFI_PASSWORD,
-            	.bssid_set = false
-        	}
-    	};
-    	ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
-    	ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &sta_config) );
-    	ESP_ERROR_CHECK( esp_wifi_start() );
-    	ESP_ERROR_CHECK( esp_wifi_connect() );
-    }else{
-    	wifi_config_t wifi_config = {
-        	.ap = {
-            	.ssid = EXAMPLE_ESP_WIFI_SSID,
-            	.ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
-            	.password = EXAMPLE_ESP_WIFI_PASS,
-            	.max_connection = EXAMPLE_MAX_STA_CONN,
-            	.authmode = WIFI_AUTH_WPA_WPA2_PSK
-        	},
-    	};
-    	if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
-        	wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    	}
-
-    	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-    	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
-    	ESP_ERROR_CHECK(esp_wifi_start());
-    }
-}
-
-void meshf_connect(){
-	ESP_LOGI(TAG,"%s",WIFI_MODE_SET);
+	// Inicializacao Do MESH
+	
+	ESP_ERROR_CHECK(esp_mesh_init()); //Inicializa o "mesh stack"
+	ESP_ERROR_CHECK(esp_mesh_set_max_layer(MAX_LAYERS));//Numero maximo de niveis da rede
+	ESP_ERROR_CHECK(esp_mesh_set_vote_percentage(0.9));//Porcentagem minima para a escolha do Noh raiz
+    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(40));//Tempo sem comunicacao entre pai e filho com que fara a dissociacao do filho
+	
+	mesh_cfg_t config_mesh = MESH_INIT_CONFIG_DEFAULT(); //Possui a configuracao base mesh para aplicar depois
+	
+	//Mesh Network Identifier (MID)
+	memcpy((uint8_t *) &config_mesh.mesh_id,MESH_ID,6);
+	
+	config_mesh.event_cb = &mesh_event_handler; //mesh event callback
+	config_mesh.channel = WIFI_CHANNEL;
+	config_mesh.router.ssid_len = strlen(ROUTER_SSID);
+	memcpy((uint8_t *) &config_mesh.router.ssid, ROUTER_SSID, config_mesh.router.ssid_len);
+    memcpy((uint8_t *) &config_mesh.router.password, ROUTER_PASSWORD, strlen(ROUTER_PASSWORD));
+	config_mesh.mesh_ap.max_connection = MAX_CLIENTS;
+    memcpy((uint8_t *) &config_mesh.mesh_ap.password, ROUTER_PASSWORD, strlen(ROUTER_PASSWORD));
+    ESP_ERROR_CHECK(esp_mesh_set_config(&config_mesh));
+    /* mesh start */
+    ESP_ERROR_CHECK(esp_mesh_start());
 }
