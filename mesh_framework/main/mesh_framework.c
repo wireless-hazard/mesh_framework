@@ -39,7 +39,7 @@ void mesh_event_handler(mesh_event_t evento){
 		case MESH_EVENT_STOPPED: //Reset the mesh stack's status on the device
 			is_mesh_connected = false;
         	mesh_layer = esp_mesh_get_layer();
-			ESP_LOGE(MESH_TAG,"ALGO GRAVE ACONTECEU\n");
+			ESP_LOGE(MESH_TAG,"MESH_EVENT_STOPPED\n");
 		break;
 		case MESH_EVENT_PARENT_CONNECTED:
 			//COPY AND PAST'ED 
@@ -50,12 +50,12 @@ void mesh_event_handler(mesh_event_t evento){
 			if (esp_mesh_is_root()) {
             	tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA);
         	}
-    		printf("Nao esta finalizado\n");
+    		ESP_LOGE(MESH_TAG,"MESH_EVENT_PARENT_CONNECTED\n");
 		break;
 		case MESH_EVENT_PARENT_DISCONNECTED: //Perform a fixed number of attempts to reconnect before searching for another one
 			is_mesh_connected = false;
         	mesh_layer = esp_mesh_get_layer();
-			ESP_LOGW(MESH_TAG,"Pai desconectou\n");
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_PARENT_DISCONNECTED\n");
 		break;
 		case MESH_EVENT_NO_PARENT_FOUND:
 			ESP_LOGW(MESH_TAG,"eternamente IDLE\nESP32 ira reiniciar\n");
@@ -67,7 +67,7 @@ void mesh_event_handler(mesh_event_t evento){
 		//
 		case MESH_EVENT_CHILD_CONNECTED: //A child node sucessfully connects  to the  node's  SoftAP interface
 			filhos = filhos + 1;
-			ESP_LOGW(MESH_TAG,"Mais um filho conectado %d\n",filhos);
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_CHILD_CONNECTED %d\n",filhos);
 		break;
 		case MESH_EVENT_CHILD_DISCONNECTED: //A child node disconnects from  a node 
 			filhos = filhos - 1;
@@ -95,12 +95,12 @@ void mesh_event_handler(mesh_event_t evento){
 			ESP_LOGW(MESH_TAG,"Eleicao acabou\n");
 		break;
 		case MESH_EVENT_LAYER_CHANGE: //The node's layer in the mesh network has changed
-			ESP_LOGE(MESH_TAG,"Mudou de Layer\n");
+			ESP_LOGE(MESH_TAG,"MESH_EVENT_LAYER_CHANGE\n");
 			mesh_layer = evento.info.layer_change.new_layer;
 			last_layer = mesh_layer;
 		break;
 		case MESH_EVENT_CHANNEL_SWITCH: //The mesh wifi channel has changed
-			ESP_LOGE(MESH_TAG,"Mudou para o canal %d\n",evento.info.channel_switch.channel);
+			ESP_LOGE(MESH_TAG,"MESH_EVENT_CHANNEL_SWITCH %d\n",evento.info.channel_switch.channel);
 		break;
 		//
 		//MESH ROOT-SPECIFIC EVENTS
@@ -115,19 +115,20 @@ void mesh_event_handler(mesh_event_t evento){
 		
 		break;
 		case MESH_EVENT_ROOT_LOST_IP: //The lease time  of the Node's station dynamic IP configuration has expired
-			ESP_LOGE(MESH_TAG,"Root perdeu IP\n");
+			ESP_LOGE(MESH_TAG,"MESH_EVENT_ROOT_LOST_IP\n");
 		break;
 		case MESH_EVENT_ROOT_SWITCH_REQ: //The root node has received a root switch request from  a candidate root
-			ESP_LOGE(MESH_TAG,"Tao querendo troca de root\n");
+			ESP_LOGE(MESH_TAG,"MESH_EVENT_ROOT_SWITCH_REQ\n");
 			printf(MAC2STR( evento.info.switch_req.rc_addr.addr));
 		break;
 		case MESH_EVENT_ROOT_ASKED_YIELD: //Another root node with a higher RSSI with the router has asked this root node to yield
-			printf("//TODO \n");
+			printf("MESH_EVENT_ROOT_ASKED_YIELD\n");
 		break;
 		case MESH_EVENT_SCAN_DONE:
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_SCAN_DONE");
 		break;
 		default:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT NOT HANDLED");
 		break;
 	}
 
@@ -143,6 +144,7 @@ void meshf_init(){
     }
     ESP_ERROR_CHECK(ret);
 
+    //Inicializacao Wifi
 	tcpip_adapter_init(); //Inicializa as estruturas de dados TCP/LwIP e cria a tarefa principal LwIP
 		
 	ESP_ERROR_CHECK(esp_event_loop_init(NULL,NULL)); //Lida com os eventos AINDA NAO IMPLEMENTADOS
