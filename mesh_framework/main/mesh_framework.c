@@ -22,6 +22,28 @@ static const char *MESH_TAG = "mesh_tagger";
 static bool is_mesh_connected = false;
 static int mesh_layer = -1;
 static mesh_addr_t mesh_parent_addr;
+static bool is_parent_connected = false;
+
+static uint8_t tx_buffer[1472] = { 0, };
+
+void tx_p2p(void *pvParameters){
+	uint8_t buffer[1472];
+	mesh_addr_t tx_destination;
+	mesh_data_t tx_data;
+	int send_flag = 0;
+	while(true){
+		if (is_parent_connected){
+			ESP_LOGE(MESH_TAG,"%d\n",tx_buffer[2]);
+			vTaskDelay(1000/portTICK_PERIOD_MS);
+		}
+	}
+}
+
+void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t data_size){
+	memcpy(tx_buffer,transmitted_data,data_size);
+	
+	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,1);
+}
 
 void mesh_event_handler(mesh_event_t evento){
 	switch (evento.id){
@@ -47,10 +69,12 @@ void mesh_event_handler(mesh_event_t evento){
 			memcpy(&mesh_parent_addr.addr, evento.info.connected.connected.bssid, 6);
 			last_layer = mesh_layer;
         	is_mesh_connected = true;
+        	is_parent_connected = true;
 			if (esp_mesh_is_root()) {
             	tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA);
         	}
     		ESP_LOGE(MESH_TAG,"MESH_EVENT_PARENT_CONNECTED\n");
+    		
 		break;
 		case MESH_EVENT_PARENT_DISCONNECTED: //Perform a fixed number of attempts to reconnect before searching for another one
 			is_mesh_connected = false;
@@ -177,6 +201,9 @@ void meshf_init(){
 	config_mesh.mesh_ap.max_connection = MAX_CLIENTS;
     memcpy((uint8_t *) &config_mesh.mesh_ap.password, ROUTER_PASSWORD, strlen(ROUTER_PASSWORD));
     ESP_ERROR_CHECK(esp_mesh_set_config(&config_mesh));
-    /* mesh start */
+}
+
+void meshf_start(){
+	/* mesh start */
     ESP_ERROR_CHECK(esp_mesh_start());
 }
