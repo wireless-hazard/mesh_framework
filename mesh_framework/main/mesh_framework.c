@@ -25,12 +25,28 @@ static mesh_addr_t mesh_parent_addr;
 static bool is_parent_connected = false;
 
 static uint8_t tx_buffer[1472] = { 0, };
+static mesh_addr_t tx_destination;
+
+void STR2MAC(char rec_string[17],uint8_t *address){
+	uint8_t mac[6] = {0,};
+	int j = 0;
+	for (int i = 0;i<=17;i+=3){
+		if((uint8_t)rec_string[i] <= 58){
+			mac[j] = (((uint8_t)rec_string[i]-48) * 16) + ((uint8_t)rec_string[i+1]-48);
+		}else{
+			mac[j] = (((uint8_t)rec_string[i]-55) * 16) + ((uint8_t)rec_string[i+1]-55);
+		}
+		j++;
+	}
+	memcpy(address,&mac,sizeof(uint8_t)*6);
+
+}
 
 void tx_p2p(void *pvParameters){
-	uint8_t buffer[1472];
-	mesh_addr_t tx_destination;
+	
 	mesh_data_t tx_data;
-	int send_flag = 0;
+	int flag = 0;
+
 	while(true){
 		if (is_parent_connected){
 			ESP_LOGE(MESH_TAG,"%d\n",tx_buffer[2]);
@@ -40,8 +56,9 @@ void tx_p2p(void *pvParameters){
 }
 
 void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t data_size){
-	memcpy(tx_buffer,transmitted_data,data_size);
 	
+	memcpy(tx_buffer,transmitted_data,data_size);
+	STR2MAC(mac_destination,&tx_destination.addr);
 	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,1);
 }
 

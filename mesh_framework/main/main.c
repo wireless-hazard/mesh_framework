@@ -13,7 +13,7 @@
 
 void app_main(void) {
 	uint8_t mensagem[] = {234,5,4,7};
-	char mac[] = "00:00:00:00:00:00";
+	char mac[] = "00:AA:00:00:00:00";
 	meshf_init();
 	meshf_tx_p2p(
 		mac,
