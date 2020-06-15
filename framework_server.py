@@ -46,6 +46,6 @@ while True:
 						plt.plot([peer.position,current_transmission[peer.parent_mac].position],[peer.layer,current_transmission[peer.parent_mac].layer],color='c')
 					else:
 						plt.plot([peer.position,0],[peer.layer,0],color='k')
-					fig.canvas.draw_idle()#REDESENHA O GRAFICO
-					plt.pause(0.1)
+				fig.canvas.draw_idle()#REDESENHA O GRAFICO
+				plt.pause(0.1)
 					

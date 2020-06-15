@@ -12,8 +12,8 @@
 #include "mesh_framework.h"
 
 void app_main(void) {
-	uint8_t mensagem[] = {234,5,4,7};
-	char mac[] = "00:AA:00:00:00:00";
+	uint8_t mensagem[] = {100,20,4,7};
+	char mac[] = "A4:CF:12:75:21:31";
 	meshf_init();
 	meshf_tx_p2p(
 		mac,

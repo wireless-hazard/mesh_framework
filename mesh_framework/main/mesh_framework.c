@@ -24,17 +24,24 @@ static int mesh_layer = -1;
 static mesh_addr_t mesh_parent_addr;
 static bool is_parent_connected = false;
 
-static uint8_t tx_buffer[1472] = { 0, };
+static uint8_t tx_buffer[1460] = { 0, };
+
 static mesh_addr_t tx_destination;
+static mesh_data_t tx_data;
 
 void STR2MAC(char rec_string[17],uint8_t *address){
 	uint8_t mac[6] = {0,};
 	int j = 0;
 	for (int i = 0;i<=17;i+=3){
 		if((uint8_t)rec_string[i] <= 58){
-			mac[j] = (((uint8_t)rec_string[i]-48) * 16) + ((uint8_t)rec_string[i+1]-48);
+			mac[j] = (((uint8_t)rec_string[i]-48) * 16);
 		}else{
-			mac[j] = (((uint8_t)rec_string[i]-55) * 16) + ((uint8_t)rec_string[i+1]-55);
+			mac[j] = (((uint8_t)rec_string[i]-55) * 16);
+		}
+		if((uint8_t)rec_string[i+1] <= 58){
+			mac[j] += ((uint8_t)rec_string[i+1]-48);	
+		}else{
+			mac[j] += ((uint8_t)rec_string[i+1]-55);
 		}
 		j++;
 	}
@@ -44,22 +51,26 @@ void STR2MAC(char rec_string[17],uint8_t *address){
 
 void tx_p2p(void *pvParameters){
 	
-	mesh_data_t tx_data;
-	int flag = 0;
+	int flag = MESH_DATA_P2P;
+	tx_data.proto = MESH_PROTO_BIN;
 
-	while(true){
-		if (is_parent_connected){
-			ESP_LOGE(MESH_TAG,"%d\n",tx_buffer[2]);
-			vTaskDelay(1000/portTICK_PERIOD_MS);
-		}
+	while (!is_parent_connected){
+		vTaskDelay(5*1000/portTICK_PERIOD_MS);
 	}
+	esp_err_t send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
+
+	ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
+
+	vTaskDelete(NULL);
 }
 
 void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t data_size){
-	
-	memcpy(tx_buffer,transmitted_data,data_size);
+	tx_data.data = tx_buffer;
+	tx_data.size = data_size;
+
+	memcpy(tx_data.data, transmitted_data, data_size);
 	STR2MAC(mac_destination,&tx_destination.addr);
-	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,1);
+	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,0);
 }
 
 void mesh_event_handler(mesh_event_t evento){
@@ -78,7 +89,7 @@ void mesh_event_handler(mesh_event_t evento){
 		case MESH_EVENT_STOPPED: //Reset the mesh stack's status on the device
 			is_mesh_connected = false;
         	mesh_layer = esp_mesh_get_layer();
-			ESP_LOGE(MESH_TAG,"MESH_EVENT_STOPPED\n");
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_STOPPED\n");
 		break;
 		case MESH_EVENT_PARENT_CONNECTED:
 			//COPY AND PAST'ED 
@@ -90,7 +101,7 @@ void mesh_event_handler(mesh_event_t evento){
 			if (esp_mesh_is_root()) {
             	tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA);
         	}
-    		ESP_LOGE(MESH_TAG,"MESH_EVENT_PARENT_CONNECTED\n");
+    		ESP_LOGW(MESH_TAG,"MESH_EVENT_PARENT_CONNECTED\n");
     		
 		break;
 		case MESH_EVENT_PARENT_DISCONNECTED: //Perform a fixed number of attempts to reconnect before searching for another one
@@ -136,12 +147,12 @@ void mesh_event_handler(mesh_event_t evento){
 			ESP_LOGW(MESH_TAG,"Eleicao acabou\n");
 		break;
 		case MESH_EVENT_LAYER_CHANGE: //The node's layer in the mesh network has changed
-			ESP_LOGE(MESH_TAG,"MESH_EVENT_LAYER_CHANGE\n");
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_LAYER_CHANGE\n");
 			mesh_layer = evento.info.layer_change.new_layer;
 			last_layer = mesh_layer;
 		break;
 		case MESH_EVENT_CHANNEL_SWITCH: //The mesh wifi channel has changed
-			ESP_LOGE(MESH_TAG,"MESH_EVENT_CHANNEL_SWITCH %d\n",evento.info.channel_switch.channel);
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_CHANNEL_SWITCH %d\n",evento.info.channel_switch.channel);
 		break;
 		//
 		//MESH ROOT-SPECIFIC EVENTS
@@ -156,10 +167,10 @@ void mesh_event_handler(mesh_event_t evento){
 		
 		break;
 		case MESH_EVENT_ROOT_LOST_IP: //The lease time  of the Node's station dynamic IP configuration has expired
-			ESP_LOGE(MESH_TAG,"MESH_EVENT_ROOT_LOST_IP\n");
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_LOST_IP\n");
 		break;
 		case MESH_EVENT_ROOT_SWITCH_REQ: //The root node has received a root switch request from  a candidate root
-			ESP_LOGE(MESH_TAG,"MESH_EVENT_ROOT_SWITCH_REQ\n");
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_SWITCH_REQ\n");
 			printf(MAC2STR( evento.info.switch_req.rc_addr.addr));
 		break;
 		case MESH_EVENT_ROOT_ASKED_YIELD: //Another root node with a higher RSSI with the router has asked this root node to yield
