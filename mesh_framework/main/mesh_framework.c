@@ -29,6 +29,10 @@ static uint8_t tx_buffer[1460] = { 0, };
 static mesh_addr_t tx_destination;
 static mesh_data_t tx_data;
 
+static mesh_addr_t rx_sender;
+static mesh_data_t rx_data;
+static uint8_t *rx_data2main;
+
 void STR2MAC(char rec_string[17],uint8_t *address){
 	uint8_t mac[6] = {0,};
 	int j = 0;
@@ -53,10 +57,20 @@ void tx_p2p(void *pvParameters){
 	
 	int flag = MESH_DATA_P2P;
 	tx_data.proto = MESH_PROTO_BIN;
+	uint8_t self_mac[6] = {0,};
 
 	while (!is_parent_connected){
 		vTaskDelay(5*1000/portTICK_PERIOD_MS);
 	}
+
+	esp_wifi_get_mac(ESP_IF_WIFI_AP,&self_mac);
+
+	if(self_mac[0]==tx_destination.addr[0] && self_mac[1]==tx_destination.addr[1] && self_mac[2]==tx_destination.addr[2] 
+	&& self_mac[3]==tx_destination.addr[3] && self_mac[4]==tx_destination.addr[4] && self_mac[5]==tx_destination.addr[5]){
+		ESP_LOGE(MESH_TAG,"NOT SENDING TO LOOPBACK INTERFACE");
+		vTaskDelete(NULL);
+	}
+
 	esp_err_t send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
 
 	ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
@@ -71,6 +85,14 @@ void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t d
 	memcpy(tx_data.data, transmitted_data, data_size);
 	STR2MAC(mac_destination,&tx_destination.addr);
 	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,0);
+}
+
+void rx_connection(void *pvParameters){
+	
+} 
+
+void meshf_rx(uint8_t *array_data){
+	rx_data2main = array_data;
 }
 
 void mesh_event_handler(mesh_event_t evento){
