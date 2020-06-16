@@ -13,11 +13,18 @@
 
 void app_main(void) {
 	uint8_t mensagem[] = {100,20,4,7};
+	uint8_t rx_mensagem[8] = {0,};
 	char mac[] = "A4:CF:12:75:21:31";
 	meshf_init();
+	meshf_start();
+	meshf_rx(rx_mensagem);
 	meshf_tx_p2p(
 		mac,
 		mensagem,
 		sizeof(mensagem));
-	meshf_start();
+	if (data_ready()){
+		for(int i = 0;i < sizeof(rx_mensagem);i++){
+			printf("%d\n",rx_mensagem[i]);
+		}
+	}
 }

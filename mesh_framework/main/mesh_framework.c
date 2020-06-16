@@ -19,19 +19,22 @@
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
-static bool is_mesh_connected = false;
 static int mesh_layer = -1;
 static mesh_addr_t mesh_parent_addr;
+
+static bool is_mesh_connected = false;
 static bool is_parent_connected = false;
+static bool is_data_ready = false;
 
 static uint8_t tx_buffer[1460] = { 0, };
+static uint8_t rx_buffer[MESH_MTU] = { 0, };
 
 static mesh_addr_t tx_destination;
 static mesh_data_t tx_data;
 
 static mesh_addr_t rx_sender;
 static mesh_data_t rx_data;
-static uint8_t *rx_data2main;
+static uint8_t *rx_data2main = NULL;;
 
 void STR2MAC(char rec_string[17],uint8_t *address){
 	uint8_t mac[6] = {0,};
@@ -88,11 +91,33 @@ void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t d
 }
 
 void rx_connection(void *pvParameters){
-	
+
+	rx_data.data = rx_buffer;
+	rx_data.size = MESH_MTU;
+	mesh_rx_pending_t rx_pending;
+	int flag = 0;
+
+	while(true){
+		is_data_ready = false;
+		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
+
+		ESP_LOGI(MESH_TAG,"%d %d",rx_pending.toSelf,rx_pending.toDS);
+		while(rx_pending.toSelf <= 0){
+			vTaskDelay(1*1000/portTICK_PERIOD_MS);
+		}
+		ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
+		memcpy(rx_data2main,rx_data.data,rx_data.size);
+		is_data_ready = true;
+	}
 } 
 
 void meshf_rx(uint8_t *array_data){
 	rx_data2main = array_data;
+	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,NULL,5,NULL,1);
+}
+
+bool data_ready(){
+	return is_data_ready;
 }
 
 void mesh_event_handler(mesh_event_t evento){
