@@ -63,7 +63,7 @@ void tx_p2p(void *pvParameters){
 	uint8_t self_mac[6] = {0,};
 
 	while (!is_parent_connected){
-		vTaskDelay(5*1000/portTICK_PERIOD_MS);
+		vTaskDelay(30*1000/portTICK_PERIOD_MS);
 	}
 
 	esp_wifi_get_mac(ESP_IF_WIFI_AP,&self_mac);
@@ -75,9 +75,12 @@ void tx_p2p(void *pvParameters){
 	}
 
 	esp_err_t send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
-
-	ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
-
+	while (send_error != ESP_OK){
+		vTaskDelay(1*1000/portTICK_PERIOD_MS);
+		ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
+		send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
+	}
+	ESP_LOGE(MESH_TAG,"DATA ENVIADA");
 	vTaskDelete(NULL);
 }
 
@@ -97,17 +100,22 @@ void rx_connection(void *pvParameters){
 	mesh_rx_pending_t rx_pending;
 	int flag = 0;
 
+	while (!is_parent_connected){
+		vTaskDelay(5*1000/portTICK_PERIOD_MS);
+	}
+
 	while(true){
-		is_data_ready = false;
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 
 		ESP_LOGI(MESH_TAG,"%d %d",rx_pending.toSelf,rx_pending.toDS);
-		while(rx_pending.toSelf <= 0){
-			vTaskDelay(1*1000/portTICK_PERIOD_MS);
+		if(rx_pending.toSelf <= 0){
+			vTaskDelay(0.5*1000/portTICK_PERIOD_MS);
+		}else{
+			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
+			memcpy(rx_data2main,rx_data.data,rx_data.size);
+			is_data_ready = true;
+			ESP_LOGE(MESH_TAG,"DATA RECEBIDA");
 		}
-		ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
-		memcpy(rx_data2main,rx_data.data,rx_data.size);
-		is_data_ready = true;
 	}
 } 
 
