@@ -12,20 +12,22 @@
 #include "mesh_framework.h"
 
 void app_main(void) {
-	uint8_t mensagem[] = {100,20,4,7};
-	uint8_t rx_mensagem[4] = {0,};
-	char mac[] = "A4:CF:12:75:21:31";
-	meshf_init();
-	meshf_start();
-	meshf_rx(rx_mensagem);
+	uint8_t mensagem[] = {100,20,4,7}; // Mensagem a ser transmitida
+	uint8_t rx_mensagem[4] = {0,}; //Buffer que recebera a mensagem recebida
+	char mac[] = "A4:CF:12:75:21:31"; //MAC para o qual a mensagem sera transmitida
+	meshf_init(); //Inicializa as configuracoes
+	meshf_start(); //Inicializa a rede MESH
+	meshf_rx(rx_mensagem); //Inicializa o receptor das mensagens
 	meshf_tx_p2p(
 		mac,
 		mensagem,
-		sizeof(mensagem));
-	while (!data_ready()){
-		vTaskDelay(1*1000/portTICK_PERIOD_MS);
+		sizeof(mensagem)); //Transmite a mensagem {100,20,4,7} para "A4:CF:12:75:21:31"
+	while (!data_ready()){ //Enquanto os dados nao estiverem prontos...
+		meshf_sleep_time(1000); //...insere um delay de 1 segundo
 	}
-	for(int i = 0;i < sizeof(rx_mensagem);i++){
-		printf("%d\n",rx_mensagem[i]);
-	}	
+	printf("\n");
+	for(int i = 0;i < sizeof(rx_mensagem);i++){ //Printa a mensagem no console
+		printf(" %d ",rx_mensagem[i]);
+	}
+	free_rx_buffer(); //Libera o buffer	
 }

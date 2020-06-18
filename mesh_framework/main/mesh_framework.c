@@ -108,7 +108,7 @@ void rx_connection(void *pvParameters){
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 
 		ESP_LOGI(MESH_TAG,"%d %d",rx_pending.toSelf,rx_pending.toDS);
-		if(rx_pending.toSelf <= 0){
+		if(rx_pending.toSelf <= 0 || is_data_ready == true){
 			vTaskDelay(0.5*1000/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
@@ -126,6 +126,14 @@ void meshf_rx(uint8_t *array_data){
 
 bool data_ready(){
 	return is_data_ready;
+}
+
+void free_rx_buffer(){
+	is_data_ready = false;
+}
+
+void meshf_sleep_time(float delay){
+	vTaskDelay(delay/portTICK_PERIOD_MS);
 }
 
 void mesh_event_handler(mesh_event_t evento){
