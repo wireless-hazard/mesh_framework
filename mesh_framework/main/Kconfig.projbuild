@@ -19,4 +19,10 @@ config MAX_LAYERS
     help
 	Maximum number of layers in the mesh network.
 
+config IS_TODS_ALLOWED
+    bool "comunication to external network"
+    default false
+    help
+    Is the comunication to external network allowed?
+
 endmenu

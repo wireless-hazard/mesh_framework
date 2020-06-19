@@ -16,6 +16,9 @@
 #define ROUTER_SSID CONFIG_ROUTER_SSID
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
+
+#define TODS_IP "192.168.0.6"
+#define TODS_PORT 8000
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -34,7 +37,9 @@ static mesh_data_t tx_data;
 
 static mesh_addr_t rx_sender;
 static mesh_data_t rx_data;
-static uint8_t *rx_data2main = NULL;;
+
+static mesh_addr_t toDS_destination;
+static mesh_data_t toDS_data;
 
 void STR2MAC(char rec_string[17],uint8_t *address){
 	uint8_t mac[6] = {0,};
@@ -80,8 +85,89 @@ void tx_p2p(void *pvParameters){
 		ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
 		send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
 	}
-	ESP_LOGE(MESH_TAG,"DATA ENVIADA");
+	ESP_LOGE(MESH_TAG,"DADOS ENVIADOS");
 	vTaskDelete(NULL);
+}
+
+void send_external_net(void *pvParameters){
+	
+
+	mesh_addr_t from;
+	mesh_addr_t to;
+	mesh_data_t data;
+	data.size = MESH_MTU;
+	data.data = rx_buffer;
+	mesh_rx_pending_t rx_pending;
+
+	ip4_addr_t ipteste[4] = {0,};
+
+	int flag = 0;
+
+	while(true){
+		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
+		// ESP_LOGI(MESH_TAG,"Numero de pacotes para rede externa: %d",rx_pending.toDS);
+		if(rx_pending.toDS <= 0){
+			vTaskDelay(0.5*1000/portTICK_PERIOD_MS);
+		}else{
+
+			esp_err_t err = esp_mesh_recv_toDS(&from,&to,&data,0,&flag,NULL,0);
+						
+			ESP_LOGW(MESH_TAG, "vindos de: "MACSTR" dados: %d, size: %d",MAC2STR(from.addr),  (int8_t)data.data[1], data.size);
+			ESP_LOGW(MESH_TAG,"Passando os pacotes via SOCKETS para o ip "IPSTR"",IP2STR(&to.mip.ip4));
+
+			memcpy(ipteste,&to.mip.ip4.addr,sizeof(to.mip.ip4.addr));
+			
+			char rx_buffer[128];
+    		char addr_str[128];
+    		int addr_family;
+    		int ip_protocol;
+    		
+			struct sockaddr_in destAddr;
+
+			int Byte1 = ((int)ip4_addr1(ipteste));
+    		int Byte2 = ((int)ip4_addr2(ipteste));
+    		int Byte3 = ((int)ip4_addr3(ipteste));
+    		int Byte4 = ((int)ip4_addr4(ipteste));
+
+    		char ip_final[19]={0,};
+    		char dados_final[data.size];
+    		
+    		sprintf(ip_final,"%d.%d.%d.%d",Byte1,Byte2,Byte3,Byte4);
+    		
+    		sprintf(dados_final, MACSTR";%02x:%02x:%02x:%02x:%02x:%02x;%d;%d;",MAC2STR(from.addr),data.data[data.size-1],
+    				data.data[data.size-2],data.data[data.size-3],data.data[data.size-4],data.data[data.size-5],data.data[data.size-6],
+    				(int8_t)data.data[data.size-7],(int)data.data[data.size-8]);
+
+    		for (int i = data.size-9;i >= 0;i--){
+    			if (i != 0){
+    				sprintf(dados_final,"%s%d;",dados_final,data.data[i]);
+    			}else{
+    				sprintf(dados_final,"%s%d",dados_final,data.data[i]);
+    			}
+    		}
+
+    		destAddr.sin_addr.s_addr = inet_addr(ip_final);
+    		destAddr.sin_family = AF_INET;
+    		destAddr.sin_port = htons((unsigned short)to.mip.port);
+    		addr_family = AF_INET;
+    		ip_protocol = IPPROTO_IP;
+    		inet_ntoa_r(destAddr.sin_addr, addr_str, sizeof(addr_str) - 1);
+	
+			int sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
+			int error = connect(sock, (struct sockaddr *)&destAddr, sizeof(destAddr));
+			if(error!=0){
+				ESP_LOGE(MESH_TAG,"SERVIDOR SOCKET ESTA OFFLINE \n REINICIANDO CONEXAO");
+				close(sock);
+				xTaskCreatePinnedToCore(&send_external_net,"Recepcao",4096,NULL,5,NULL,1);
+				vTaskDelete(NULL);	
+			}else{	
+				printf("Estado da conexao: %dK\n",error);
+			
+				send(sock,&dados_final,strlen(dados_final),0);
+			}
+			close(sock);
+		}	
+	}
 }
 
 void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t data_size){
@@ -93,8 +179,69 @@ void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t d
 	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,0);
 }
 
+void tx_TODS(void *pvParameters){
+	uint8_t prov_buffer[8] = {0,};
+	mesh_addr_t parent_bssid;
+
+	
+	int flag = MESH_DATA_TODS;
+
+	wifi_ap_record_t apdata;
+
+	while (!is_parent_connected){
+		ESP_LOGE(MESH_TAG,"NO PARENT CONNECTED");
+		vTaskDelay(10*1000/portTICK_PERIOD_MS);
+	}	
+	
+	esp_err_t err = esp_wifi_sta_get_ap_info(&apdata);
+	ESP_LOGW(MESH_TAG,"rssi: %d\n",apdata.rssi);
+	esp_err_t bssid_error = esp_mesh_get_parent_bssid(&parent_bssid);
+
+	if (bssid_error == ESP_OK){
+		prov_buffer[0] = (uint8_t)esp_mesh_get_layer();
+		prov_buffer[1] = (uint8_t)apdata.rssi;
+	}
+
+	ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(bssid_error));
+
+	int j = 0;
+
+	for (int i = 5; i >= 0; --i){
+		prov_buffer[j+2] = parent_bssid.addr[i];
+		++j;
+	}
+
+	memcpy(toDS_data.data, &prov_buffer, sizeof(prov_buffer));
+	esp_err_t send_error = esp_mesh_send(&toDS_destination,&toDS_data,flag,NULL,0);
+
+	while (send_error != ESP_OK){
+		ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
+		vTaskDelay(10*1000/portTICK_PERIOD_MS);
+		esp_err_t send_error = esp_mesh_send(&toDS_data,&toDS_destination,flag,NULL,0);
+	}
+	ESP_LOGW(MESH_TAG,"Enviando camada para o router");
+	for (int i = 0; i < toDS_data.size; i++ ){
+		printf("%d\n",toDS_data.data[i]);
+	}
+	vTaskDelete(NULL);		
+}
+
+void meshf_tx_TODS(char ip_destination[],int port, uint8_t transmitted_data[], uint16_t data_size){
+	
+	toDS_data.data = tx_buffer;
+	toDS_data.size = data_size + 8;
+	toDS_data.proto = MESH_PROTO_BIN;
+
+	toDS_destination.mip.port = port;
+	toDS_destination.mip.ip4.addr = ipaddr_addr(ip_destination);
+
+	memcpy(toDS_data.data + 8, transmitted_data, data_size);
+	xTaskCreatePinnedToCore(&tx_TODS,"TO DS transmission",4096,NULL,5,NULL,0);
+}
+
 void rx_connection(void *pvParameters){
 
+	uint8_t *array_data = (uint8_t *)pvParameters;
 	rx_data.data = rx_buffer;
 	rx_data.size = MESH_MTU;
 	mesh_rx_pending_t rx_pending;
@@ -107,21 +254,20 @@ void rx_connection(void *pvParameters){
 	while(true){
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 
-		ESP_LOGI(MESH_TAG,"%d %d",rx_pending.toSelf,rx_pending.toDS);
+		// ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d",rx_pending.toSelf);
 		if(rx_pending.toSelf <= 0 || is_data_ready == true){
 			vTaskDelay(0.5*1000/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
-			memcpy(rx_data2main,rx_data.data,rx_data.size);
+			memcpy(array_data,rx_data.data,rx_data.size);
 			is_data_ready = true;
-			ESP_LOGE(MESH_TAG,"DATA RECEBIDA");
+			ESP_LOGE(MESH_TAG,"DADOS RECEBIDOS");
 		}
 	}
 } 
 
 void meshf_rx(uint8_t *array_data){
-	rx_data2main = array_data;
-	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,NULL,5,NULL,1);
+	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,((void *)array_data),5,NULL,1);
 }
 
 bool data_ready(){
@@ -163,6 +309,9 @@ void mesh_event_handler(mesh_event_t evento){
         	is_parent_connected = true;
 			if (esp_mesh_is_root()) {
             	tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA);
+            	if (CONFIG_IS_TODS_ALLOWED){
+            		xTaskCreatePinnedToCore(&send_external_net,"TO DS COMMUNICATION",4096,NULL,5,NULL,1);
+            	}
         	}
     		ESP_LOGW(MESH_TAG,"MESH_EVENT_PARENT_CONNECTED\n");
     		

@@ -1210,6 +1210,16 @@
                 "range": null,
                 "title": "Max Mesh Layers",
                 "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "Is the comunication to external network allowed?\n",
+                "id": "IS_TODS_ALLOWED",
+                "name": "IS_TODS_ALLOWED",
+                "range": null,
+                "title": "comunication to external network",
+                "type": "bool"
             }
         ],
         "depends_on": null,

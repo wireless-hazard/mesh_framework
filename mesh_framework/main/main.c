@@ -29,5 +29,11 @@ void app_main(void) {
 	for(int i = 0;i < sizeof(rx_mensagem);i++){ //Printa a mensagem no console
 		printf(" %d ",rx_mensagem[i]);
 	}
+	printf("\n");
+	meshf_tx_TODS(
+			"192.168.0.6",
+			8000,
+			mensagem,
+			sizeof(mensagem));
 	free_rx_buffer(); //Libera o buffer	
 }
