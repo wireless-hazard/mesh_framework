@@ -12,8 +12,8 @@
 #include "mesh_framework.h"
 
 void app_main(void) {
-	uint8_t mensagem[] = {100,20,4,7}; // Mensagem a ser transmitida
-	uint8_t rx_mensagem[4] = {0,}; //Buffer que recebera a mensagem recebida
+	uint8_t mensagem[] = {15,20,4,7,25,37}; // Mensagem a ser transmitida
+	uint8_t rx_mensagem[6] = {0,}; //Buffer que recebera a mensagem recebida
 	char mac[] = "A4:CF:12:75:21:31"; //MAC para o qual a mensagem sera transmitida
 	meshf_init(); //Inicializa as configuracoes
 	meshf_start(); //Inicializa a rede MESH

@@ -128,23 +128,28 @@ void send_external_net(void *pvParameters){
     		int Byte2 = ((int)ip4_addr2(ipteste));
     		int Byte3 = ((int)ip4_addr3(ipteste));
     		int Byte4 = ((int)ip4_addr4(ipteste));
-
+    		int data_size = data.size;
     		char ip_final[19]={0,};
-    		char dados_final[data.size];
+    		char dados_final[data_size];
+    		char dados_orig[data_size];
     		
     		sprintf(ip_final,"%d.%d.%d.%d",Byte1,Byte2,Byte3,Byte4);
-    		
-    		sprintf(dados_final, MACSTR";%02x:%02x:%02x:%02x:%02x:%02x;%d;%d;",MAC2STR(from.addr),data.data[data.size-1],
-    				data.data[data.size-2],data.data[data.size-3],data.data[data.size-4],data.data[data.size-5],data.data[data.size-6],
-    				(int8_t)data.data[data.size-7],(int)data.data[data.size-8]);
 
-    		for (int i = data.size-9;i >= 0;i--){
-    			if (i != 0){
-    				sprintf(dados_final,"%s%d;",dados_final,data.data[i]);
+    		for (int i = 8;i < data_size;i++){
+    			if( i != 8){
+    			sprintf(dados_orig,"%s%d;",dados_orig,data.data[i]);
     			}else{
-    				sprintf(dados_final,"%s%d",dados_final,data.data[i]);
+    				sprintf(dados_orig,"%d;",data.data[i]);
     			}
     		}
+    		
+    		sprintf(dados_final, MACSTR";%02x:%02x:%02x:%02x:%02x:%02x;%d;%d;",MAC2STR(from.addr),data.data[7],
+    				data.data[6],data.data[5],data.data[4],data.data[3],data.data[2],
+    				(int8_t)data.data[1],(int)data.data[0]);
+
+    		char FINAL[sizeof(dados_orig)+sizeof(dados_final)];
+    		sprintf(FINAL,"%s%s",dados_orig,dados_final);
+    		ESP_LOGI(MESH_TAG,"%s",FINAL);
 
     		destAddr.sin_addr.s_addr = inet_addr(ip_final);
     		destAddr.sin_family = AF_INET;
