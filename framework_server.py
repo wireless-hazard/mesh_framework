@@ -36,7 +36,7 @@ while True:
 				dados = dados.split(';')
 				current_transmission[dados[0]] = received_message(dados[0],dados[1],dados[2],dados[3])
 				received_data.append(dados[4:])
-				if dados[0] not in current_transmission.keys():
+				if current_transmission[dados[0]].position == 0:
 					current_transmission[dados[0]].position = (random.randint(0,360)*3.1415/180) 
 				print("esp transmissor: {}\nesp pai: {}\nrssi: {}\ncamada: {}\n".format(current_transmission[dados[0]].esp_mac,current_transmission[dados[0]].parent_mac,current_transmission[dados[0]].rssi,current_transmission[dados[0]].layer))
 				grafico.clear()
