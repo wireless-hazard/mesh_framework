@@ -16,9 +16,6 @@
 #define ROUTER_SSID CONFIG_ROUTER_SSID
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
-
-#define TODS_IP "192.168.0.6"
-#define TODS_PORT 8000
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -149,10 +146,6 @@ void send_external_net(void *pvParameters){
     		sprintf(header, MACSTR";%02x:%02x:%02x:%02x:%02x:%02x;%.3d;%.2d;",MAC2STR(from.addr),data.data[7],
     				data.data[6],data.data[5],data.data[4],data.data[3],data.data[2],
     				(int8_t)data.data[1],(int)data.data[0]);
-    		ESP_LOGI(MESH_TAG,"%d",(int)data_size);
-    		ESP_LOGI(MESH_TAG,"%s TAMANHO: %d",header,(int)sizeof(header));
-    		ESP_LOGI(MESH_TAG,"%s TAMANHO: %d",dados,(int)sizeof(dados));
-
 
     		sprintf(dados_final,"%s",header);
     		sprintf(dados_final + (int)sizeof(header) - 1,"%s",dados);

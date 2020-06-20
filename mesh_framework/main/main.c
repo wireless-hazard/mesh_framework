@@ -30,10 +30,14 @@ void app_main(void) {
 		printf(" %d ",rx_mensagem[i]);
 	}
 	printf("\n");
-	meshf_tx_TODS(
-			"192.168.0.6",
-			8000,
-			mensagem,
-			sizeof(mensagem));
-	free_rx_buffer(); //Libera o buffer	
+	free_rx_buffer(); //Libera o buffer
+	while(true){
+		meshf_tx_TODS( //Manda mensagem para o IP
+				"192.168.0.6",
+				8000,
+				mensagem,
+				sizeof(mensagem));
+		meshf_sleep_time(5000);
+	}
+		
 }
