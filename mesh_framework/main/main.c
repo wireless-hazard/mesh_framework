@@ -12,15 +12,19 @@
 #include "mesh_framework.h"
 
 void app_main(void) {
-	int8_t rssi;
-	uint8_t mensagem[3] = {192,168,0}; // Mensagem a ser transmitida
-	char mac[] = "48:83:C7:94:54:3E"; //MAC para o qual a mensagem sera transmitida
+	uint8_t mensagem[2] = {0,};
 	meshf_init(); //Inicializa as configuracoes
 	meshf_start(); //Inicializa a rede MESH
-	
+	int i = 0;
 	printf("\n");
 	while(true){
-		meshf_rssi_info(&rssi,mac);
+		mensagem[1] = i;
+		meshf_tx_TODS(
+			"192.168.0.6",
+			8000,
+			mensagem,
+			sizeof(mensagem));
+		i++;
 		meshf_sleep_time(10000);
 	}
 }

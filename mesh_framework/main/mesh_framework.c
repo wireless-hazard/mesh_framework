@@ -38,7 +38,8 @@ static mesh_data_t rx_data;
 static mesh_addr_t toDS_destination;
 static mesh_data_t toDS_data;
 
-static int8_t *rssi = NULL;
+static int8_t *rssi_g = NULL;
+static uint8_t mac[6] = {0,};
 static wifi_scan_config_t cfg_scan = {
 		.ssid = 0,
 		.bssid = 0,
@@ -156,9 +157,10 @@ void send_external_net(void *pvParameters){
 				}
 			}
     		
-    		sprintf(header, MACSTR";%02x:%02x:%02x:%02x:%02x:%02x;%.3d;%.2d;",MAC2STR(from.addr),data.data[7],
-    				data.data[6],data.data[5],data.data[4],data.data[3],data.data[2],
-    				(int8_t)data.data[1],(int)data.data[0]);
+    		sprintf(header,"%02x:%02x:%02x:%02x:%02x:%02x;%02x:%02x:%02x:%02x:%02x:%02x;%.3d;%.2d;",
+    			from.addr[0],from.addr[1],from.addr[2],from.addr[3],from.addr[4],from.addr[5]+1,
+    			data.data[7],data.data[6],data.data[5],data.data[4],data.data[3],data.data[2],
+    			(int8_t)data.data[1],(int)data.data[0]);
 
     		sprintf(dados_final,"%s",header);
     		sprintf(dados_final + (int)sizeof(header) - 1,"%s",dados);
@@ -307,21 +309,28 @@ void scan_complete(void *pvParameters){
    	
     esp_mesh_set_self_organized(1,0);//Re-enable self organized networking if still connected
     for (int i = 0;i < phones;i++){
-    	ESP_LOGI(MESH_TAG,"SSID: %s    RSSI: %d    channel: %d",aps_list[i].ssid,aps_list[i].rssi, aps_list[i].primary);
+    	if (aps_list[i].bssid[0] == mac[0] && aps_list[i].bssid[1] == mac[1] && aps_list[i].bssid[2] == mac[2] && 
+    		aps_list[i].bssid[3] == mac[3] && aps_list[i].bssid[4] == mac[4] &&  aps_list[i].bssid[5] == mac[5]){
+    		ESP_LOGI(MESH_TAG,"SSID: %s    RSSI: %d    channel: %d",aps_list[i].ssid,aps_list[i].rssi, aps_list[i].primary);
+
+    		*rssi_g = aps_list[i].rssi;
+    		is_data_ready = true;
+
+    		vTaskDelete(NULL);
+    	}
     }
+    ESP_LOGE(MESH_TAG,"AP Not found");
+    *rssi_g = 0;
     is_data_ready = true;
     vTaskDelete(NULL);
 }
 
 void meshf_rssi_info(int8_t *rssi,char interested_mac[]){
-	uint8_t mac[6] = {0,};
 	STR2MAC(mac,interested_mac);
-	// memcpy(cfg_scan.bssid,mac,sizeof(mac));
-
+	rssi_g = rssi;
 	while (!is_parent_connected){
 		vTaskDelay(5*1000/portTICK_PERIOD_MS);
 	}
-
 	xTaskCreatePinnedToCore(&rssi_info,"RSSI info",4096,NULL,6,NULL,0);
 }
 
