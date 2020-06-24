@@ -20,9 +20,9 @@ grafico.set_yticklabels([])
 grafico.set_xticklabels([])
 received_data = []
 
-while True:
-	with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-		s.bind(("192.168.0.6",8000))
+with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
+	s.bind(("192.168.0.6",8000))
+	while True:
 		s.listen()
 		conn,addr = s.accept()
 		with conn:

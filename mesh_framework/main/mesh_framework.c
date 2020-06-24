@@ -38,7 +38,19 @@ static mesh_data_t rx_data;
 static mesh_addr_t toDS_destination;
 static mesh_data_t toDS_data;
 
-void STR2MAC(char rec_string[17],uint8_t *address){
+static int8_t *rssi = NULL;
+static wifi_scan_config_t cfg_scan = {
+		.ssid = 0,
+		.bssid = 0,
+		.channel = 0,
+		.show_hidden = 0,
+		.scan_type = WIFI_SCAN_TYPE_ACTIVE,
+		.scan_time.passive = 500,
+		.scan_time.active.min = 120,
+		.scan_time.active.max = 500,
+};
+
+void STR2MAC(uint8_t *address,char rec_string[17]){
 	uint8_t mac[6] = {0,};
 	int j = 0;
 	for (int i = 0;i<=17;i+=3){
@@ -125,6 +137,7 @@ void send_external_net(void *pvParameters){
     		int Byte2 = ((int)ip4_addr2(ipteste));
     		int Byte3 = ((int)ip4_addr3(ipteste));
     		int Byte4 = ((int)ip4_addr4(ipteste));
+
     		int data_size = data.size;
     		char ip_final[19]={0,};
     		char header[45];
@@ -181,7 +194,7 @@ void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t d
 	tx_data.size = data_size;
 
 	memcpy(tx_data.data, transmitted_data, data_size);
-	STR2MAC(mac_destination,&tx_destination.addr);
+	STR2MAC(tx_destination.addr,mac_destination);
 	xTaskCreatePinnedToCore(&tx_p2p,"P2P transmission",4096,NULL,5,NULL,0);
 }
 
@@ -226,9 +239,6 @@ void tx_TODS(void *pvParameters){
 		esp_err_t send_error = esp_mesh_send(&toDS_data,&toDS_destination,flag,NULL,0);
 	}
 	ESP_LOGW(MESH_TAG,"Enviando camada para o router");
-	for (int i = 0; i < toDS_data.size; i++ ){
-		printf("%d\n",toDS_data.data[i]);
-	}
 	vTaskDelete(NULL);		
 }
 
@@ -274,6 +284,45 @@ void rx_connection(void *pvParameters){
 
 void meshf_rx(uint8_t *array_data){
 	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,((void *)array_data),5,NULL,1);
+}
+
+void rssi_info(void *pvParameters){
+	//Disable self organizaned networking
+	esp_mesh_set_self_organized(0,0);
+	//Stop any scans already in progress
+	esp_wifi_scan_stop();
+	//Manually start scan. Will automatically stop when run to completion
+	esp_wifi_scan_start(&cfg_scan,true);
+	vTaskDelete(NULL);
+}
+
+void scan_complete(void *pvParameters){
+	uint16_t phones = 0;
+    wifi_ap_record_t *aps_list;
+    esp_wifi_scan_get_ap_num(&phones);
+
+    aps_list = (wifi_ap_record_t *)malloc(phones * sizeof(wifi_ap_record_t));
+
+	esp_wifi_scan_get_ap_records(&phones, aps_list);
+   	
+    esp_mesh_set_self_organized(1,0);//Re-enable self organized networking if still connected
+    for (int i = 0;i < phones;i++){
+    	ESP_LOGI(MESH_TAG,"SSID: %s    RSSI: %d    channel: %d",aps_list[i].ssid,aps_list[i].rssi, aps_list[i].primary);
+    }
+    is_data_ready = true;
+    vTaskDelete(NULL);
+}
+
+void meshf_rssi_info(int8_t *rssi,char interested_mac[]){
+	uint8_t mac[6] = {0,};
+	STR2MAC(mac,interested_mac);
+	// memcpy(cfg_scan.bssid,mac,sizeof(mac));
+
+	while (!is_parent_connected){
+		vTaskDelay(5*1000/portTICK_PERIOD_MS);
+	}
+
+	xTaskCreatePinnedToCore(&rssi_info,"RSSI info",4096,NULL,6,NULL,0);
 }
 
 bool data_ready(){
@@ -396,6 +445,7 @@ void mesh_event_handler(mesh_event_t evento){
 		break;
 		case MESH_EVENT_SCAN_DONE:
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_SCAN_DONE");
+			xTaskCreatePinnedToCore(&scan_complete,"SCAN DONE",4096,NULL,6,NULL,1);
 		break;
 		default:
 			ESP_LOGW(MESH_TAG,"MESH_EVENT NOT HANDLED");
