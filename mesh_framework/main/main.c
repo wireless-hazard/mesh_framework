@@ -12,19 +12,17 @@
 #include "mesh_framework.h"
 
 void app_main(void) {
-	uint8_t mensagem[2] = {0,};
 	meshf_init(); //Inicializa as configuracoes
 	meshf_start(); //Inicializa a rede MESH
-	int i = 0;
-	printf("\n");
+	uint8_t buffer[2] = {0,};
 	while(true){
-		mensagem[1] = i;
+		buffer[0] = (uint8_t)esp_random();
+		buffer[1] = (uint8_t)esp_random();
 		meshf_tx_TODS(
-			"192.168.0.6",
+			"192.168.0.2",
 			8000,
-			mensagem,
-			sizeof(mensagem));
-		i++;
-		meshf_sleep_time(10000);
+			buffer,
+			sizeof(buffer));
+		meshf_sleep_time(5000);
 	}
 }

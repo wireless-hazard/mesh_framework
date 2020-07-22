@@ -1218,7 +1218,7 @@
                 "id": "IS_TODS_ALLOWED",
                 "name": "IS_TODS_ALLOWED",
                 "range": null,
-                "title": "comunication to external network",
+                "title": "Allow comunication to external network",
                 "type": "bool"
             }
         ],

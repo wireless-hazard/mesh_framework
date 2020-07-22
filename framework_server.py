@@ -1,4 +1,5 @@
-import socket,time,random
+#!/usr/bin/env python3
+import socket,time,random,sys
 from matplotlib import pyplot as plt
 
 class received_message:
@@ -21,7 +22,7 @@ grafico.set_xticklabels([])
 received_data = []
 
 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-	s.bind(("192.168.0.6",8000))
+	s.bind((sys.argv[1],int(sys.argv[2])))
 	while True:
 		s.listen()
 		conn,addr = s.accept()
