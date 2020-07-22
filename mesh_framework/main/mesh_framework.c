@@ -77,10 +77,6 @@ void tx_p2p(void *pvParameters){
 	tx_data.proto = MESH_PROTO_BIN;
 	uint8_t self_mac[6] = {0,};
 
-	while (!is_parent_connected){
-		vTaskDelay(30*1000/portTICK_PERIOD_MS);
-	}
-
 	esp_wifi_get_mac(ESP_IF_WIFI_AP,&self_mac);
 
 	if(self_mac[0]==tx_destination.addr[0] && self_mac[1]==tx_destination.addr[1] && self_mac[2]==tx_destination.addr[2] 
@@ -203,17 +199,10 @@ void meshf_tx_p2p(char mac_destination[], uint8_t transmitted_data[], uint16_t d
 void tx_TODS(void *pvParameters){
 	uint8_t prov_buffer[8] = {0,};
 	mesh_addr_t parent_bssid;
-
 	
 	int flag = MESH_DATA_TODS;
-
 	wifi_ap_record_t apdata;
 
-	while (!is_parent_connected){
-		ESP_LOGE(MESH_TAG,"NO PARENT CONNECTED");
-		vTaskDelay(10*1000/portTICK_PERIOD_MS);
-	}	
-	
 	esp_err_t err = esp_wifi_sta_get_ap_info(&apdata);
 	ESP_LOGW(MESH_TAG,"rssi: %d\n",apdata.rssi);
 	esp_err_t bssid_error = esp_mesh_get_parent_bssid(&parent_bssid);
@@ -264,10 +253,6 @@ void rx_connection(void *pvParameters){
 	rx_data.size = MESH_MTU;
 	mesh_rx_pending_t rx_pending;
 	int flag = 0;
-
-	while (!is_parent_connected){
-		vTaskDelay(5*1000/portTICK_PERIOD_MS);
-	}
 
 	while(true){
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
@@ -328,9 +313,6 @@ void scan_complete(void *pvParameters){
 void meshf_rssi_info(int8_t *rssi,char interested_mac[]){
 	STR2MAC(mac,interested_mac);
 	rssi_g = rssi;
-	while (!is_parent_connected){
-		vTaskDelay(5*1000/portTICK_PERIOD_MS);
-	}
 	xTaskCreatePinnedToCore(&rssi_info,"RSSI info",4096,NULL,6,NULL,0);
 }
 
@@ -511,4 +493,9 @@ void meshf_init(){
 void meshf_start(){
 	/* mesh start */
     ESP_ERROR_CHECK(esp_mesh_start());
+    /*Blocks the code's flow until the ESP connects to a parent*/
+    while(!is_parent_connected){
+    	ESP_LOGE(MESH_TAG,"NOT CONNECTED TO A PARENT YET");
+		vTaskDelay(10*1000/portTICK_PERIOD_MS);	
+	}
 }
