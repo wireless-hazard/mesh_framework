@@ -7,6 +7,7 @@
 #include "esp_mesh.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 #include "freertos/event_groups.h"
 #include "lwip/sockets.h"
 #include "mesh_framework.h"
@@ -16,6 +17,12 @@
 #define ROUTER_SSID CONFIG_ROUTER_SSID
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
+
+#ifndef CONFIG_IS_TODS_ALLOWED
+	#define CONFIG_IS_TODS_ALLOWED false
+#endif
+
+static SemaphoreHandle_t SemaphoreParentConnected = NULL;
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -68,7 +75,6 @@ void STR2MAC(uint8_t *address,char rec_string[17]){
 		j++;
 	}
 	memcpy(address,&mac,sizeof(uint8_t)*6);
-
 }
 
 void tx_p2p(void *pvParameters){
@@ -97,7 +103,6 @@ void tx_p2p(void *pvParameters){
 
 void send_external_net(void *pvParameters){
 	
-
 	mesh_addr_t from;
 	mesh_addr_t to;
 	mesh_data_t data;
@@ -113,7 +118,7 @@ void send_external_net(void *pvParameters){
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 		// ESP_LOGI(MESH_TAG,"Numero de pacotes para rede externa: %d",rx_pending.toDS);
 		if(rx_pending.toDS <= 0){
-			vTaskDelay(0.5*1000/portTICK_PERIOD_MS);
+			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
 
 			esp_err_t err = esp_mesh_recv_toDS(&from,&to,&data,0,&flag,NULL,0);
@@ -177,11 +182,9 @@ void send_external_net(void *pvParameters){
 				close(sock);
 				xTaskCreatePinnedToCore(&send_external_net,"Recepcao",4096,NULL,5,NULL,1);
 				vTaskDelete(NULL);	
-			}else{	
-				printf("Estado da conexao: %dK\n",error);
-			
-				send(sock,&dados_final,strlen(dados_final),0);
-			}
+			}	
+			printf("Estado da conexao: %dK\n",error);
+			send(sock,&dados_final,strlen(dados_final),0);
 			close(sock);
 		}	
 	}
@@ -224,10 +227,10 @@ void tx_TODS(void *pvParameters){
 	memcpy(toDS_data.data, &prov_buffer, sizeof(prov_buffer));
 	esp_err_t send_error = esp_mesh_send(&toDS_destination,&toDS_data,flag,NULL,0);
 
-	while (send_error != ESP_OK){
+	if (send_error != ESP_OK){
 		ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
-		vTaskDelay(10*1000/portTICK_PERIOD_MS);
-		esp_err_t send_error = esp_mesh_send(&toDS_data,&toDS_destination,flag,NULL,0);
+		xTaskCreatePinnedToCore(&tx_TODS,"TO DS transmission",4096,NULL,5,NULL,0);
+		vTaskDelete(NULL);
 	}
 	ESP_LOGW(MESH_TAG,"Enviando camada para o router");
 	vTaskDelete(NULL);		
@@ -259,7 +262,7 @@ void rx_connection(void *pvParameters){
 
 		// ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d",rx_pending.toSelf);
 		if(rx_pending.toSelf <= 0 || is_data_ready == true){
-			vTaskDelay(0.5*1000/portTICK_PERIOD_MS);
+			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
 			memcpy(array_data,rx_data.data,rx_data.size);
@@ -353,6 +356,7 @@ void mesh_event_handler(mesh_event_t evento){
 			last_layer = mesh_layer;
         	is_mesh_connected = true;
         	is_parent_connected = true;
+        	xSemaphoreGive(SemaphoreParentConnected);
 			if (esp_mesh_is_root()) {
             	tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA);
             	if (CONFIG_IS_TODS_ALLOWED){
@@ -364,6 +368,7 @@ void mesh_event_handler(mesh_event_t evento){
 		break;
 		case MESH_EVENT_PARENT_DISCONNECTED: //Perform a fixed number of attempts to reconnect before searching for another one
 			is_mesh_connected = false;
+			is_parent_connected = false;
         	mesh_layer = esp_mesh_get_layer();
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_PARENT_DISCONNECTED\n");
 		break;
@@ -488,14 +493,18 @@ void meshf_init(){
 	config_mesh.mesh_ap.max_connection = MAX_CLIENTS;
     memcpy((uint8_t *) &config_mesh.mesh_ap.password, ROUTER_PASSWORD, strlen(ROUTER_PASSWORD));
     ESP_ERROR_CHECK(esp_mesh_set_config(&config_mesh));
+    SemaphoreParentConnected = xSemaphoreCreateBinary();
+	if (SemaphoreParentConnected == NULL){
+		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE");
+	}
 }
 
 void meshf_start(){
 	/* mesh start */
     ESP_ERROR_CHECK(esp_mesh_start());
     /*Blocks the code's flow until the ESP connects to a parent*/
-    while(!is_parent_connected){
-    	ESP_LOGE(MESH_TAG,"NOT CONNECTED TO A PARENT YET");
-		vTaskDelay(10*1000/portTICK_PERIOD_MS);	
-	}
+    ESP_LOGE(MESH_TAG,"NOT CONNECTED TO A PARENT YET");
+    xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    xSemaphoreGive(SemaphoreParentConnected);
+    ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
 }
