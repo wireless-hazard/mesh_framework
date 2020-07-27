@@ -4,7 +4,7 @@ void meshf_tx_p2p(char mac_destination[],uint8_t transmitted_data[],uint16_t dat
 void meshf_tx_TODS(char ip_destination[],int port,uint8_t transmitted_data[],uint16_t data_size);
 void meshf_rx(uint8_t *array_data);
 void meshf_rssi_info(int8_t *rssi,char interested_mac[]);
-bool data_ready();
+void data_ready();
 void free_rx_buffer();
 void meshf_sleep_time(float delay);
 void mesh_event_handler(mesh_event_t evento);

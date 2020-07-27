@@ -23,6 +23,7 @@
 #endif
 
 static SemaphoreHandle_t SemaphoreParentConnected = NULL;
+static SemaphoreHandle_t SemaphoreDataReady = NULL;
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -31,7 +32,7 @@ static mesh_addr_t mesh_parent_addr;
 
 static bool is_mesh_connected = false;
 static bool is_parent_connected = false;
-static bool is_data_ready = false;
+static bool is_buffer_free = true;
 
 static uint8_t tx_buffer[1460] = { 0, };
 static uint8_t rx_buffer[MESH_MTU] = { 0, };
@@ -93,11 +94,11 @@ void tx_p2p(void *pvParameters){
 
 	esp_err_t send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
 	while (send_error != ESP_OK){
+		ESP_LOGE(MESH_TAG,"Erro :%s na comunicacao p2p\n",esp_err_to_name(send_error));
 		vTaskDelay(1*1000/portTICK_PERIOD_MS);
-		ESP_LOGE(MESH_TAG,"%s\n",esp_err_to_name(send_error));
 		send_error = esp_mesh_send(&tx_destination,&tx_data,flag,NULL,0);
 	}
-	ESP_LOGE(MESH_TAG,"DADOS ENVIADOS");
+	ESP_LOGI(MESH_TAG,"DADOS ENVIADOS");
 	vTaskDelete(NULL);
 }
 
@@ -232,7 +233,7 @@ void tx_TODS(void *pvParameters){
 		xTaskCreatePinnedToCore(&tx_TODS,"TO DS transmission",4096,NULL,5,NULL,0);
 		vTaskDelete(NULL);
 	}
-	ESP_LOGW(MESH_TAG,"Enviando camada para o router");
+	ESP_LOGW(MESH_TAG,"Sending the messagem to the external network");
 	vTaskDelete(NULL);		
 }
 
@@ -260,14 +261,15 @@ void rx_connection(void *pvParameters){
 	while(true){
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 
-		// ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d",rx_pending.toSelf);
-		if(rx_pending.toSelf <= 0 || is_data_ready == true){
+		//ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d\n Estado do Semaforo: %d\n",rx_pending.toSelf,uxSemaphoreGetCount(SemaphoreDataReady));
+		if(rx_pending.toSelf <= 0 || !is_buffer_free){
 			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
 			memcpy(array_data,rx_data.data,rx_data.size);
-			is_data_ready = true;
-			ESP_LOGE(MESH_TAG,"DADOS RECEBIDOS");
+			is_buffer_free = false;
+			xSemaphoreGive(SemaphoreDataReady);
+			ESP_LOGI(MESH_TAG,"DADOS RECEBIDOS");
 		}
 	}
 } 
@@ -302,14 +304,14 @@ void scan_complete(void *pvParameters){
     		ESP_LOGI(MESH_TAG,"SSID: %s    RSSI: %d    channel: %d",aps_list[i].ssid,aps_list[i].rssi, aps_list[i].primary);
 
     		*rssi_g = aps_list[i].rssi;
-    		is_data_ready = true;
+    		xSemaphoreGive(SemaphoreDataReady);
 
     		vTaskDelete(NULL);
     	}
     }
     ESP_LOGE(MESH_TAG,"AP Not found");
     *rssi_g = 0;
-    is_data_ready = true;
+    xSemaphoreGive(SemaphoreDataReady);
     vTaskDelete(NULL);
 }
 
@@ -319,12 +321,12 @@ void meshf_rssi_info(int8_t *rssi,char interested_mac[]){
 	xTaskCreatePinnedToCore(&rssi_info,"RSSI info",4096,NULL,6,NULL,0);
 }
 
-bool data_ready(){
-	return is_data_ready;
+void data_ready(){
+	xSemaphoreTake(SemaphoreDataReady,portMAX_DELAY);
 }
 
 void free_rx_buffer(){
-	is_data_ready = false;
+	is_buffer_free = true;
 }
 
 void meshf_sleep_time(float delay){
@@ -369,6 +371,7 @@ void mesh_event_handler(mesh_event_t evento){
 		case MESH_EVENT_PARENT_DISCONNECTED: //Perform a fixed number of attempts to reconnect before searching for another one
 			is_mesh_connected = false;
 			is_parent_connected = false;
+			xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
         	mesh_layer = esp_mesh_get_layer();
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_PARENT_DISCONNECTED\n");
 		break;
@@ -495,7 +498,11 @@ void meshf_init(){
     ESP_ERROR_CHECK(esp_mesh_set_config(&config_mesh));
     SemaphoreParentConnected = xSemaphoreCreateBinary();
 	if (SemaphoreParentConnected == NULL){
-		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE");
+		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: PARENTCONNECTED");
+	}
+	SemaphoreDataReady = xSemaphoreCreateBinary();
+	if (SemaphoreDataReady == NULL){
+		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: DATAREADY");
 	}
 }
 
