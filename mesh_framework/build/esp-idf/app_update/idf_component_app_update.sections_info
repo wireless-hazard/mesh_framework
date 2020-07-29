@@ -108,15 +108,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  51 .text.esp_ota_erase_last_boot_app_partition 000000d8  00000000  00000000  00001108  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 52 .rodata.__func__$5974 00000022  00000000  00000000  000011e0  2**2
+ 52 .rodata.__func__$5981 00000022  00000000  00000000  000011e0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 53 .rodata.__func__$5963 0000001e  00000000  00000000  00001204  2**2
+ 53 .rodata.__func__$5970 0000001e  00000000  00000000  00001204  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 54 .bss.curr_partition$5961 00000004  00000000  00000000  00001224  2**2
+ 54 .bss.curr_partition$5968 00000004  00000000  00000000  00001224  2**2
                   ALLOC
- 55 .rodata.__func__$5920 00000018  00000000  00000000  00001224  2**2
+ 55 .rodata.__func__$5927 00000018  00000000  00000000  00001224  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 56 .rodata.__func__$5893 0000000e  00000000  00000000  0000123c  2**2
+ 56 .rodata.__func__$5900 0000000e  00000000  00000000  0000123c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
  57 .bss.s_ota_ops_last_handle 00000004  00000000  00000000  0000124c  2**2
                   ALLOC

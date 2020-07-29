@@ -13,20 +13,22 @@
 #include "mesh_framework.h"
 
 void app_main(void) {
-	uint8_t mensagem[] = {100,20,4,7};
-	uint8_t rx_mensagem[4] = {0,};
-	char mac[] = "A4:CF:12:75:21:31";
+	uint8_t mensagem[] = {10,25};
+	uint8_t rx_mensagem[2] = {0,};
+	char mac[] = "A4:CF:12:75:21:31"; //softAP
 	meshf_init();
 	meshf_start();
 	meshf_rx(rx_mensagem);
 	meshf_tx_p2p(
-		mac,
-		mensagem,
-		sizeof(mensagem));
+			mac,
+			mensagem,
+			sizeof(mensagem));
+	meshf_task_debugger();
 	data_ready();
 	printf("\n");
 	for(int i = 0;i < sizeof(rx_mensagem);i++){
 		printf(" %d ",rx_mensagem[i]);
 	}
 	free_rx_buffer();
+	meshf_task_debugger();
 }

@@ -321,6 +321,18 @@ void meshf_rssi_info(int8_t *rssi,char interested_mac[]){
 	xTaskCreatePinnedToCore(&rssi_info,"RSSI info",4096,NULL,6,NULL,0);
 }
 
+void meshf_task_debugger(void){
+	size_t free_memory = xPortGetFreeHeapSize();
+	printf("\n\nFree heap memory: %d bytes\n\n",free_memory);
+	char pcWriterBuffer[2400] = {0,};
+	vTaskList(pcWriterBuffer);
+	printf("%s",pcWriterBuffer);
+	printf("\n\n");
+	vTaskGetRunTimeStats(pcWriterBuffer);
+	printf("%s",pcWriterBuffer);
+	printf("\n\n");
+}
+
 void data_ready(){
 	xSemaphoreTake(SemaphoreDataReady,portMAX_DELAY);
 }

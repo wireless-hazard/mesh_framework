@@ -56,11 +56,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  25 .iram1.32     00000028  00000000  00000000  0000062c  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 26 .rodata.__func__$5723 00000031  00000000  00000000  00000654  2**2
+ 26 .rodata.__func__$5730 00000031  00000000  00000000  00000654  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 27 .rodata.__func__$5713 00000032  00000000  00000000  00000688  2**2
+ 27 .rodata.__func__$5720 00000032  00000000  00000000  00000688  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 28 .rodata.__func__$5697 00000014  00000000  00000000  000006bc  2**2
+ 28 .rodata.__func__$5704 00000014  00000000  00000000  000006bc  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
  29 .data.s_flash_op_cpu 00000004  00000000  00000000  000006d0  2**2
                   CONTENTS, ALLOC, LOAD, DATA
@@ -161,9 +161,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  29 .iram1.34     0000006e  00000000  00000000  00000944  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 30 .rodata.__func__$5822 00000011  00000000  00000000  000009b4  2**2
+ 30 .rodata.__func__$5829 00000011  00000000  00000000  000009b4  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 31 .rodata.__func__$5813 00000015  00000000  00000000  000009c8  2**2
+ 31 .rodata.__func__$5820 00000015  00000000  00000000  000009c8  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
  32 .bss.s_mmap_last_handle 00000004  00000000  00000000  000009e0  2**2
                   ALLOC
@@ -262,7 +262,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  30 .iram1.37     00000121  00000000  00000000  000008ec  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 31 .bss.unlocked$5991 00000001  00000000  00000000  00000a0d  2**0
+ 31 .bss.unlocked$5998 00000001  00000000  00000000  00000a0d  2**0
                   ALLOC
  32 .bss.s_flash_guard_ops 00000004  00000000  00000000  00000a10  2**2
                   ALLOC
