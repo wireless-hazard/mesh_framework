@@ -1220,6 +1220,16 @@
                 "range": null,
                 "title": "Allow comunication to external network",
                 "type": "bool"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "URL of the broker to connect to\n",
+                "id": "BROKER_URL",
+                "name": "BROKER_URL",
+                "range": null,
+                "title": "Broker URL",
+                "type": "string"
             }
         ],
         "depends_on": null,

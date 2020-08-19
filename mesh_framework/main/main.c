@@ -10,25 +10,19 @@
 #include "freertos/event_groups.h"
 #include "freertos/semphr.h"
 #include "lwip/sockets.h"
+#include "lwip/dns.h"
+#include "lwip/netdb.h"
+#include "mqtt_client.h"
 #include "mesh_framework.h"
 
 void app_main(void) {
-	uint8_t mensagem[] = {10,25};
-	uint8_t rx_mensagem[2] = {0,};
 	char mac[] = "A4:CF:12:75:21:31"; //softAP
 	meshf_init();
 	meshf_start();
-	meshf_rx(rx_mensagem);
-	meshf_tx_p2p(
-			mac,
-			mensagem,
-			sizeof(mensagem));
-	meshf_task_debugger();
-	data_ready();
-	printf("\n");
-	for(int i = 0;i < sizeof(rx_mensagem);i++){
-		printf(" %d ",rx_mensagem[i]);
-	}
-	free_rx_buffer();
-	meshf_task_debugger();
+	meshf_mqtt_start();
+
+	int msg_id = esp_mqtt_client_publish(mqtt_handler, "/teste/ando", "data_3", 0, 1, 0);
+    printf("sent publish successful, msg_id=%d\n", msg_id);
+    msg_id = esp_mqtt_client_subscribe(mqtt_handler, "/teste/send", 0);
+    printf("sent subscribe successful, msg_id=%d\n", msg_id);
 }

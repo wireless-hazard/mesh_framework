@@ -5,11 +5,18 @@
 #include "esp_wifi.h"
 #include "esp_event_loop.h"
 #include "esp_mesh.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "freertos/event_groups.h"
+
 #include "lwip/sockets.h"
+#include "lwip/dns.h"
+#include "lwip/netdb.h"
+
+#include "mqtt_client.h"
+
 #include "mesh_framework.h"
 
 #define MAX_LAYERS CONFIG_MAX_LAYERS
@@ -23,6 +30,7 @@
 #endif
 
 static SemaphoreHandle_t SemaphoreParentConnected = NULL;
+static SemaphoreHandle_t SemaphoreBrokerConnected = NULL;
 static SemaphoreHandle_t SemaphoreDataReady = NULL;
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
@@ -58,6 +66,8 @@ static wifi_scan_config_t cfg_scan = {
 		.scan_time.active.min = 120,
 		.scan_time.active.max = 500,
 };
+
+esp_mqtt_client_handle_t mqtt_handler;
 
 void STR2MAC(uint8_t *address,char rec_string[17]){
 	uint8_t mac[6] = {0,};
@@ -463,6 +473,61 @@ void mesh_event_handler(mesh_event_t evento){
 		break;
 	}
 
+}
+
+static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
+
+	mqtt_handler = event->client;
+
+	switch (event->event_id) {
+		case MQTT_EVENT_CONNECTED:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_CONNECTED");
+			xSemaphoreGive(SemaphoreBrokerConnected);
+		break;
+		case MQTT_EVENT_DISCONNECTED:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_DISCONNECTED");
+		break;
+		case MQTT_EVENT_SUBSCRIBED:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_SUBSCRIBED");
+		break;
+		case MQTT_EVENT_UNSUBSCRIBED:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_UNSUBSCRIBED");
+		break;
+		case MQTT_EVENT_PUBLISHED:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_PUBLISHED");
+		break;
+		case MQTT_EVENT_DATA:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_DATA");
+			printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+            printf("DATA=%.*s\r\n", event->data_len, event->data);
+		break;
+		case MQTT_EVENT_ERROR:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_ERROR");
+		break;
+		default:
+            ESP_LOGI(MESH_TAG, "MQTT_EVENT NOT HANDLED, ID:%d", event->event_id);
+        break;
+	}
+	return ESP_OK;
+}
+
+void meshf_mqtt_start(){
+	
+	esp_mqtt_client_config_t mqtt_cfg = {
+        .uri = CONFIG_BROKER_URL,
+        .event_handle = mqtt_event_handler,
+    };
+
+    SemaphoreBrokerConnected = xSemaphoreCreateBinary();
+
+    xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    xSemaphoreGive(SemaphoreParentConnected);
+
+    esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
+    esp_mqtt_client_start(mqtt_handler);
+
+    xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
+    xSemaphoreGive(SemaphoreBrokerConnected);
 }
 
 void meshf_init(){

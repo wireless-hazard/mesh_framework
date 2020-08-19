@@ -25,4 +25,11 @@ config IS_TODS_ALLOWED
     help
     Is the comunication to external network allowed?
 
+config BROKER_URL
+        string "Broker URL"
+        default "mqtt://test.mosquitto.org"
+        help
+            URL of the broker to connect to
+
+
 endmenu
