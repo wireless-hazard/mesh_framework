@@ -412,6 +412,7 @@
     "ROUTER_SSID": "Net virtua apt 104",
     "SECURE_BOOT_ENABLED": false,
     "SECURE_SIGNED_APPS_NO_SECURE_BOOT": false,
+    "SNTP_SERVER": "pool.ntp.org",
     "SPIFFS_API_DBG": false,
     "SPIFFS_CACHE": true,
     "SPIFFS_CACHE_DBG": false,

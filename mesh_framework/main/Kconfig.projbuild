@@ -31,5 +31,10 @@ config BROKER_URL
         help
             URL of the broker to connect to
 
+config SNTP_SERVER
+        string "SNTP Server"
+        default "pool.ntp.org"
+        help
+            URL of the SNTP Server
 
 endmenu

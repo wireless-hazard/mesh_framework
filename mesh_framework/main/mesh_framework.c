@@ -16,6 +16,7 @@
 #include "lwip/netdb.h"
 
 #include "mqtt_client.h"
+#include "esp_sntp.h"
 
 #include "mesh_framework.h"
 
@@ -591,4 +592,29 @@ void meshf_start(){
     xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
     xSemaphoreGive(SemaphoreParentConnected);
     ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
+    if (esp_mesh_is_root()){
+    	
+    	char strftime_buff[64];
+		
+		sntp_setoperatingmode(SNTP_OPMODE_POLL);
+		sntp_setservername(0, CONFIG_SNTP_SERVER);
+		
+		sntp_init();
+
+		time_t now = 0;
+    	struct tm timeinfo = { 0 };
+    	int retry = 0;
+    	const int retry_count = 10;
+    	while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
+        	ESP_LOGI(MESH_TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+        	vTaskDelay(2000 / portTICK_PERIOD_MS);
+    	}
+    	time(&now);
+    	setenv("TZ", "UTC+3", 1);
+		tzset();
+    	localtime_r(&now, &timeinfo);
+
+		strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+		ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
+    }
 }

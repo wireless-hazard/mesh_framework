@@ -24,29 +24,8 @@ void app_main(void) {
 	meshf_start();
 	meshf_mqtt_start();
 
-	char strftime_buff[64];
 	char mqtt_string[256];
-
-	sntp_setoperatingmode(SNTP_OPMODE_POLL);
-	sntp_setservername(0, "pool.ntp.org");
-	sntp_init();
-
-	time_t now = 0;
-    struct tm timeinfo = { 0 };
-    int retry = 0;
-    const int retry_count = 10;
-    while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
-        ESP_LOGI("TESTE", "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-    }
-    time(&now);
-    setenv("TZ", "UTC+3", 1);
-	tzset();
-    localtime_r(&now, &timeinfo);
-
-	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
-	ESP_LOGI("TESTE", "The current date/time in UNIPAMPA is: %s", strftime_buff);
-
+	char strftime_buff[64];
 	// Hall effect sensor test
 	gpio_pad_select_gpio(2);
 	/* Set the GPIO as a push/pull output */
