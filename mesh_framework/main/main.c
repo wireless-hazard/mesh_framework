@@ -40,18 +40,16 @@ void app_main(void) {
 
 			time_t now = 0;
     		struct tm timeinfo = { 0 };
-    		int retry = 0;
-    		const int retry_count = 10;
+    		
     		time(&now);
-    		setenv("TZ", "UTC+3", 1);
-			tzset();
     		localtime_r(&now, &timeinfo);
 
 			strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
 			ESP_LOGI("TESTE", "The current date/time in UNIPAMPA is: %s", strftime_buff);
 			sprintf(mqtt_string,"The current date/time in UNIPAMPA is: %s", strftime_buff);
-			esp_mqtt_client_publish(mqtt_handler,"/sntp/esp32time",mqtt_string,0,0,0);
-
+			if (esp_mesh_is_root()){
+				esp_mqtt_client_publish(mqtt_handler,"/sntp/esp32time",mqtt_string,0,0,0);
+			}
 			meshf_sleep_time(2000);
 			gpio_set_level(2,0);
 		}

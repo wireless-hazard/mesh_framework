@@ -513,22 +513,23 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 }
 
 void meshf_mqtt_start(){
-	
-	esp_mqtt_client_config_t mqtt_cfg = {
-        .uri = CONFIG_BROKER_URL,
-        .event_handle = mqtt_event_handler,
-    };
+	if (esp_mesh_is_root()){
+		esp_mqtt_client_config_t mqtt_cfg = {
+        	.uri = CONFIG_BROKER_URL,
+        	.event_handle = mqtt_event_handler,
+    	};
 
-    SemaphoreBrokerConnected = xSemaphoreCreateBinary();
+    	SemaphoreBrokerConnected = xSemaphoreCreateBinary();
 
-    xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
-    xSemaphoreGive(SemaphoreParentConnected);
+    	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    	xSemaphoreGive(SemaphoreParentConnected);
 
-    esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_start(mqtt_handler);
+    	esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
+    	esp_mqtt_client_start(mqtt_handler);
 
-    xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-    xSemaphoreGive(SemaphoreBrokerConnected);
+    	xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
+    	xSemaphoreGive(SemaphoreBrokerConnected);
+    }
 }
 
 void meshf_init(){
@@ -593,7 +594,7 @@ void meshf_start(){
     xSemaphoreGive(SemaphoreParentConnected);
     ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
     if (esp_mesh_is_root()){
-    	
+
     	char strftime_buff[64];
 		
 		sntp_setoperatingmode(SNTP_OPMODE_POLL);
