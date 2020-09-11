@@ -277,6 +277,9 @@ void rx_connection(void *pvParameters){
 			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
+			if (rx_data.data[0] == 'S' && rx_data.data[1] == 'N' && rx_data.data[2] == 'T' && rx_data.data[3] == 'P' && rx_data.size == 32){
+				ESP_LOGE(MESH_TAG,"REQUEST SNTP");
+			}
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
 			xSemaphoreGive(SemaphoreDataReady);
