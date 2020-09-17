@@ -9,6 +9,9 @@
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "freertos/semphr.h"
+#include <esp_system.h>
+#include <time.h>
+#include <sys/time.h>
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
@@ -19,18 +22,7 @@
 #include "driver/gpio.h"
 #include "esp_sntp.h"
 
-void meshf_asktime(){
-	uint8_t buffer[1460] = {0,};
-	uint8_t sntp_data[] = {'S','N','T','P'};
-	mesh_data_t sntp_packet;
-	sntp_packet.data = buffer;
-	sntp_packet.size = 8*4;
-	sntp_packet.proto = MESH_PROTO_BIN;
-	memcpy(sntp_packet.data,&sntp_data,8*4);
-	esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
-	ESP_LOGI("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
-
-}
+#include <cJSON.h>
 
 void app_main(void) {
 	meshf_init();
@@ -49,13 +41,18 @@ void app_main(void) {
 	gpio_set_direction(2, GPIO_MODE_OUTPUT);
 	adc1_config_width(ADC_WIDTH_BIT_12);
 	int lobby;
+
 	meshf_asktime();
-	data_ready();
-	ESP_LOGE("TAG","%d %d %d %d",teste[0],teste[1],teste[2],teste[3]);
-	free_rx_buffer();
-	data_ready();
-	ESP_LOGE("TAG","%d %d %d %d",teste[0],teste[1],teste[2],teste[3]);
-	free_rx_buffer();
+	while(true){
+		meshf_sleep_time(5000);
+		time_t now = 0;
+		time(&now);
+    	struct tm timeinfo = { 0 };
+		localtime_r(&now, &timeinfo);
+		strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+		ESP_LOGI("MESH_TAG", "UNIPAMPA is: %s", strftime_buff);
+	}
+
 	// while(true){
 	// 	lobby = hall_sensor_read();
 	// 	printf("HALL EFFECT VALUE = %d\n", lobby);

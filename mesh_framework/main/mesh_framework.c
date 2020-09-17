@@ -11,6 +11,10 @@
 #include "freertos/semphr.h"
 #include "freertos/event_groups.h"
 
+#include <esp_system.h>
+#include <time.h>
+#include <sys/time.h>
+
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
@@ -33,6 +37,7 @@
 static SemaphoreHandle_t SemaphoreParentConnected = NULL;
 static SemaphoreHandle_t SemaphoreBrokerConnected = NULL;
 static SemaphoreHandle_t SemaphoreDataReady = NULL;
+static SemaphoreHandle_t SemaphoreSNTPConnected = NULL;
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -270,6 +275,9 @@ void rx_connection(void *pvParameters){
 	int flag = 0;
 
 	while(true){
+		rx_data.data = rx_buffer;
+		rx_data.size = MESH_MTU;
+
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 
 		//ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d\n Estado do Semaforo: %d\n",rx_pending.toSelf,uxSemaphoreGetCount(SemaphoreDataReady));
@@ -279,6 +287,79 @@ void rx_connection(void *pvParameters){
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
 			if (rx_data.data[0] == 'S' && rx_data.data[1] == 'N' && rx_data.data[2] == 'T' && rx_data.data[3] == 'P' && rx_data.size == 32){
 				ESP_LOGE(MESH_TAG,"REQUEST SNTP");
+
+				char strftime_buff[64];
+				time_t now = 0;
+    			struct tm timeinfo = { 0 };
+    		
+    			xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
+    			xSemaphoreGive(SemaphoreSNTPConnected);
+
+    			time(&now);
+    			localtime_r(&now, &timeinfo);
+
+				strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+				ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
+
+				uint8_t buffer[1460] = {0,};
+				uint8_t sntp_data[14] = {0,};
+
+				sntp_data[0] = 'P';
+				sntp_data[1] = 'T';
+				sntp_data[2] = 'N';
+				sntp_data[3] = 'S';
+
+				int tempo = now;
+				int factor = 1000000000;
+				int index = 13;
+
+				while(index >= 4){
+					sntp_data[index] = tempo/factor;
+					tempo = tempo - (sntp_data[index]*factor);
+					factor = factor/10;
+					index = index - 1;
+				}
+
+				mesh_data_t sntp_packet;
+				sntp_packet.data = buffer;
+				sntp_packet.size = sizeof(sntp_data);
+				sntp_packet.proto = MESH_PROTO_BIN;
+				memcpy(sntp_packet.data,&sntp_data,sntp_packet.size);
+				esp_err_t send_error = esp_mesh_send(&rx_sender,&sntp_packet,MESH_DATA_P2P,NULL,0);
+				ESP_LOGW("MESH_TAG","Sending SNTP RESPONSE = %s\n",esp_err_to_name(send_error));
+				continue;
+			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'T' && rx_data.data[2] == 'N' && rx_data.data[3] == 'S'){
+
+				int tempo_temp = 0;
+				int tempo = 0;
+				int factor = 1000000000;
+				int index = 13;
+
+				while(index >= 4){
+					tempo_temp = rx_data.data[index]*factor;
+					tempo = tempo + tempo_temp;
+					factor = factor/10;
+					index = index - 1;
+				}
+
+				struct timeval tv;//Cria a estrutura temporaria para funcao abaixo.
+  				tv.tv_sec = tempo;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
+  				settimeofday(&tv, NULL);
+
+				char strftime_buff[64];
+				time_t now = 0;
+				time(&now);
+				setenv("TZ", "UTC+3", 1);
+				tzset();
+    			struct tm timeinfo = { 0 };
+
+    			localtime_r(&now, &timeinfo);
+
+				strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+				ESP_LOGI(MESH_TAG, "The current date/time RECEIVED in UNIPAMPA is: %s", strftime_buff);
+
+				ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
+				continue;
 			}
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
@@ -290,6 +371,20 @@ void rx_connection(void *pvParameters){
 
 void meshf_rx(uint8_t *array_data){
 	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,((void *)array_data),5,NULL,1);
+}
+
+void meshf_asktime(){
+	// if (!esp_mesh_is_root()){ THIS LINE ADDS AN WEIRD BUG 
+		uint8_t buffer[1460] = {0,};
+		uint8_t sntp_data[] = {'S','N','T','P'};
+		mesh_data_t sntp_packet;
+		sntp_packet.data = buffer;
+		sntp_packet.size = 8*4;
+		sntp_packet.proto = MESH_PROTO_BIN;
+		memcpy(sntp_packet.data,&sntp_data,8*4);
+		esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
+		ESP_LOGW("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
+	// }
 }
 
 void rssi_info(void *pvParameters){
@@ -586,6 +681,10 @@ void meshf_init(){
 	if (SemaphoreDataReady == NULL){
 		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: DATAREADY");
 	}
+	SemaphoreSNTPConnected = xSemaphoreCreateBinary();
+	if (SemaphoreSNTPConnected == NULL){
+		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: SNTPCONNECTED");
+	}
 }
 
 void meshf_start(){
@@ -620,5 +719,8 @@ void meshf_start(){
 
 		strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
 		ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
+		xSemaphoreGive(SemaphoreSNTPConnected);
+
+		
     }
 }
