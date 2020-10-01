@@ -16,7 +16,7 @@
     "BOOTLOADER_WDT_DISABLE_IN_USER_CODE": false,
     "BOOTLOADER_WDT_ENABLE": true,
     "BOOTLOADER_WDT_TIME_MS": 9000,
-    "BROKER_URL": "mqtt://test.mosquitto.org",
+    "BROKER_URL": "mqtt://mqtt.eclipse.org",
     "BROWNOUT_DET": true,
     "BROWNOUT_DET_LVL": 0,
     "BROWNOUT_DET_LVL_SEL_0": true,

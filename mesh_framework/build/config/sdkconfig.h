@@ -33,7 +33,7 @@
 #define CONFIG_ROUTER_PASSWORD "411985350"
 #define CONFIG_MAX_CLIENTS 5
 #define CONFIG_MAX_LAYERS 3
-#define CONFIG_BROKER_URL "mqtt://test.mosquitto.org"
+#define CONFIG_BROKER_URL "mqtt://mqtt.eclipse.org"
 #define CONFIG_SNTP_SERVER "pool.ntp.org"
 #define CONFIG_PARTITION_TABLE_SINGLE_APP 1
 #define CONFIG_PARTITION_TABLE_CUSTOM_FILENAME "partitions.csv"

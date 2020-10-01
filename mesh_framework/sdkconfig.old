@@ -89,7 +89,8 @@ CONFIG_ROUTER_PASSWORD="411985350"
 CONFIG_MAX_CLIENTS=5
 CONFIG_MAX_LAYERS=3
 CONFIG_IS_TODS_ALLOWED=
-CONFIG_BROKER_URL="mqtt://test.mosquitto.org"
+CONFIG_BROKER_URL="mqtt://mqtt.eclipse.org"
+CONFIG_SNTP_SERVER="pool.ntp.org"
 
 #
 # Partition Table

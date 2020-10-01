@@ -325,7 +325,7 @@ void rx_connection(void *pvParameters){
 				sntp_packet.size = sizeof(sntp_data);
 				sntp_packet.proto = MESH_PROTO_BIN;
 				memcpy(sntp_packet.data,&sntp_data,sntp_packet.size);
-				esp_err_t send_error = esp_mesh_send(&rx_sender,&sntp_packet,MESH_DATA_P2P,NULL,0);
+				esp_err_t send_error = esp_mesh_send(&rx_sender,&sntp_packet,MESH_DATA_FROMDS,NULL,0);
 				ESP_LOGW("MESH_TAG","Sending SNTP RESPONSE = %s\n",esp_err_to_name(send_error));
 				continue;
 			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'T' && rx_data.data[2] == 'N' && rx_data.data[3] == 'S'){
@@ -360,6 +360,21 @@ void rx_connection(void *pvParameters){
 
 				ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
 				continue;
+			}else if (rx_data.data[2] == 'M' && rx_data.data[3] == 'Q' && rx_data.data[4] == 'T' && rx_data.data[5] == 'T'){
+				ESP_LOGW(MESH_TAG,"MQTT PUBLISH REQUEST");
+				char *topic = malloc(rx_data.data[0]-1);
+				memcpy(topic,rx_data.data+6,rx_data.data[0]-1);
+				topic[rx_data.data[0]-1] ='\0';
+				ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
+
+				char *published_data = malloc(rx_data.data[1]);
+				memcpy(published_data,rx_data.data+rx_data.data[0]+6,rx_data.data[1]);
+				published_data[rx_data.data[1]] = '\0';
+				ESP_LOGI(MESH_TAG,"Data ->%s<-\n",published_data);
+
+				esp_mqtt_client_publish(mqtt_handler,topic,published_data,0,0,0);
+
+				continue;
 			}
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
@@ -374,17 +389,40 @@ void meshf_rx(uint8_t *array_data){
 }
 
 void meshf_asktime(){
-	// if (!esp_mesh_is_root()){ THIS LINE ADDS AN WEIRD BUG 
+	if (!esp_mesh_is_root()){ //THIS LINE ADDS AN WEIRD BUG 
 		uint8_t buffer[1460] = {0,};
 		uint8_t sntp_data[] = {'S','N','T','P'};
 		mesh_data_t sntp_packet;
 		sntp_packet.data = buffer;
 		sntp_packet.size = 8*4;
 		sntp_packet.proto = MESH_PROTO_BIN;
+		sntp_packet.tos = MESH_TOS_P2P;
 		memcpy(sntp_packet.data,&sntp_data,8*4);
 		esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
 		ESP_LOGW("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
-	// }
+	}
+}
+
+void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint16_t data_size){
+	if (!esp_mesh_is_root()){
+		mesh_data_t tx_data;
+		tx_data.data = tx_buffer;
+		tx_data.size = data_size + topic_size + 6;
+		int flag = MESH_DATA_P2P;
+		tx_data.proto = MESH_PROTO_BIN;
+		tx_data.tos = MESH_TOS_P2P;
+		memcpy(tx_data.data + 6, topic, topic_size);
+		memcpy(tx_data.data + topic_size + 6,data,data_size);
+		tx_data.data[0] = topic_size;
+		tx_data.data[1] = data_size;
+		tx_data.data[2] = 'M'; 
+		tx_data.data[3] = 'Q';
+		tx_data.data[4] = 'T';
+		tx_data.data[5] = 'T';
+		tx_data.data[topic_size+5] = ';';
+		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,flag,NULL,0);
+		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));	
+	}
 }
 
 void rssi_info(void *pvParameters){
@@ -492,7 +530,6 @@ void mesh_event_handler(mesh_event_t evento){
 		case MESH_EVENT_PARENT_DISCONNECTED: //Perform a fixed number of attempts to reconnect before searching for another one
 			is_mesh_connected = false;
 			is_parent_connected = false;
-			xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
         	mesh_layer = esp_mesh_get_layer();
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_PARENT_DISCONNECTED\n");
 		break;
