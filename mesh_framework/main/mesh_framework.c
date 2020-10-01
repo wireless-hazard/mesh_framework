@@ -373,6 +373,8 @@ void rx_connection(void *pvParameters){
 				ESP_LOGI(MESH_TAG,"Data ->%s<-\n",published_data);
 
 				esp_mqtt_client_publish(mqtt_handler,topic,published_data,0,0,0);
+				free(topic);
+				free(published_data);
 
 				continue;
 			}
@@ -421,7 +423,7 @@ void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint
 		tx_data.data[5] = 'T';
 		tx_data.data[topic_size+5] = ';';
 		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,flag,NULL,0);
-		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));	
+		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));
 	}
 }
 

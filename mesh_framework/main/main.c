@@ -35,7 +35,10 @@ void app_main(void) {
 
 	meshf_rx(&teste);
 	meshf_asktime();
-	meshf_mqtt_publish(topico,data,sizeof(topico),sizeof(data));
+	while(true){
+		meshf_mqtt_publish(topico,data,sizeof(topico),sizeof(data));
+		meshf_sleep_time(15000);
+	}
 	// char mqtt_string[256];
 	// char strftime_buff[64];
 	// // Hall effect sensor test
