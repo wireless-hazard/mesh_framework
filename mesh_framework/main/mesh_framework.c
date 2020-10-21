@@ -38,6 +38,7 @@ static SemaphoreHandle_t SemaphoreParentConnected = NULL;
 static SemaphoreHandle_t SemaphoreBrokerConnected = NULL;
 static SemaphoreHandle_t SemaphoreDataReady = NULL;
 static SemaphoreHandle_t SemaphoreSNTPConnected = NULL;
+static SemaphoreHandle_t SemaphorePONG = NULL;
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -377,6 +378,25 @@ void rx_connection(void *pvParameters){
 				free(published_data);
 
 				continue;
+			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'I' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
+				uint8_t buffer[1460] = {0,};
+				uint8_t pong_data[] = {'P','O','N','G'};
+				mesh_data_t pong_packet;
+				pong_packet.data = buffer;
+				pong_packet.size = 8*4;
+				pong_packet.proto = MESH_PROTO_BIN;
+				memcpy(pong_packet.data,&pong_data,8*4);
+				esp_err_t send_error;
+				if (esp_mesh_is_root()){
+					send_error = esp_mesh_send(&rx_sender,&pong_packet,MESH_DATA_FROMDS,NULL,0);
+				}else{
+					send_error = esp_mesh_send(&rx_sender,&pong_packet,flag,NULL,0);
+				}
+				ESP_LOGW("MESH_TAG","Sending PING RESPONSE = %s\n",esp_err_to_name(send_error));	
+				continue;
+			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'O' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
+				xSemaphoreGive(SemaphorePONG);
+				continue;
 			}
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
@@ -425,6 +445,47 @@ void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint
 		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,flag,NULL,0);
 		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));
 	}
+}
+
+void pinging(void *pvParameters){
+	char *mac_destination = (char *)pvParameters;
+	printf("%s\n",mac_destination);
+	uint8_t buffer[1460] = {0,};
+	uint8_t ping_data[] = {'P','I','N','G'};
+
+	mesh_addr_t ping_destination;
+	STR2MAC(ping_destination.addr,mac_destination);
+	mesh_data_t ping_packet;
+	ping_packet.data = buffer;
+	ping_packet.size = 8*4;
+	ping_packet.proto = MESH_PROTO_BIN;
+	memcpy(ping_packet.data,&ping_data,8*4);
+
+	esp_err_t send_error = esp_mesh_send(&tx_destination,&ping_packet,MESH_DATA_P2P,NULL,0);
+	if (send_error == ESP_OK){
+		struct timeval b4;
+
+		gettimeofday(&b4, NULL);
+
+		unsigned long long b4inMS = (unsigned long long)(b4.tv_sec) * 1000 + (unsigned long long)(b4.tv_usec) / 1000;
+		ESP_LOGW("MESH_TAG","Sending PING = %s\n",esp_err_to_name(send_error));
+		xSemaphoreTake(SemaphorePONG,portMAX_DELAY);
+
+		struct timeval after;
+
+		gettimeofday(&after, NULL);
+
+		unsigned long long afterinMS = (unsigned long long)(after.tv_sec) * 1000 + (unsigned long long)(after.tv_usec) / 1000;
+		unsigned long long delay = afterinMS - b4inMS;
+		ESP_LOGW("MESH_TAG","PONG Received\n after(%lld) - before(%lld) = delay: %lld ms",afterinMS,b4inMS,delay);
+	}else{
+		ESP_LOGW("MESH_TAG","Sending PING = %s\n",esp_err_to_name(send_error));
+	}
+	vTaskDelete(NULL);
+}
+
+void meshf_ping(char mac_destination[]){
+	xTaskCreatePinnedToCore(&pinging,"Ping an ESP32",4096,((void *)mac_destination),5,NULL,1);	
 }
 
 void rssi_info(void *pvParameters){
@@ -724,6 +785,7 @@ void meshf_init(){
 	if (SemaphoreSNTPConnected == NULL){
 		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: SNTPCONNECTED");
 	}
+	SemaphorePONG = xSemaphoreCreateBinary();
 }
 
 void meshf_start(){

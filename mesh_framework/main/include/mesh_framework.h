@@ -7,6 +7,7 @@ void meshf_tx_TODS(char ip_destination[],int port,uint8_t transmitted_data[],uin
 void meshf_rx(uint8_t *array_data);
 void meshf_asktime();
 void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint16_t data_size);
+void meshf_ping(char mac_destination[]);
 void meshf_rssi_info(int8_t *rssi,char interested_mac[]);
 void meshf_task_debugger(void);
 void data_ready();
