@@ -50,7 +50,6 @@ static bool is_mesh_connected = false;
 static bool is_parent_connected = false;
 static bool is_buffer_free = true;
 
-static uint8_t json_flag[] = "flag";
 static uint8_t tx_buffer[1460] = { 0, };
 static uint8_t rx_buffer[MESH_MTU] = { 0, };
 
@@ -313,17 +312,25 @@ void rx_connection(void *pvParameters){
 			cJSON *json = cJSON_Parse(data_json);
 			char *string1 = cJSON_Print(json);
 			printf("%s\n",string1);
-			free(string1);
 			cJSON *json_flag_data = cJSON_GetObjectItemCaseSensitive(json, "flag");
 
 			if (strcmp(json_flag_data->valuestring,"PING") == 0){
-				uint8_t buffer[18] = {0,};
-				uint8_t pong_data[] = "PONG";
+				uint8_t buffer[20] = {0,};
 				mesh_data_t pong_packet;
 				pong_packet.data = buffer;
-				pong_packet.size = 18;
+				pong_packet.size = 20;
 				pong_packet.proto = MESH_PROTO_JSON;
-				meshf_uint8_t_json_creator(pong_packet.data,json_flag,sizeof(json_flag),pong_data,sizeof(pong_data));
+				
+				cJSON *json_pong = cJSON_CreateObject();
+				cJSON_AddStringToObject(json_pong,"flag","PONG");
+				char *string2 = cJSON_Print(json_pong);
+				
+				for(int i = 0; i<19;i++){
+					pong_packet.data[i] = string2[i];
+				}
+
+				free(string2);
+
 				printf("%s\n",pong_packet.data);
 				esp_err_t send_error;
 				if (esp_mesh_is_root()){
@@ -336,10 +343,7 @@ void rx_connection(void *pvParameters){
 			}else if (strcmp(json_flag_data->valuestring,"PONG") == 0){
 				xSemaphoreGive(SemaphorePONG);
 				continue;	
-			}
-
-
-			if (rx_data.data[0] == 'S' && rx_data.data[1] == 'N' && rx_data.data[2] == 'T' && rx_data.data[3] == 'P' && rx_data.size == 32){
+			}else if (strcmp(json_flag_data->valuestring,"SNTP") == 0){
 				ESP_LOGE(MESH_TAG,"REQUEST SNTP");
 
 				char strftime_buff[64];
@@ -355,49 +359,34 @@ void rx_connection(void *pvParameters){
 				strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
 				ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
 
-				uint8_t buffer[1460] = {0,};
-				uint8_t sntp_data[14] = {0,};
+				cJSON *json_ptns = cJSON_CreateObject();
+				cJSON_AddStringToObject(json_ptns,"flag","PTNS");
+				cJSON_AddNumberToObject(json_ptns,"time",now);
+				char *string = cJSON_Print(json_ptns);
+				printf("%s\n",string);
 
-				sntp_data[0] = 'P';
-				sntp_data[1] = 'T';
-				sntp_data[2] = 'N';
-				sntp_data[3] = 'S';
-
-				int tempo = now;
-				int factor = 1000000000;
-				int index = 13;
-
-				while(index >= 4){
-					sntp_data[index] = tempo/factor;
-					tempo = tempo - (sntp_data[index]*factor);
-					factor = factor/10;
-					index = index - 1;
-				}
+				uint8_t buffer[41] = {0,};
 
 				mesh_data_t sntp_packet;
 				sntp_packet.data = buffer;
-				sntp_packet.size = sizeof(sntp_data);
-				sntp_packet.proto = MESH_PROTO_BIN;
-				memcpy(sntp_packet.data,&sntp_data,sntp_packet.size);
+				sntp_packet.size = 41;
+				sntp_packet.proto = MESH_PROTO_JSON;
+				
+				for(int i = 0; i < 40; i++){
+					sntp_packet.data[i] = string[i];
+				}
+				printf("%s\n",sntp_packet.data);
+				free(string);
+				cJSON_Delete(json_ptns);
 				esp_err_t send_error = esp_mesh_send(&rx_sender,&sntp_packet,MESH_DATA_FROMDS,NULL,0);
 				ESP_LOGW("MESH_TAG","Sending SNTP RESPONSE = %s\n",esp_err_to_name(send_error));
 				continue;
-			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'T' && rx_data.data[2] == 'N' && rx_data.data[3] == 'S'){
-
-				int tempo_temp = 0;
-				int tempo = 0;
-				int factor = 1000000000;
-				int index = 13;
-
-				while(index >= 4){
-					tempo_temp = rx_data.data[index]*factor;
-					tempo = tempo + tempo_temp;
-					factor = factor/10;
-					index = index - 1;
-				}
+			}else if (strcmp(json_flag_data->valuestring,"PTNS") == 0){
+				
+				cJSON *json_time_data = cJSON_GetObjectItemCaseSensitive(json,"time");
 
 				struct timeval tv;//Cria a estrutura temporaria para funcao abaixo.
-  				tv.tv_sec = tempo;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
+  				tv.tv_sec = json_time_data->valueint;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
   				settimeofday(&tv, NULL);
 
 				char strftime_buff[64];
@@ -414,24 +403,103 @@ void rx_connection(void *pvParameters){
 
 				ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
 				continue;
-			}else if (rx_data.data[2] == 'M' && rx_data.data[3] == 'Q' && rx_data.data[4] == 'T' && rx_data.data[5] == 'T'){
-				ESP_LOGW(MESH_TAG,"MQTT PUBLISH REQUEST");
-				char *topic = malloc(rx_data.data[0]-1);
-				memcpy(topic,rx_data.data+6,rx_data.data[0]-1);
-				topic[rx_data.data[0]-1] ='\0';
-				ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
 
-				char *published_data = malloc(rx_data.data[1]);
-				memcpy(published_data,rx_data.data+rx_data.data[0]+6,rx_data.data[1]);
-				published_data[rx_data.data[1]] = '\0';
-				ESP_LOGI(MESH_TAG,"Data ->%s<-\n",published_data);
-
-				esp_mqtt_client_publish(mqtt_handler,topic,published_data,0,0,0);
-				free(topic);
-				free(published_data);
-
-				continue;
 			}
+
+
+			// if (rx_data.data[0] == 'S' && rx_data.data[1] == 'N' && rx_data.data[2] == 'T' && rx_data.data[3] == 'P' && rx_data.size == 32){
+			// 	ESP_LOGE(MESH_TAG,"REQUEST SNTP");
+
+			// 	char strftime_buff[64];
+			// 	time_t now = 0;
+   //  			struct tm timeinfo = { 0 };
+    		
+   //  			xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
+   //  			xSemaphoreGive(SemaphoreSNTPConnected);
+
+   //  			time(&now);
+   //  			localtime_r(&now, &timeinfo);
+
+			// 	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+			// 	ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
+
+			// 	uint8_t buffer[1460] = {0,};
+			// 	uint8_t sntp_data[14] = {0,};
+
+			// 	sntp_data[0] = 'P';
+			// 	sntp_data[1] = 'T';
+			// 	sntp_data[2] = 'N';
+			// 	sntp_data[3] = 'S';
+
+			// 	int tempo = now;
+			// 	int factor = 1000000000;
+			// 	int index = 13;
+
+			// 	while(index >= 4){
+			// 		sntp_data[index] = tempo/factor;
+			// 		tempo = tempo - (sntp_data[index]*factor);
+			// 		factor = factor/10;
+			// 		index = index - 1;
+			// 	}
+
+			// 	mesh_data_t sntp_packet;
+			// 	sntp_packet.data = buffer;
+			// 	sntp_packet.size = sizeof(sntp_data);
+			// 	sntp_packet.proto = MESH_PROTO_BIN;
+			// 	memcpy(sntp_packet.data,&sntp_data,sntp_packet.size);
+			// 	esp_err_t send_error = esp_mesh_send(&rx_sender,&sntp_packet,MESH_DATA_FROMDS,NULL,0);
+			// 	ESP_LOGW("MESH_TAG","Sending SNTP RESPONSE = %s\n",esp_err_to_name(send_error));
+			// 	continue;
+			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'T' && rx_data.data[2] == 'N' && rx_data.data[3] == 'S'){
+
+			// 	int tempo_temp = 0;
+			// 	int tempo = 0;
+			// 	int factor = 1000000000;
+			// 	int index = 13;
+
+			// 	while(index >= 4){
+			// 		tempo_temp = rx_data.data[index]*factor;
+			// 		tempo = tempo + tempo_temp;
+			// 		factor = factor/10;
+			// 		index = index - 1;
+			// 	}
+
+			// 	struct timeval tv;//Cria a estrutura temporaria para funcao abaixo.
+  	// 			tv.tv_sec = tempo;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
+  	// 			settimeofday(&tv, NULL);
+
+			// 	char strftime_buff[64];
+			// 	time_t now = 0;
+			// 	time(&now);
+			// 	setenv("TZ", "UTC+3", 1);
+			// 	tzset();
+   //  			struct tm timeinfo = { 0 };
+
+   //  			localtime_r(&now, &timeinfo);
+
+			// 	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+			// 	ESP_LOGI(MESH_TAG, "The current date/time RECEIVED in UNIPAMPA is: %s", strftime_buff);
+
+			// 	ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
+			// 	continue;
+			// }else if (rx_data.data[2] == 'M' && rx_data.data[3] == 'Q' && rx_data.data[4] == 'T' && rx_data.data[5] == 'T'){
+			// 	ESP_LOGW(MESH_TAG,"MQTT PUBLISH REQUEST");
+			// 	char *topic = malloc(rx_data.data[0]-1);
+			// 	memcpy(topic,rx_data.data+6,rx_data.data[0]-1);
+			// 	topic[rx_data.data[0]-1] ='\0';
+			// 	ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
+
+			// 	char *published_data = malloc(rx_data.data[1]);
+			// 	memcpy(published_data,rx_data.data+rx_data.data[0]+6,rx_data.data[1]);
+			// 	published_data[rx_data.data[1]] = '\0';
+			// 	ESP_LOGI(MESH_TAG,"Data ->%s<-\n",published_data);
+
+			// 	esp_mqtt_client_publish(mqtt_handler,topic,published_data,0,0,0);
+			// 	free(topic);
+			// 	free(published_data);
+
+			// 	continue;
+			// }
 			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'I' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
 			// 	uint8_t buffer[1460] = {0,};
 			// 	uint8_t pong_data[] = {'P','O','N','G'};
@@ -466,16 +534,22 @@ void meshf_rx(uint8_t *array_data){
 
 void meshf_asktime(){
 	if (!esp_mesh_is_root()){ //THIS LINE ADDS AN WEIRD BUG 
-		uint8_t buffer[1460] = {0,};
-		uint8_t sntp_data[] = "SNTP";
+		uint8_t buffer[20] = {0,};
+		cJSON *json_sntp = cJSON_CreateObject();
+		cJSON_AddStringToObject(json_sntp,"flag","SNTP");
+		char *string = cJSON_Print(json_sntp);
 		mesh_data_t sntp_packet;
 		sntp_packet.data = buffer;
-		sntp_packet.size = 8*4;
-		sntp_packet.proto = MESH_PROTO_BIN;
+		sntp_packet.size = 20;
+		sntp_packet.proto = MESH_PROTO_JSON;
 		sntp_packet.tos = MESH_TOS_P2P;
-		memcpy(sntp_packet.data,&sntp_data,8*4);
+		for (int i = 0; i<19; i++){
+			sntp_packet.data[i] = string[i];
+		}
 		esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
 		ESP_LOGW("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
+		free(string);
+		cJSON_Delete(json_sntp);
 	}
 }
 
@@ -504,16 +578,24 @@ void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint
 void pinging(void *pvParameters){
 	char *mac_destination = (char *)pvParameters;
 	printf("%s\n",mac_destination);
-	uint8_t buffer[18] = {0,};
-	uint8_t ping_data[] = "PING";
-
+	uint8_t buffer[20] = {0,};
+	cJSON *json_ping = cJSON_CreateObject();
+	cJSON_AddStringToObject(json_ping,"flag","PING");
+	char *string1 = cJSON_Print(json_ping);
+	
 	mesh_addr_t ping_destination;
 	STR2MAC(ping_destination.addr,mac_destination);
 	mesh_data_t ping_packet;
 	ping_packet.data = buffer;
-	ping_packet.size = 18;
+	ping_packet.size = 20;
 	ping_packet.proto = MESH_PROTO_JSON;
-	meshf_uint8_t_json_creator(ping_packet.data,json_flag,sizeof(json_flag),ping_data,sizeof(ping_data));
+	
+	for(int i = 0; i<19;i++){
+		ping_packet.data[i] = string1[i];
+	}
+
+	free(string1);
+
 	esp_err_t send_error = esp_mesh_send(&tx_destination,&ping_packet,MESH_DATA_P2P,NULL,0);
 	if (send_error == ESP_OK){
 		struct timeval b4;
@@ -534,6 +616,7 @@ void pinging(void *pvParameters){
 	}else{
 		ESP_LOGW("MESH_TAG","Sending PING = %s\n",esp_err_to_name(send_error));
 	}
+	cJSON_Delete(json_ping);
 	vTaskDelete(NULL);
 }
 
