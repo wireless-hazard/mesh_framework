@@ -2114,119 +2114,115 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  10 .literal.commonErrorHandler_dump 000000a8  00000000  00000000  00000108  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 11 .literal.esp_panic_dig_reset 00000018  00000000  00000000  000001b0  2**2
+ 11 .literal.commonErrorHandler 00000054  00000000  00000000  000001b0  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 12 .literal.commonErrorHandler 0000004c  00000000  00000000  000001c8  2**2
+ 12 .literal.esp_error_check_failed_print 0000002c  00000000  00000000  00000204  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 13 .literal.esp_error_check_failed_print 0000002c  00000000  00000000  00000214  2**2
+ 13 .literal.abort 00000018  00000000  00000000  00000230  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 14 .literal.abort 00000018  00000000  00000000  00000240  2**2
+ 14 .literal.vApplicationStackOverflowHook 00000018  00000000  00000000  00000248  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 15 .literal.vApplicationStackOverflowHook 00000018  00000000  00000000  00000258  2**2
+ 15 .literal.panicHandler 000000a8  00000000  00000000  00000260  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 16 .literal.panicHandler 000000a8  00000000  00000000  00000270  2**2
+ 16 .literal.xt_unhandled_exception 00000068  00000000  00000000  00000308  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 17 .literal.xt_unhandled_exception 00000068  00000000  00000000  00000318  2**2
+ 17 .literal.esp_set_breakpoint_if_jtag 00000008  00000000  00000000  00000370  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 18 .literal.esp_set_breakpoint_if_jtag 00000008  00000000  00000000  00000380  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 19 .literal.esp_set_watchpoint 00000004  00000000  00000000  00000388  2**2
+ 18 .literal.esp_set_watchpoint 00000004  00000000  00000000  00000378  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
- 20 .literal._esp_error_check_failed_without_abort 00000008  00000000  00000000  0000038c  2**2
+ 19 .literal._esp_error_check_failed_without_abort 00000008  00000000  00000000  0000037c  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 21 .literal._esp_error_check_failed 0000000c  00000000  00000000  00000394  2**2
+ 20 .literal._esp_error_check_failed 0000000c  00000000  00000000  00000384  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 22 .text         00000000  00000000  00000000  000003a0  2**0
+ 21 .text         00000000  00000000  00000000  00000390  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
- 23 .data         00000000  00000000  00000000  000003a0  2**0
+ 22 .data         00000000  00000000  00000000  00000390  2**0
                   CONTENTS, ALLOC, LOAD, DATA
- 24 .bss          00000000  00000000  00000000  000003a0  2**0
+ 23 .bss          00000000  00000000  00000000  00000390  2**0
                   ALLOC
- 25 .text.panicPutChar 0000001e  00000000  00000000  000003a0  2**2
+ 24 .text.panicPutChar 0000001e  00000000  00000000  00000390  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 26 .text.panicPutStr 0000001a  00000000  00000000  000003c0  2**2
+ 25 .text.panicPutStr 0000001a  00000000  00000000  000003b0  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 27 .text.panicPutHex 0000002f  00000000  00000000  000003dc  2**2
+ 26 .text.panicPutHex 0000002f  00000000  00000000  000003cc  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 28 .text.panicPutDec 00000046  00000000  00000000  0000040c  2**2
+ 27 .text.panicPutDec 00000046  00000000  00000000  000003fc  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 29 .text.setFirstBreakpoint 00000013  00000000  00000000  00000454  2**2
+ 28 .text.setFirstBreakpoint 00000013  00000000  00000000  00000444  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
- 30 .rodata.str1.4 000006db  00000000  00000000  00000468  2**2
+ 29 .rodata.str1.4 000006db  00000000  00000000  00000458  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 31 .text.illegal_instruction_helper 00000073  00000000  00000000  00000b44  2**2
+ 30 .text.illegal_instruction_helper 00000073  00000000  00000000  00000b34  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 32 .text.reconfigureAllWdts 000000a8  00000000  00000000  00000bb8  2**2
+ 31 .text.reconfigureAllWdts 000000a8  00000000  00000000  00000ba8  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 33 .text.putEntry 00000037  00000000  00000000  00000c60  2**2
+ 32 .text.putEntry 00000037  00000000  00000000  00000c50  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 34 .text.doBacktrace 00000078  00000000  00000000  00000c98  2**2
+ 33 .text.doBacktrace 00000078  00000000  00000000  00000c88  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 35 .text.invoke_abort 0000001d  00000000  00000000  00000d10  2**2
+ 34 .text.invoke_abort 0000001d  00000000  00000000  00000d00  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 36 .text.haltOtherCore 00000018  00000000  00000000  00000d30  2**2
+ 35 .text.haltOtherCore 00000018  00000000  00000000  00000d20  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 37 .rodata       00000080  00000000  00000000  00000d48  2**2
+ 36 .rodata       00000080  00000000  00000000  00000d38  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA
- 38 .text.commonErrorHandler_dump 00000146  00000000  00000000  00000dc8  2**2
+ 37 .text.commonErrorHandler_dump 00000146  00000000  00000000  00000db8  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 39 .text.esp_panic_dig_reset 00000036  00000000  00000000  00000f10  2**2
+ 38 .text.commonErrorHandler 000000cf  00000000  00000000  00000f00  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 40 .text.commonErrorHandler 0000009a  00000000  00000000  00000f48  2**2
+ 39 .text.esp_error_check_failed_print 0000005e  00000000  00000000  00000fd0  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 41 .text.esp_error_check_failed_print 0000005e  00000000  00000000  00000fe4  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 42 .text.esp_reset_reason_set_hint 00000005  00000000  00000000  00001044  2**2
+ 40 .text.esp_reset_reason_set_hint 00000005  00000000  00000000  00001030  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
- 43 .text.esp_reset_reason_get_hint 00000007  00000000  00000000  0000104c  2**2
+ 41 .text.esp_reset_reason_get_hint 00000007  00000000  00000000  00001038  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
- 44 .text.abort   0000003e  00000000  00000000  00001054  2**2
+ 42 .text.abort   0000003e  00000000  00000000  00001040  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 45 .text.vApplicationStackOverflowHook 00000023  00000000  00000000  00001094  2**2
+ 43 .text.vApplicationStackOverflowHook 00000023  00000000  00000000  00001080  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 46 .text.panicHandler 0000019a  00000000  00000000  000010b8  2**2
+ 44 .text.panicHandler 0000019a  00000000  00000000  000010a4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 47 .text.xt_unhandled_exception 000000b4  00000000  00000000  00001254  2**2
+ 45 .text.xt_unhandled_exception 000000b4  00000000  00000000  00001240  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 48 .text.esp_set_breakpoint_if_jtag 00000016  00000000  00000000  00001308  2**2
+ 46 .text.esp_set_breakpoint_if_jtag 00000016  00000000  00000000  000012f4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 49 .text.esp_set_watchpoint 00000059  00000000  00000000  00001320  2**2
+ 47 .text.esp_set_watchpoint 00000059  00000000  00000000  0000130c  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 50 .text.esp_clear_watchpoint 00000013  00000000  00000000  0000137c  2**2
+ 48 .text.esp_clear_watchpoint 00000013  00000000  00000000  00001368  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 51 .text._esp_error_check_failed_without_abort 00000018  00000000  00000000  00001390  2**2
+ 49 .text._esp_error_check_failed_without_abort 00000018  00000000  00000000  0000137c  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 52 .text._esp_error_check_failed 0000001e  00000000  00000000  000013a8  2**2
+ 50 .text._esp_error_check_failed 0000001e  00000000  00000000  00001394  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 53 .bss.other_core_frame 00000004  00000000  00000000  000013c8  2**2
+ 51 .bss.other_core_frame 00000004  00000000  00000000  000013b4  2**2
                   ALLOC
- 54 .rodata.edesc 000000a0  00000000  00000000  000013c8  2**2
+ 52 .rodata.edesc 000000a0  00000000  00000000  000013b4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA
- 55 .bss.abort_called 00000001  00000000  00000000  00001468  2**0
+ 53 .bss.abort_called 00000001  00000000  00000000  00001454  2**0
                   ALLOC
- 56 .debug_frame  00000280  00000000  00000000  00001468  2**2
+ 54 .debug_frame  00000268  00000000  00000000  00001454  2**2
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 57 .debug_info   00001fa2  00000000  00000000  000016e8  2**0
+ 55 .debug_info   00001e9f  00000000  00000000  000016bc  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 58 .debug_abbrev 000004a2  00000000  00000000  0000368a  2**0
+ 56 .debug_abbrev 00000447  00000000  00000000  0000355b  2**0
                   CONTENTS, READONLY, DEBUGGING
- 59 .debug_loc    000004d9  00000000  00000000  00003b2c  2**0
+ 57 .debug_loc    000004b8  00000000  00000000  000039a2  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 60 .debug_aranges 000000e8  00000000  00000000  00004005  2**0
+ 58 .debug_aranges 000000e0  00000000  00000000  00003e5a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 61 .debug_ranges 000000d8  00000000  00000000  000040ed  2**0
+ 59 .debug_ranges 000000d0  00000000  00000000  00003f3a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 62 .debug_line   00000b80  00000000  00000000  000041c5  2**0
+ 60 .debug_line   00000b33  00000000  00000000  0000400a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 63 .debug_str    00000d88  00000000  00000000  00004d45  2**0
+ 61 .debug_str    00000d06  00000000  00000000  00004b3d  2**0
                   CONTENTS, READONLY, DEBUGGING
- 64 .comment      0000003b  00000000  00000000  00005acd  2**0
+ 62 .comment      0000003b  00000000  00000000  00005843  2**0
                   CONTENTS, READONLY
- 65 .xtensa.info  00000038  00000000  00000000  00005b08  2**0
+ 63 .xtensa.info  00000038  00000000  00000000  0000587e  2**0
                   CONTENTS, READONLY
- 66 .xt.lit       000000b0  00000000  00000000  00005b40  2**0
+ 64 .xt.lit       000000a8  00000000  00000000  000058b6  2**0
                   CONTENTS, RELOC, READONLY
- 67 .xt.prop      000007e0  00000000  00000000  00005bf0  2**0
+ 65 .xt.prop      000007a4  00000000  00000000  0000595e  2**0
                   CONTENTS, RELOC, READONLY
 
 phy_init.c.obj:     file format elf32-xtensa-le

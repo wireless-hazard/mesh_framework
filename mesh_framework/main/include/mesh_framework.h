@@ -1,6 +1,7 @@
 #include "mqtt_client.h"
 
 void STR2MAC(uint8_t *address,char rec_string[17]);
+uint16_t meshf_uint8_t_json_creator(uint8_t json_value[], uint8_t key[], uint16_t size_key, uint8_t value[], uint16_t size_value);
 void tx_p2p(void *pvParameters);
 void meshf_tx_p2p(char mac_destination[],uint8_t transmitted_data[],uint16_t data_size);
 void meshf_tx_TODS(char ip_destination[],int port,uint8_t transmitted_data[],uint16_t data_size);
@@ -19,3 +20,4 @@ void meshf_init();
 void meshf_start();
 
 extern esp_mqtt_client_handle_t mqtt_handler;
+extern mesh_data_t rx_data;

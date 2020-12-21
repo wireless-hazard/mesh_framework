@@ -14,6 +14,7 @@
 #include <esp_system.h>
 #include <time.h>
 #include <sys/time.h>
+#include <cJSON.h>
 
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
@@ -49,6 +50,7 @@ static bool is_mesh_connected = false;
 static bool is_parent_connected = false;
 static bool is_buffer_free = true;
 
+static uint8_t json_flag[] = "flag";
 static uint8_t tx_buffer[1460] = { 0, };
 static uint8_t rx_buffer[MESH_MTU] = { 0, };
 
@@ -56,7 +58,7 @@ static mesh_addr_t tx_destination;
 static mesh_data_t tx_data;
 
 static mesh_addr_t rx_sender;
-static mesh_data_t rx_data;
+mesh_data_t rx_data;
 
 static mesh_addr_t toDS_destination;
 static mesh_data_t toDS_data;
@@ -93,6 +95,25 @@ void STR2MAC(uint8_t *address,char rec_string[17]){
 		j++;
 	}
 	memcpy(address,&mac,sizeof(uint8_t)*6);
+}
+
+uint16_t meshf_uint8_t_json_creator(uint8_t json_value[], uint8_t key[], uint16_t size_key, uint8_t value[], uint16_t size_value){
+	uint8_t front_header[] =  "{ \"";
+	uint8_t inter_header[] = "\" :\"";
+	uint8_t back_header[] = "\"}";
+	int16_t index = 0;
+
+	memcpy(json_value+index,&front_header,sizeof(front_header));
+	index = index + sizeof(front_header)-1;
+	memcpy(json_value+index,key,size_key);
+	index = index + size_key-1;
+	memcpy(json_value+index,&inter_header,sizeof(inter_header));
+	index = index + sizeof(inter_header) - 1;
+	memcpy(json_value+index,value,size_value);
+	index = index + size_value - 1;
+	memcpy(json_value+index,&back_header,sizeof(back_header));
+	index = index + sizeof(back_header) - 1;
+	return index;
 }
 
 void tx_p2p(void *pvParameters){
@@ -286,6 +307,38 @@ void rx_connection(void *pvParameters){
 			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
+			char data_json[180] = {0,};
+			
+			sprintf(data_json,"%s", rx_data.data);
+			cJSON *json = cJSON_Parse(data_json);
+			char *string1 = cJSON_Print(json);
+			printf("%s\n",string1);
+			free(string1);
+			cJSON *json_flag_data = cJSON_GetObjectItemCaseSensitive(json, "flag");
+
+			if (strcmp(json_flag_data->valuestring,"PING") == 0){
+				uint8_t buffer[18] = {0,};
+				uint8_t pong_data[] = "PONG";
+				mesh_data_t pong_packet;
+				pong_packet.data = buffer;
+				pong_packet.size = 18;
+				pong_packet.proto = MESH_PROTO_JSON;
+				meshf_uint8_t_json_creator(pong_packet.data,json_flag,sizeof(json_flag),pong_data,sizeof(pong_data));
+				printf("%s\n",pong_packet.data);
+				esp_err_t send_error;
+				if (esp_mesh_is_root()){
+					send_error = esp_mesh_send(&rx_sender,&pong_packet,MESH_DATA_FROMDS,NULL,0);
+				}else{
+					send_error = esp_mesh_send(&rx_sender,&pong_packet,flag,NULL,0);
+				}
+				ESP_LOGW("MESH_TAG","Sending PING RESPONSE = %s\n",esp_err_to_name(send_error));	
+				continue;
+			}else if (strcmp(json_flag_data->valuestring,"PONG") == 0){
+				xSemaphoreGive(SemaphorePONG);
+				continue;	
+			}
+
+
 			if (rx_data.data[0] == 'S' && rx_data.data[1] == 'N' && rx_data.data[2] == 'T' && rx_data.data[3] == 'P' && rx_data.size == 32){
 				ESP_LOGE(MESH_TAG,"REQUEST SNTP");
 
@@ -378,26 +431,27 @@ void rx_connection(void *pvParameters){
 				free(published_data);
 
 				continue;
-			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'I' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
-				uint8_t buffer[1460] = {0,};
-				uint8_t pong_data[] = {'P','O','N','G'};
-				mesh_data_t pong_packet;
-				pong_packet.data = buffer;
-				pong_packet.size = 8*4;
-				pong_packet.proto = MESH_PROTO_BIN;
-				memcpy(pong_packet.data,&pong_data,8*4);
-				esp_err_t send_error;
-				if (esp_mesh_is_root()){
-					send_error = esp_mesh_send(&rx_sender,&pong_packet,MESH_DATA_FROMDS,NULL,0);
-				}else{
-					send_error = esp_mesh_send(&rx_sender,&pong_packet,flag,NULL,0);
-				}
-				ESP_LOGW("MESH_TAG","Sending PING RESPONSE = %s\n",esp_err_to_name(send_error));	
-				continue;
-			}else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'O' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
-				xSemaphoreGive(SemaphorePONG);
-				continue;
 			}
+			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'I' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
+			// 	uint8_t buffer[1460] = {0,};
+			// 	uint8_t pong_data[] = {'P','O','N','G'};
+			// 	mesh_data_t pong_packet;
+			// 	pong_packet.data = buffer;
+			// 	pong_packet.size = 8*4;
+			// 	pong_packet.proto = MESH_PROTO_BIN;
+			// 	memcpy(pong_packet.data,&pong_data,8*4);
+			// 	esp_err_t send_error;
+			// 	if (esp_mesh_is_root()){
+			// 		send_error = esp_mesh_send(&rx_sender,&pong_packet,MESH_DATA_FROMDS,NULL,0);
+			// 	}else{
+			// 		send_error = esp_mesh_send(&rx_sender,&pong_packet,flag,NULL,0);
+			// 	}
+			// 	ESP_LOGW("MESH_TAG","Sending PING RESPONSE = %s\n",esp_err_to_name(send_error));	
+			// 	continue;
+			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'O' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
+			// 	xSemaphoreGive(SemaphorePONG);
+			// 	continue;
+			// }
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
 			xSemaphoreGive(SemaphoreDataReady);
@@ -413,7 +467,7 @@ void meshf_rx(uint8_t *array_data){
 void meshf_asktime(){
 	if (!esp_mesh_is_root()){ //THIS LINE ADDS AN WEIRD BUG 
 		uint8_t buffer[1460] = {0,};
-		uint8_t sntp_data[] = {'S','N','T','P'};
+		uint8_t sntp_data[] = "SNTP";
 		mesh_data_t sntp_packet;
 		sntp_packet.data = buffer;
 		sntp_packet.size = 8*4;
@@ -450,17 +504,16 @@ void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint
 void pinging(void *pvParameters){
 	char *mac_destination = (char *)pvParameters;
 	printf("%s\n",mac_destination);
-	uint8_t buffer[1460] = {0,};
-	uint8_t ping_data[] = {'P','I','N','G'};
+	uint8_t buffer[18] = {0,};
+	uint8_t ping_data[] = "PING";
 
 	mesh_addr_t ping_destination;
 	STR2MAC(ping_destination.addr,mac_destination);
 	mesh_data_t ping_packet;
 	ping_packet.data = buffer;
-	ping_packet.size = 8*4;
-	ping_packet.proto = MESH_PROTO_BIN;
-	memcpy(ping_packet.data,&ping_data,8*4);
-
+	ping_packet.size = 18;
+	ping_packet.proto = MESH_PROTO_JSON;
+	meshf_uint8_t_json_creator(ping_packet.data,json_flag,sizeof(json_flag),ping_data,sizeof(ping_data));
 	esp_err_t send_error = esp_mesh_send(&tx_destination,&ping_packet,MESH_DATA_P2P,NULL,0);
 	if (send_error == ESP_OK){
 		struct timeval b4;
