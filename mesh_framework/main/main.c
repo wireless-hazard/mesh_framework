@@ -27,12 +27,13 @@
 void app_main(void) {
 	meshf_init();
 	meshf_start();
-	
+	meshf_mqtt_start();
 	uint8_t rx_mensagem[180] = {0,};
 	meshf_rx(rx_mensagem);
 
 	meshf_asktime();
+	meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),"string",strlen("string"));
 	char mac_destination[] = "80:7D:3A:B7:C8:18";
+	meshf_sleep_time(1000);
 	meshf_ping(mac_destination);
-
 }

@@ -301,7 +301,7 @@ void rx_connection(void *pvParameters){
 
 		ESP_ERROR_CHECK(esp_mesh_get_rx_pending(&rx_pending));
 
-		//ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d\n Estado do Semaforo: %d\n",rx_pending.toSelf,uxSemaphoreGetCount(SemaphoreDataReady));
+		// ESP_LOGI(MESH_TAG,"Numero de pacotes para este ESP32: %d\n Estado do Semaforo: %d\n",rx_pending.toSelf,uxSemaphoreGetCount(SemaphoreDataReady));
 		if(rx_pending.toSelf <= 0 || !is_buffer_free){
 			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
@@ -404,122 +404,17 @@ void rx_connection(void *pvParameters){
 				ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
 				continue;
 
+			}else if(strcmp(json_flag_data->valuestring,"MQTT") == 0){
+				ESP_LOGW(MESH_TAG,"MQTT PUBLISH REQUEST");
+				cJSON *json_topic = cJSON_GetObjectItemCaseSensitive(json,"topic");
+				ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",json_topic->valuestring);
+				cJSON *json_published = cJSON_GetObjectItemCaseSensitive(json,"data");
+				ESP_LOGI(MESH_TAG,"Data ->%s<-\n",json_published->valuestring);
+				esp_mqtt_client_publish(mqtt_handler,json_topic->valuestring,json_published->valuestring,0,0,0);
+				free(json_topic);
+				free(json_published);
+				continue;
 			}
-
-
-			// if (rx_data.data[0] == 'S' && rx_data.data[1] == 'N' && rx_data.data[2] == 'T' && rx_data.data[3] == 'P' && rx_data.size == 32){
-			// 	ESP_LOGE(MESH_TAG,"REQUEST SNTP");
-
-			// 	char strftime_buff[64];
-			// 	time_t now = 0;
-   //  			struct tm timeinfo = { 0 };
-    		
-   //  			xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
-   //  			xSemaphoreGive(SemaphoreSNTPConnected);
-
-   //  			time(&now);
-   //  			localtime_r(&now, &timeinfo);
-
-			// 	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
-			// 	ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
-
-			// 	uint8_t buffer[1460] = {0,};
-			// 	uint8_t sntp_data[14] = {0,};
-
-			// 	sntp_data[0] = 'P';
-			// 	sntp_data[1] = 'T';
-			// 	sntp_data[2] = 'N';
-			// 	sntp_data[3] = 'S';
-
-			// 	int tempo = now;
-			// 	int factor = 1000000000;
-			// 	int index = 13;
-
-			// 	while(index >= 4){
-			// 		sntp_data[index] = tempo/factor;
-			// 		tempo = tempo - (sntp_data[index]*factor);
-			// 		factor = factor/10;
-			// 		index = index - 1;
-			// 	}
-
-			// 	mesh_data_t sntp_packet;
-			// 	sntp_packet.data = buffer;
-			// 	sntp_packet.size = sizeof(sntp_data);
-			// 	sntp_packet.proto = MESH_PROTO_BIN;
-			// 	memcpy(sntp_packet.data,&sntp_data,sntp_packet.size);
-			// 	esp_err_t send_error = esp_mesh_send(&rx_sender,&sntp_packet,MESH_DATA_FROMDS,NULL,0);
-			// 	ESP_LOGW("MESH_TAG","Sending SNTP RESPONSE = %s\n",esp_err_to_name(send_error));
-			// 	continue;
-			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'T' && rx_data.data[2] == 'N' && rx_data.data[3] == 'S'){
-
-			// 	int tempo_temp = 0;
-			// 	int tempo = 0;
-			// 	int factor = 1000000000;
-			// 	int index = 13;
-
-			// 	while(index >= 4){
-			// 		tempo_temp = rx_data.data[index]*factor;
-			// 		tempo = tempo + tempo_temp;
-			// 		factor = factor/10;
-			// 		index = index - 1;
-			// 	}
-
-			// 	struct timeval tv;//Cria a estrutura temporaria para funcao abaixo.
-  	// 			tv.tv_sec = tempo;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
-  	// 			settimeofday(&tv, NULL);
-
-			// 	char strftime_buff[64];
-			// 	time_t now = 0;
-			// 	time(&now);
-			// 	setenv("TZ", "UTC+3", 1);
-			// 	tzset();
-   //  			struct tm timeinfo = { 0 };
-
-   //  			localtime_r(&now, &timeinfo);
-
-			// 	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
-			// 	ESP_LOGI(MESH_TAG, "The current date/time RECEIVED in UNIPAMPA is: %s", strftime_buff);
-
-			// 	ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
-			// 	continue;
-			// }else if (rx_data.data[2] == 'M' && rx_data.data[3] == 'Q' && rx_data.data[4] == 'T' && rx_data.data[5] == 'T'){
-			// 	ESP_LOGW(MESH_TAG,"MQTT PUBLISH REQUEST");
-			// 	char *topic = malloc(rx_data.data[0]-1);
-			// 	memcpy(topic,rx_data.data+6,rx_data.data[0]-1);
-			// 	topic[rx_data.data[0]-1] ='\0';
-			// 	ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
-
-			// 	char *published_data = malloc(rx_data.data[1]);
-			// 	memcpy(published_data,rx_data.data+rx_data.data[0]+6,rx_data.data[1]);
-			// 	published_data[rx_data.data[1]] = '\0';
-			// 	ESP_LOGI(MESH_TAG,"Data ->%s<-\n",published_data);
-
-			// 	esp_mqtt_client_publish(mqtt_handler,topic,published_data,0,0,0);
-			// 	free(topic);
-			// 	free(published_data);
-
-			// 	continue;
-			// }
-			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'I' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
-			// 	uint8_t buffer[1460] = {0,};
-			// 	uint8_t pong_data[] = {'P','O','N','G'};
-			// 	mesh_data_t pong_packet;
-			// 	pong_packet.data = buffer;
-			// 	pong_packet.size = 8*4;
-			// 	pong_packet.proto = MESH_PROTO_BIN;
-			// 	memcpy(pong_packet.data,&pong_data,8*4);
-			// 	esp_err_t send_error;
-			// 	if (esp_mesh_is_root()){
-			// 		send_error = esp_mesh_send(&rx_sender,&pong_packet,MESH_DATA_FROMDS,NULL,0);
-			// 	}else{
-			// 		send_error = esp_mesh_send(&rx_sender,&pong_packet,flag,NULL,0);
-			// 	}
-			// 	ESP_LOGW("MESH_TAG","Sending PING RESPONSE = %s\n",esp_err_to_name(send_error));	
-			// 	continue;
-			// }else if (rx_data.data[0] == 'P' && rx_data.data[1] == 'O' && rx_data.data[2] == 'N' && rx_data.data[3] == 'G' && rx_data.size == 32){
-			// 	xSemaphoreGive(SemaphorePONG);
-			// 	continue;
-			// }
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
 			xSemaphoreGive(SemaphoreDataReady);
@@ -553,25 +448,30 @@ void meshf_asktime(){
 	}
 }
 
-void meshf_mqtt_publish(uint8_t *topic, uint8_t *data, uint16_t topic_size, uint16_t data_size){
+void meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size){
 	if (!esp_mesh_is_root()){
+		cJSON *json_mqtt = cJSON_CreateObject();
+		cJSON_AddStringToObject(json_mqtt,"flag","MQTT");
+		cJSON_AddStringToObject(json_mqtt,"topic",topic);
+		cJSON_AddStringToObject(json_mqtt,"data",data);
+		char *string = cJSON_Print(json_mqtt);
 		mesh_data_t tx_data;
 		tx_data.data = tx_buffer;
-		tx_data.size = data_size + topic_size + 6;
-		int flag = MESH_DATA_P2P;
-		tx_data.proto = MESH_PROTO_BIN;
+		tx_data.size = data_size + topic_size + 47;
+		tx_data.proto = MESH_PROTO_JSON;
 		tx_data.tos = MESH_TOS_P2P;
-		memcpy(tx_data.data + 6, topic, topic_size);
-		memcpy(tx_data.data + topic_size + 6,data,data_size);
-		tx_data.data[0] = topic_size;
-		tx_data.data[1] = data_size;
-		tx_data.data[2] = 'M'; 
-		tx_data.data[3] = 'Q';
-		tx_data.data[4] = 'T';
-		tx_data.data[5] = 'T';
-		tx_data.data[topic_size+5] = ';';
-		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,flag,NULL,0);
+		for(int i = 0; i < tx_data.size-1;i++){
+			tx_data.data[i] = string[i];
+		}
+		printf("%s\n",tx_data.data);
+		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,MESH_DATA_P2P,NULL,0);
 		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));
+		cJSON_Delete(json_mqtt);
+		free(string);
+	}else{
+		ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
+		ESP_LOGI(MESH_TAG,"Data ->%s<-\n",data);
+		esp_mqtt_client_publish(mqtt_handler,topic,data,0,0,0);
 	}
 }
 
