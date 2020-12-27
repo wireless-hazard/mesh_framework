@@ -3,7 +3,7 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_wifi.h"
-#include "esp_event_loop.h"
+#include "esp_event.h"
 #include "esp_mesh.h"
 
 #include "freertos/FreeRTOS.h"
@@ -45,6 +45,8 @@ static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
 static int mesh_layer = -1;
 static mesh_addr_t mesh_parent_addr;
+
+static esp_netif_t *netif_sta = NULL;
 
 static bool is_mesh_connected = false;
 static bool is_parent_connected = false;
@@ -196,34 +198,34 @@ void send_external_net(void *pvParameters){
 				}
 			}
     		
-    		sprintf(header,"%02x:%02x:%02x:%02x:%02x:%02x;%02x:%02x:%02x:%02x:%02x:%02x;%.3d;%.2d;",
-    			from.addr[0],from.addr[1],from.addr[2],from.addr[3],from.addr[4],from.addr[5]+1,
-    			data.data[7],data.data[6],data.data[5],data.data[4],data.data[3],data.data[2],
-    			(int8_t)data.data[1],(int)data.data[0]);
+   //  		sprintf(header,"%02x:%02x:%02x:%02x:%02x:%02x;%02x:%02x:%02x:%02x:%02x:%02x;%.3d;%.2d;",
+   //  			from.addr[0],from.addr[1],from.addr[2],from.addr[3],from.addr[4],from.addr[5]+1,
+   //  			data.data[7],data.data[6],data.data[5],data.data[4],data.data[3],data.data[2],
+   //  			(int8_t)data.data[1],(int)data.data[0]);
 
-    		sprintf(dados_final,"%s",header);
-    		sprintf(dados_final + (int)sizeof(header) - 1,"%s",dados);
+   //  		sprintf(dados_final,"%s",header);
+   //  		sprintf(dados_final + (int)sizeof(header) - 1,"%s",dados);
     		
-    		ESP_LOGI(MESH_TAG,"%s",dados_final);
+   //  		ESP_LOGI(MESH_TAG,"%s",dados_final);
 
-    		destAddr.sin_addr.s_addr = inet_addr(ip_final);
-    		destAddr.sin_family = AF_INET;
-    		destAddr.sin_port = htons((unsigned short)to.mip.port);
-    		addr_family = AF_INET;
-    		ip_protocol = IPPROTO_IP;
-    		inet_ntoa_r(destAddr.sin_addr, addr_str, sizeof(addr_str) - 1);
+   //  		destAddr.sin_addr.s_addr = inet_addr(ip_final);
+   //  		destAddr.sin_family = AF_INET;
+   //  		destAddr.sin_port = htons((unsigned short)to.mip.port);
+   //  		addr_family = AF_INET;
+   //  		ip_protocol = IPPROTO_IP;
+   //  		inet_ntoa_r(destAddr.sin_addr, addr_str, sizeof(addr_str) - 1);
 	
-			int sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
-			int error = connect(sock, (struct sockaddr *)&destAddr, sizeof(destAddr));
-			if(error!=0){
-				ESP_LOGE(MESH_TAG,"SERVIDOR SOCKET ESTA OFFLINE \n REINICIANDO CONEXAO");
-				close(sock);
-				xTaskCreatePinnedToCore(&send_external_net,"Recepcao",4096,NULL,5,NULL,1);
-				vTaskDelete(NULL);	
-			}	
-			printf("Estado da conexao: %dK\n",error);
-			send(sock,&dados_final,strlen(dados_final),0);
-			close(sock);
+			// int sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
+			// int error = connect(sock, (struct sockaddr *)&destAddr, sizeof(destAddr));
+			// if(error!=0){
+			// 	ESP_LOGE(MESH_TAG,"SERVIDOR SOCKET ESTA OFFLINE \n REINICIANDO CONEXAO");
+			// 	close(sock);
+			// 	xTaskCreatePinnedToCore(&send_external_net,"Recepcao",4096,NULL,5,NULL,1);
+			// 	vTaskDelete(NULL);	
+			// }	
+			// printf("Estado da conexao: %dK\n",error);
+			// send(sock,&dados_final,strlen(dados_final),0);
+			// close(sock);
 		}	
 	}
 }
@@ -591,8 +593,10 @@ void meshf_sleep_time(float delay){
 	vTaskDelay(delay/portTICK_PERIOD_MS);
 }
 
-void mesh_event_handler(mesh_event_t evento){
-	switch (evento.id){
+void mesh_event_handler(void *arg, esp_event_base_t event_base,
+                        int32_t event_id, void *event_data)
+{
+	switch (event_id){
 		static int filhos = 0;
 		static uint8_t last_layer = 0;
 		//
@@ -610,10 +614,6 @@ void mesh_event_handler(mesh_event_t evento){
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_STOPPED\n");
 		break;
 		case MESH_EVENT_PARENT_CONNECTED:
-			//COPY AND PAST'ED 
-			mesh_layer = evento.info.connected.self_layer;
-			memcpy(&mesh_parent_addr.addr, evento.info.connected.connected.bssid, 6);
-			last_layer = mesh_layer;
         	is_mesh_connected = true;
         	is_parent_connected = true;
         	xSemaphoreGive(SemaphoreParentConnected);
@@ -646,7 +646,7 @@ void mesh_event_handler(mesh_event_t evento){
 		break;
 		case MESH_EVENT_CHILD_DISCONNECTED: //A child node disconnects from  a node 
 			filhos = filhos - 1;
-			printf(MAC2STR(evento.info.child_disconnected.mac));
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_CHILD_DISCONNECTED %d\n",filhos);
 		break;
 		case MESH_EVENT_ROUTING_TABLE_ADD: //A node's descendant (with its possible futher descendants) joins the mesh network
 			ESP_LOGW(MESH_TAG,"MAC adicionado a tabela de roteamento\n");
@@ -671,30 +671,27 @@ void mesh_event_handler(mesh_event_t evento){
 		break;
 		case MESH_EVENT_LAYER_CHANGE: //The node's layer in the mesh network has changed
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_LAYER_CHANGE\n");
-			mesh_layer = evento.info.layer_change.new_layer;
-			last_layer = mesh_layer;
 		break;
 		case MESH_EVENT_CHANNEL_SWITCH: //The mesh wifi channel has changed
-			ESP_LOGW(MESH_TAG,"MESH_EVENT_CHANNEL_SWITCH %d\n",evento.info.channel_switch.channel);
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_CHANNEL_SWITCH");
 		break;
 		//
 		//MESH ROOT-SPECIFIC EVENTS
 		//
-		case MESH_EVENT_ROOT_GOT_IP: //The station DHCP client retrieves a dynamic IP configuration or a Static IP is applied
-			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_GOT_IP\n");
-			ESP_LOGI(MESH_TAG,
-                 	 "<MESH_EVENT_ROOT_GOT_IP>sta ip: " IPSTR ", mask: " IPSTR ", gw: " IPSTR,
-                 	 IP2STR(&evento.info.got_ip.ip_info.ip),
-                 	 IP2STR(&evento.info.got_ip.ip_info.netmask),
-                 	 IP2STR(&evento.info.got_ip.ip_info.gw));
+		// case MESH_EVENT_ROOT_GOT_IP: //The station DHCP client retrieves a dynamic IP configuration or a Static IP is applied
+		// 	ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_GOT_IP\n");
+		// 	ESP_LOGI(MESH_TAG,
+  //                	 "<MESH_EVENT_ROOT_GOT_IP>sta ip: " IPSTR ", mask: " IPSTR ", gw: " IPSTR,
+  //                	 IP2STR(&evento.info.got_ip.ip_info.ip),
+  //                	 IP2STR(&evento.info.got_ip.ip_info.netmask),
+  //                	 IP2STR(&evento.info.got_ip.ip_info.gw));
 		
-		break;
-		case MESH_EVENT_ROOT_LOST_IP: //The lease time  of the Node's station dynamic IP configuration has expired
-			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_LOST_IP\n");
-		break;
+		// break;
+		// case MESH_EVENT_ROOT_LOST_IP: //The lease time  of the Node's station dynamic IP configuration has expired
+		// 	ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_LOST_IP\n");
+		// break;
 		case MESH_EVENT_ROOT_SWITCH_REQ: //The root node has received a root switch request from  a candidate root
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_SWITCH_REQ\n");
-			printf(MAC2STR( evento.info.switch_req.rc_addr.addr));
 		break;
 		case MESH_EVENT_ROOT_ASKED_YIELD: //Another root node with a higher RSSI with the router has asked this root node to yield
 			printf("MESH_EVENT_ROOT_ASKED_YIELD\n");
@@ -766,6 +763,14 @@ void meshf_mqtt_start(){
     }
 }
 
+void ip_event_handler(void *arg, esp_event_base_t event_base,
+                      int32_t event_id, void *event_data)
+{
+    ip_event_got_ip_t *event = (ip_event_got_ip_t *) event_data;
+    ESP_LOGI(MESH_TAG, "<IP_EVENT_STA_GOT_IP>IP:" IPSTR, IP2STR(&event->ip_info.ip));
+
+}
+
 void meshf_init(){
 
 	//Initialize NVS
@@ -777,21 +782,25 @@ void meshf_init(){
     ESP_ERROR_CHECK(ret);
 
     //Inicializacao Wifi
-	tcpip_adapter_init(); //Inicializa as estruturas de dados TCP/LwIP e cria a tarefa principal LwIP
+	ESP_ERROR_CHECK(esp_netif_init()); //Inicializa as estruturas de dados TCP/LwIP e cria a tarefa principal LwIP
 		
-	ESP_ERROR_CHECK(esp_event_loop_init(NULL,NULL)); //Lida com os eventos AINDA NAO IMPLEMENTADOS
-	
+	ESP_ERROR_CHECK(esp_event_loop_create_default()); //Lida com os eventos AINDA NAO IMPLEMENTADOS
+	ESP_ERROR_CHECK(esp_netif_create_default_wifi_mesh_netifs(&netif_sta, NULL));
+
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT(); //
 	esp_wifi_init(&cfg); //Inicia o Wifi com os seus parametros padroes
-	
-	ESP_ERROR_CHECK(tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA));//Desliga o cliente dhcp
-	ESP_ERROR_CHECK(tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP));//Desliga o servidor dhcp
+	ESP_ERROR_CHECK(esp_event_handler_register(MESH_EVENT, ESP_EVENT_ANY_ID, &mesh_event_handler, NULL));
+	ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
+	// ESP_ERROR_CHECK(tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA));//Desliga o cliente dhcp
+	// ESP_ERROR_CHECK(tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP));//Desliga o servidor dhcp
 	
 	ESP_ERROR_CHECK(esp_wifi_start());
 
 	// Inicializacao Do MESH
 	
 	ESP_ERROR_CHECK(esp_mesh_init()); //Inicializa o "mesh stack"
+	ESP_ERROR_CHECK(esp_event_handler_register(MESH_EVENT, ESP_EVENT_ANY_ID, &mesh_event_handler, NULL));
+	ESP_ERROR_CHECK(esp_mesh_set_topology(MESH_TOPO_TREE));
 	ESP_ERROR_CHECK(esp_mesh_set_max_layer(MAX_LAYERS));//Numero maximo de niveis da rede
 	ESP_ERROR_CHECK(esp_mesh_set_vote_percentage(0.9));//Porcentagem minima para a escolha do Noh raiz
     ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(40));//Tempo sem comunicacao entre pai e filho com que fara a dissociacao do filho
@@ -801,7 +810,6 @@ void meshf_init(){
 	//Mesh Network Identifier (MID)
 	memcpy((uint8_t *) &config_mesh.mesh_id,MESH_ID,6);
 	
-	config_mesh.event_cb = &mesh_event_handler; //mesh event callback
 	config_mesh.channel = WIFI_CHANNEL;
 	config_mesh.router.ssid_len = strlen(ROUTER_SSID);
 	memcpy((uint8_t *) &config_mesh.router.ssid, ROUTER_SSID, config_mesh.router.ssid_len);

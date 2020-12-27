@@ -14,7 +14,6 @@ void meshf_task_debugger(void);
 void data_ready();
 void free_rx_buffer();
 void meshf_sleep_time(float delay);
-void mesh_event_handler(mesh_event_t evento);
 void meshf_mqtt_start();
 void meshf_init();
 void meshf_start();

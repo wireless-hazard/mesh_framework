@@ -1,4 +1,4 @@
-# Install script for directory: /home/magno/esp-idf/components/micro-ecc
+# Install script for directory: /home/magno/esp-idf/components/bootloader/subproject/components/micro-ecc
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

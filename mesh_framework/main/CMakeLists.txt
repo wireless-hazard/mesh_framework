@@ -1,5 +1,3 @@
-set(COMPONENT_SRCS "mesh_framework.c"
-                   "main.c")
-set(COMPONENT_ADD_INCLUDEDIRS ". include")
-
-register_component()
+idf_component_register(SRCS "mesh_framework.c"
+                            "main.c"
+                    INCLUDE_DIRS "." "include")
