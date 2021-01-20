@@ -450,7 +450,7 @@ void meshf_asktime(){
 	}
 }
 
-void meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size){
+int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size){
 	if (!esp_mesh_is_root()){
 		cJSON *json_mqtt = cJSON_CreateObject();
 		cJSON_AddStringToObject(json_mqtt,"flag","MQTT");
@@ -470,10 +470,15 @@ void meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t
 		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));
 		cJSON_Delete(json_mqtt);
 		free(string);
+		return send_error;
 	}else{
 		ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
 		ESP_LOGI(MESH_TAG,"Data ->%s<-\n",data);
-		esp_mqtt_client_publish(mqtt_handler,topic,data,0,0,0);
+		int send_error = esp_mqtt_client_publish(mqtt_handler,topic,data,0,0,0);
+		if (send_error != 0){ //Zero indica que houve um erro ao tentar publicar
+			return ESP_FAIL;
+		}
+		return ESP_OK;
 	}
 }
 
@@ -743,26 +748,6 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 	return ESP_OK;
 }
 
-void meshf_mqtt_start(){
-	if (esp_mesh_is_root()){
-		esp_mqtt_client_config_t mqtt_cfg = {
-        	.uri = CONFIG_BROKER_URL,
-        	.event_handle = mqtt_event_handler,
-    	};
-
-    	SemaphoreBrokerConnected = xSemaphoreCreateBinary();
-
-    	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
-    	xSemaphoreGive(SemaphoreParentConnected);
-
-    	esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
-    	esp_mqtt_client_start(mqtt_handler);
-
-    	xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-    	xSemaphoreGive(SemaphoreBrokerConnected);
-    }
-}
-
 void ip_event_handler(void *arg, esp_event_base_t event_base,
                       int32_t event_id, void *event_data)
 {
@@ -832,7 +817,7 @@ void meshf_init(){
 	SemaphorePONG = xSemaphoreCreateBinary();
 }
 
-void meshf_start(){
+void meshf_start(bool MQTT, bool SNTP){
 	/* mesh start */
     ESP_ERROR_CHECK(esp_mesh_start());
     /*Blocks the code's flow until the ESP connects to a parent*/
@@ -840,7 +825,7 @@ void meshf_start(){
     xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
     xSemaphoreGive(SemaphoreParentConnected);
     ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
-    if (esp_mesh_is_root()){
+    if (esp_mesh_is_root() && SNTP){
 
     	char strftime_buff[64];
 		
@@ -866,6 +851,22 @@ void meshf_start(){
 		ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
 		xSemaphoreGive(SemaphoreSNTPConnected);
 
-		
-    }
+	}
+	if (esp_mesh_is_root() && MQTT){
+		esp_mqtt_client_config_t mqtt_cfg = {
+        	.uri = CONFIG_BROKER_URL,
+        	.event_handle = mqtt_event_handler,
+    	};
+
+    	SemaphoreBrokerConnected = xSemaphoreCreateBinary();
+
+    	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    	xSemaphoreGive(SemaphoreParentConnected);
+
+    	esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
+    	esp_mqtt_client_start(mqtt_handler);
+
+    	xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
+    	xSemaphoreGive(SemaphoreBrokerConnected);	
+	}
 }
