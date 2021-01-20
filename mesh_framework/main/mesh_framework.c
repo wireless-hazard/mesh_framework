@@ -40,6 +40,8 @@ static SemaphoreHandle_t SemaphoreBrokerConnected = NULL;
 static SemaphoreHandle_t SemaphoreDataReady = NULL;
 static SemaphoreHandle_t SemaphoreSNTPConnected = NULL;
 static SemaphoreHandle_t SemaphorePONG = NULL;
+
+static QueueHandle_t QueueBrokerConnected;
  
 static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
@@ -472,10 +474,15 @@ int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t 
 		free(string);
 		return send_error;
 	}else{
+		uint8_t BrokerState;
+		BaseType_t xStatus = xQueuePeek(QueueBrokerConnected,&BrokerState,portMAX_DELAY); /*Receive an item from queue without removing it from the queue*/
+		if (BrokerState != 0){
+			return ESP_FAIL;
+		}
 		ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
 		ESP_LOGI(MESH_TAG,"Data ->%s<-\n",data);
 		int send_error = esp_mqtt_client_publish(mqtt_handler,topic,data,0,0,0);
-		if (send_error != 0){ //Zero indica que houve um erro ao tentar publicar
+		if (send_error != 0){ //Zero indica que não houve um erro ao tentar publicar
 			return ESP_FAIL;
 		}
 		return ESP_OK;
@@ -715,11 +722,15 @@ void mesh_event_handler(void *arg, esp_event_base_t event_base,
 static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 
 	mqtt_handler = event->client;
-
+	
 	switch (event->event_id) {
+		BaseType_t xStatus;
+		uint8_t Queue_event;
 		case MQTT_EVENT_CONNECTED:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_CONNECTED");
-			xSemaphoreGive(SemaphoreBrokerConnected);
+			Queue_event = 0;
+			xStatus = xQueueOverwriteFromISR(QueueBrokerConnected,&Queue_event,0); /* Post an item on a queue. If the queue is already full then overwrite the value held in the queue*/
+			// xSemaphoreGive(SemaphoreBrokerConnected);
 		break;
 		case MQTT_EVENT_DISCONNECTED:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_DISCONNECTED");
@@ -740,6 +751,8 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 		break;
 		case MQTT_EVENT_ERROR:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_ERROR");
+			Queue_event = 1;
+			xStatus = xQueueOverwriteFromISR(QueueBrokerConnected,&Queue_event,0);
 		break;
 		default:
             ESP_LOGI(MESH_TAG, "MQTT_EVENT NOT HANDLED, ID:%d", event->event_id);
@@ -825,48 +838,62 @@ void meshf_start(bool MQTT, bool SNTP){
     xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
     xSemaphoreGive(SemaphoreParentConnected);
     ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
-    if (esp_mesh_is_root() && SNTP){
+    if (esp_mesh_is_root()){
+    	if (SNTP){
 
-    	char strftime_buff[64];
+    		char strftime_buff[64];
 		
-		sntp_setoperatingmode(SNTP_OPMODE_POLL);
-		sntp_setservername(0, CONFIG_SNTP_SERVER);
+			sntp_setoperatingmode(SNTP_OPMODE_POLL);
+			sntp_setservername(0, CONFIG_SNTP_SERVER);
 		
-		sntp_init();
+			sntp_init();
 
-		time_t now = 0;
-    	struct tm timeinfo = { 0 };
-    	int retry = 0;
-    	const int retry_count = 10;
-    	while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
-        	ESP_LOGI(MESH_TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-        	vTaskDelay(2000 / portTICK_PERIOD_MS);
-    	}
-    	time(&now);
-    	setenv("TZ", "UTC+3", 1);
-		tzset();
-    	localtime_r(&now, &timeinfo);
+			time_t now = 0;
+    		struct tm timeinfo = { 0 };
+    		int retry = 0;
+    		const int retry_count = 10;
+    		while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
+    	    	ESP_LOGI(MESH_TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+	        	vTaskDelay(2000 / portTICK_PERIOD_MS);
+    		}
+    		time(&now);
+    		setenv("TZ", "UTC+3", 1);
+			tzset();
+    		localtime_r(&now, &timeinfo);
 
-		strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
-		ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
-		xSemaphoreGive(SemaphoreSNTPConnected);
+			strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+			ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
+			xSemaphoreGive(SemaphoreSNTPConnected);
 
-	}
-	if (esp_mesh_is_root() && MQTT){
-		esp_mqtt_client_config_t mqtt_cfg = {
-        	.uri = CONFIG_BROKER_URL,
-        	.event_handle = mqtt_event_handler,
-    	};
+		}
+		if (MQTT){
+			esp_mqtt_client_config_t mqtt_cfg = {
+        		.uri = CONFIG_BROKER_URL,
+        		.event_handle = mqtt_event_handler,
+    		};
 
-    	SemaphoreBrokerConnected = xSemaphoreCreateBinary();
+    		SemaphoreBrokerConnected = xSemaphoreCreateBinary();
+    		QueueBrokerConnected = xQueueCreate(1,sizeof(uint8_t));
+    		uint8_t BrokerState = 0;
 
-    	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
-    	xSemaphoreGive(SemaphoreParentConnected);
+    		xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    		xSemaphoreGive(SemaphoreParentConnected);
 
-    	esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
-    	esp_mqtt_client_start(mqtt_handler);
+    		esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
+    		esp_mqtt_client_start(mqtt_handler);
 
-    	xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-    	xSemaphoreGive(SemaphoreBrokerConnected);	
+    		BaseType_t xStatus = xQueuePeek(QueueBrokerConnected,&BrokerState,portMAX_DELAY); /*Receive an item from queue without removing it from the queue*/
+    		switch(BrokerState){
+    			case 0:
+    				ESP_LOGI(MESH_TAG,"BROKER CONNECTED");
+    			break;
+    			case 1:
+    				ESP_LOGE(MESH_TAG,"BROKER NOT FOUND");
+    			break;
+    		}
+    		// xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
+    		// xSemaphoreGive(SemaphoreBrokerConnected);
+
+		}
 	}
 }
