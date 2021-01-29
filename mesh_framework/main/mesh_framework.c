@@ -40,6 +40,7 @@ static SemaphoreHandle_t SemaphoreBrokerConnected = NULL;
 static SemaphoreHandle_t SemaphoreDataReady = NULL;
 static SemaphoreHandle_t SemaphoreSNTPConnected = NULL;
 static SemaphoreHandle_t SemaphorePONG = NULL;
+static SemaphoreHandle_t SemaphoreSNTPNODE = NULL;
 
 static QueueHandle_t QueueBrokerConnected;
  
@@ -406,6 +407,7 @@ void rx_connection(void *pvParameters){
 				ESP_LOGI(MESH_TAG, "The current date/time RECEIVED in UNIPAMPA is: %s", strftime_buff);
 
 				ESP_LOGE(MESH_TAG,"RESPONSE SNTP");
+				xSemaphoreGive(SemaphoreSNTPNODE);
 				continue;
 
 			}else if(strcmp(json_flag_data->valuestring,"MQTT") == 0){
@@ -414,6 +416,8 @@ void rx_connection(void *pvParameters){
 				ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",json_topic->valuestring);
 				cJSON *json_published = cJSON_GetObjectItemCaseSensitive(json,"data");
 				ESP_LOGI(MESH_TAG,"Data ->%s<-\n",json_published->valuestring);
+				xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
+				xSemaphoreGive(SemaphoreBrokerConnected);
 				esp_mqtt_client_publish(mqtt_handler,json_topic->valuestring,json_published->valuestring,0,0,0);
 				free(json_topic);
 				free(json_published);
@@ -431,24 +435,32 @@ void meshf_rx(uint8_t *array_data){
 	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,((void *)array_data),5,NULL,1);
 }
 
+void node_sntp(void *pvParameters){
+	uint8_t buffer[20] = {0,};
+	cJSON *json_sntp = cJSON_CreateObject();
+	cJSON_AddStringToObject(json_sntp,"flag","SNTP");
+	char *string = cJSON_Print(json_sntp);
+	mesh_data_t sntp_packet;
+	sntp_packet.data = buffer;
+	sntp_packet.size = 20;
+	sntp_packet.proto = MESH_PROTO_JSON;
+	sntp_packet.tos = MESH_TOS_P2P;
+	for (int i = 0; i<19; i++){
+		sntp_packet.data[i] = string[i];
+	}
+	esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
+	ESP_LOGW("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
+	free(string);
+	cJSON_Delete(json_sntp);
+	vTaskDelete(NULL);
+	
+}
+
 void meshf_asktime(){
-	if (!esp_mesh_is_root()){ //THIS LINE ADDS AN WEIRD BUG 
-		uint8_t buffer[20] = {0,};
-		cJSON *json_sntp = cJSON_CreateObject();
-		cJSON_AddStringToObject(json_sntp,"flag","SNTP");
-		char *string = cJSON_Print(json_sntp);
-		mesh_data_t sntp_packet;
-		sntp_packet.data = buffer;
-		sntp_packet.size = 20;
-		sntp_packet.proto = MESH_PROTO_JSON;
-		sntp_packet.tos = MESH_TOS_P2P;
-		for (int i = 0; i<19; i++){
-			sntp_packet.data[i] = string[i];
-		}
-		esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
-		ESP_LOGW("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
-		free(string);
-		cJSON_Delete(json_sntp);
+	if (!esp_mesh_is_root()){ //THIS LINE ADDS AN WEIRD BUG
+		xTaskCreatePinnedToCore(&node_sntp,"NODE ASK SNTP",4096,NULL,5,NULL,1);
+		xSemaphoreTake(SemaphoreSNTPNODE,portMAX_DELAY);
+		xSemaphoreGive(SemaphoreSNTPNODE);
 	}
 }
 
@@ -730,7 +742,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_CONNECTED");
 			Queue_event = 0;
 			xStatus = xQueueOverwriteFromISR(QueueBrokerConnected,&Queue_event,0); /* Post an item on a queue. If the queue is already full then overwrite the value held in the queue*/
-			// xSemaphoreGive(SemaphoreBrokerConnected);
+			xSemaphoreGive(SemaphoreBrokerConnected);
 		break;
 		case MQTT_EVENT_DISCONNECTED:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_DISCONNECTED");
@@ -754,6 +766,8 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 			Queue_event = 1;
 			xStatus = xQueueOverwriteFromISR(QueueBrokerConnected,&Queue_event,0);
 		break;
+		case MQTT_EVENT_BEFORE_CONNECT:
+			ESP_LOGW(MESH_TAG,"MQTT_EVENT_BEFORE_CONNECT");
 		default:
             ESP_LOGI(MESH_TAG, "MQTT_EVENT NOT HANDLED, ID:%d", event->event_id);
         break;
@@ -827,10 +841,14 @@ void meshf_init(){
 	if (SemaphoreSNTPConnected == NULL){
 		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: SNTPCONNECTED");
 	}
+	SemaphoreSNTPNODE = xSemaphoreCreateBinary();
+	if (SemaphoreSNTPNODE == NULL){
+		ESP_LOGE(MESH_TAG,"ERROR CREATING SEMAPHORE: SNTPNODE");
+	}
 	SemaphorePONG = xSemaphoreCreateBinary();
 }
 
-void meshf_start(bool MQTT, bool SNTP){
+void meshf_start(){
 	/* mesh start */
     ESP_ERROR_CHECK(esp_mesh_start());
     /*Blocks the code's flow until the ESP connects to a parent*/
@@ -838,36 +856,43 @@ void meshf_start(bool MQTT, bool SNTP){
     xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
     xSemaphoreGive(SemaphoreParentConnected);
     ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
-    if (esp_mesh_is_root()){
-    	if (SNTP){
-
-    		char strftime_buff[64];
+    
+}
+void meshf_start_sntp(){
+	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    xSemaphoreGive(SemaphoreParentConnected);
+	if (esp_mesh_is_root()){
+    	char strftime_buff[64];
 		
-			sntp_setoperatingmode(SNTP_OPMODE_POLL);
-			sntp_setservername(0, CONFIG_SNTP_SERVER);
+		sntp_setoperatingmode(SNTP_OPMODE_POLL);
+		sntp_setservername(0, CONFIG_SNTP_SERVER);
 		
-			sntp_init();
+		sntp_init();
 
-			time_t now = 0;
-    		struct tm timeinfo = { 0 };
-    		int retry = 0;
-    		const int retry_count = 10;
-    		while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
-    	    	ESP_LOGI(MESH_TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-	        	vTaskDelay(2000 / portTICK_PERIOD_MS);
-    		}
-    		time(&now);
-    		setenv("TZ", "UTC+3", 1);
-			tzset();
-    		localtime_r(&now, &timeinfo);
+		time_t now = 0;
+   		struct tm timeinfo = { 0 };
+  		int retry = 0;
+   		const int retry_count = 10;
+   		while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
+   	    	ESP_LOGI(MESH_TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+        	vTaskDelay(2000 / portTICK_PERIOD_MS);
+   		}
+   		time(&now);
+   		setenv("TZ", "UTC+3", 1);
+		tzset();
+   		localtime_r(&now, &timeinfo);
 
-			strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
-			ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
-			xSemaphoreGive(SemaphoreSNTPConnected);
+		strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+		ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
+		xSemaphoreGive(SemaphoreSNTPConnected);
+	}
+}
 
-		}
-		if (MQTT){
-			esp_mqtt_client_config_t mqtt_cfg = {
+void meshf_start_mqtt(){
+	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
+    xSemaphoreGive(SemaphoreParentConnected);
+	if (esp_mesh_is_root()){
+		esp_mqtt_client_config_t mqtt_cfg = {
         		.uri = CONFIG_BROKER_URL,
         		.event_handle = mqtt_event_handler,
     		};
@@ -891,9 +916,8 @@ void meshf_start(bool MQTT, bool SNTP){
     				ESP_LOGE(MESH_TAG,"BROKER NOT FOUND");
     			break;
     		}
-    		// xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-    		// xSemaphoreGive(SemaphoreBrokerConnected);
-
-		}
+    		xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
+    		xSemaphoreGive(SemaphoreBrokerConnected);	
 	}
+
 }

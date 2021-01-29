@@ -15,7 +15,9 @@ void data_ready();
 void free_rx_buffer();
 void meshf_sleep_time(float delay);
 void meshf_init();
-void meshf_start(bool MQTT,bool SNTP);
+void meshf_start();
+void meshf_start_mqtt();
+void meshf_start_sntp();
 
 extern esp_mqtt_client_handle_t mqtt_handler;
 extern mesh_data_t rx_data;
