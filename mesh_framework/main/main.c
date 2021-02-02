@@ -36,12 +36,12 @@ void time_message_generator(char final_message[]){ //Formata a data atual do ESP
 	localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
 	esp_read_mac(self_mac,ESP_MAC_WIFI_SOFTAP); //Pega o MAC da interface Access Point
-	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
+	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo); //Passa a struct anterior para uma string
 	sprintf(final_message, "The current date/time in %02x:%02x:%02x:%02x:%02x:%02x is: %s", self_mac[0],self_mac[1],self_mac[2],self_mac[3],self_mac[4],self_mac[5],strftime_buff);
 }
 
 int next_sleep_time(int fixed_gap){ //Recebe o valor em minutos e calcula em quantos segundos o ESP devera acordar, considerando o inicio em uma hora exata.
-	if (fixed_gap <= 0){
+	if (fixed_gap <= 0){ //Se o valor do delay for de 0 minutos, retorna 0 minutos sem fazer nenhum calculo
 		return 0;
 	}
 
@@ -53,25 +53,25 @@ int next_sleep_time(int fixed_gap){ //Recebe o valor em minutos e calcula em qua
 	tzset(); //Define a time zone
 	localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
-	int minutes = timeinfo.tm_min;
-	if (minutes < fixed_gap){
-		minutes = fixed_gap;
+	int minutes = timeinfo.tm_min; //Pega o valor dos minutos atuais do RTC
+	if (minutes < fixed_gap){ //Como o prox passo eh arredondar o valor dos minutos para um multiplo de fixed_gap,
+		minutes = fixed_gap; //caso os minutos sejam menores q o proprio fixed_gap, arredonda este para fixed_gap
 	}
-	int rouded_minutes = (minutes / fixed_gap) * fixed_gap;
-	int next_minutes = rouded_minutes + fixed_gap - 1;
-	int next_seconds = 60 - timeinfo.tm_sec;
-	if (next_minutes >=59){
+	int rouded_minutes = (minutes / fixed_gap) * fixed_gap; //Transforma o valor dos minutos atuais do RTC o multiplo anterior de fixed_gap 
+	int next_minutes = rouded_minutes + fixed_gap - 1; //Calcula qual o prox valor de minutos que seja multiplo de fixed_gap 
+	int next_seconds = 60 - timeinfo.tm_sec; //Calcula o valor de segundos até que seja o minuto exato: XX:XX:00
+	if (next_minutes >=59){ //Arredonda os minutos caso seja virada de hora
 		next_minutes -= 58;
 		return (next_minutes*60 + next_seconds);
 	}
-	return ((next_minutes - minutes)*60 + next_seconds);
+	return ((next_minutes - minutes)*60 + next_seconds); //Retorna o tempo em segundos até que o ESP tenha seu RTC a XX:AA:00 sendo AA o prox valor em minutos multiplo de fixed_gap
 }
 
 void app_main(void) {
 
 	gpio_reset_pin(2);
     gpio_set_direction(2, GPIO_MODE_OUTPUT);
-    gpio_set_level(2, 1);
+    gpio_set_level(2, 1); //Acende o LED interno do ESP para mostrar que o ESP esta ligado
 
     char mqtt_data[150];
 
@@ -79,40 +79,41 @@ void app_main(void) {
 	int resp = 0;
     esp_sleep_wakeup_cause_t wakeUpCause; 
 
-    meshf_init();
+    meshf_init(); //Inicializa as configuracoes da rede MESH
     wakeUpCause = esp_sleep_get_wakeup_cause();
-	if (wakeUpCause == ESP_SLEEP_WAKEUP_TIMER){
-		meshf_start();
-		meshf_rx(rx_mensagem);
+    //Testa se o ESP acabou de sair do deepsleep ou nao
+	if (wakeUpCause == ESP_SLEEP_WAKEUP_TIMER){  //Caso tenha saido
+		meshf_start(); //Inicializa a rede MESH
+		meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
 		
-    }else{
-		meshf_start();
-		meshf_start_sntp();
-		meshf_rx(rx_mensagem);
-		meshf_asktime();
-		time_message_generator(mqtt_data);
+    }else{ //Caso ele nao esteja saindo de um deepsleep
+		meshf_start(); //Inicializa a rede MESH
+		meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
+		meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
+		meshf_asktime(); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
+		time_message_generator(mqtt_data); //Formata a data atual do ESP para dentro do array especificado
 		printf("%s\n",mqtt_data);
 
-		int awake_until = next_sleep_time(5);
+		int awake_until = next_sleep_time(5); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 
 		printf("Vai continuar acordado por %d segundos\n",awake_until);
-		meshf_sleep_time(awake_until*1000);
+		meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
 	}
 
-	meshf_start_mqtt();
+	meshf_start_mqtt(); //Conecta-se ao servidor MQTT
 
-	time_message_generator(mqtt_data);
-	resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data));
+	time_message_generator(mqtt_data); //Formata a data atual do ESP para dentro do array especificado
+	resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 	printf("%s\n",esp_err_to_name(resp));
 
-	meshf_sleep_time(60000);
+	meshf_sleep_time(60000); //Bloqueia o ESP por 1 minuto
 	// esp_mesh_stop();
 
-	int next_wakeup = next_sleep_time(5);
+	int next_wakeup = next_sleep_time(5); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 
 	printf("Ira acordar daqui a %d segundos\n",next_wakeup);
 	esp_wifi_stop();
-	esp_deep_sleep(next_wakeup*1000000);
+	esp_deep_sleep(next_wakeup*1000000); //Coloca o ESP em deepsleep até que o horario estipulado anteriormente seja atingido
 	// char mac_destination[] = "80:7D:3A:B7:C8:18";
 	// meshf_sleep_time(1000);
 	// meshf_ping(mac_destination);
