@@ -77,29 +77,42 @@ void app_main(void) {
 
 	uint8_t rx_mensagem[180] = {0,};
 	int resp = 0;
-    esp_sleep_wakeup_cause_t wakeUpCause; 
+    esp_sleep_wakeup_cause_t wakeUpCause;
 
     meshf_init(); //Inicializa as configuracoes da rede MESH
     wakeUpCause = esp_sleep_get_wakeup_cause();
     //Testa se o ESP acabou de sair do deepsleep ou nao
-	if (wakeUpCause == ESP_SLEEP_WAKEUP_TIMER){  //Caso tenha saido
-		meshf_start(); //Inicializa a rede MESH
-		meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
-		meshf_start_mqtt(); //Conecta-se ao servidor MQTT
-		
-    }else{ //Caso ele nao esteja saindo de um deepsleep
-		meshf_start(); //Inicializa a rede MESH
-		meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
-		meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
-		meshf_start_mqtt(); //Conecta-se ao servidor MQTT
-		meshf_asktime(); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
-		time_message_generator(mqtt_data); //Formata a data atual do ESP para dentro do array especificado
-		printf("%s\n",mqtt_data);
+    switch (wakeUpCause){
+		case ESP_SLEEP_WAKEUP_TIMER:  //Caso tenha saido por causa do temporizador 
+			meshf_start(); //Inicializa a rede MESH
+			meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
+			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
+			ESP_LOGI("MESH_TAG","ESP_SLEEP_WAKEUP_TIMER");
+		break;
+		case ESP_SLEEP_WAKEUP_EXT0: //Caso tenha saido por causa do pino (Por enquanto so printa o motivo)
+			ESP_LOGI("MESH_TAG","ESP_SLEEP_WAKEUP_EXT0");
+			gpio_set_level(2, 0); 
+			meshf_sleep_time(1000);
+			gpio_set_level(2, 1); //Apenas pisca o led
+			meshf_start(); //Inicializa a rede MESH
+			meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
+			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
+		break;
+    	default: //Caso ele nao esteja saindo de um deepsleep
+    		ESP_LOGI("MESH_TAG","ESP_SLEEP_FIRST_TIME");
+			meshf_start(); //Inicializa a rede MESH
+			meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
+			meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
+			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
+			meshf_asktime(); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
+			time_message_generator(mqtt_data); //Formata a data atual do ESP para dentro do array especificado
+			printf("%s\n",mqtt_data);
 
-		int awake_until = next_sleep_time(2); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
+			int awake_until = next_sleep_time(2); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 
-		printf("Vai continuar acordado por %d segundos\n",awake_until);
-		meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
+			printf("Vai continuar acordado por %d segundos\n",awake_until);
+			meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
+		break;
 	}
 
 	time_message_generator(mqtt_data); //Formata a data atual do ESP para dentro do array especificado
@@ -107,15 +120,16 @@ void app_main(void) {
 	resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 	printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
 
-	meshf_sleep_time(60000); //Bloqueia o ESP por 1 minuto
+	meshf_sleep_time(30000); //Bloqueia o ESP por 1 minuto
 	// esp_mesh_stop();
+
+	esp_err_t gpio_trigger = esp_sleep_enable_ext0_wakeup(GPIO_NUM_4,1); //Ativa o esp para acordar quando o pino GPIO4 tiver nivel logico alto
+    printf("PINO FOI CONFIGURADO COMO GPIO DO SONO: %s\n",esp_err_to_name(gpio_trigger));
 
 	int next_wakeup = next_sleep_time(2); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 
 	printf("Ira acordar daqui a %d segundos\n",next_wakeup);
+	esp_sleep_enable_timer_wakeup(next_wakeup*1000000); //Ativa o esp para acordar depois que o tempo definido anteriormente ter passado
 	esp_wifi_stop();
-	esp_deep_sleep(next_wakeup*1000000); //Coloca o ESP em deepsleep até que o horario estipulado anteriormente seja atingido
-	// char mac_destination[] = "80:7D:3A:B7:C8:18";
-	// meshf_sleep_time(1000);
-	// meshf_ping(mac_destination);
+	esp_deep_sleep_start(); //Coloca o esp em deep sleep
 }
