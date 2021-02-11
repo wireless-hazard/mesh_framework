@@ -474,7 +474,7 @@ int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t 
 		char *string = cJSON_Print(json_mqtt);
 		mesh_data_t tx_data;
 		tx_data.data = tx_buffer;
-		tx_data.size = data_size + topic_size + 47;
+		tx_data.size = data_size + topic_size + 48;
 		tx_data.proto = MESH_PROTO_JSON;
 		tx_data.tos = MESH_TOS_P2P;
 		for(int i = 0; i < tx_data.size-1;i++){
