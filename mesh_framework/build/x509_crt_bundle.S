@@ -1,4 +1,4 @@
-/* * Data converted from /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from /home/magno/Documents/github/mesh_framework/mesh_framework/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

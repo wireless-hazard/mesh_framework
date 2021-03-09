@@ -1,4 +1,4 @@
-# Install script for directory: /home/magno/Documents/Github/framework/mesh_framework/mesh_framework
+# Install script for directory: /home/magno/Documents/github/mesh_framework/mesh_framework
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/esp-idf/cmake_install.cmake")
+  include("/home/magno/Documents/github/mesh_framework/mesh_framework/build/esp-idf/cmake_install.cmake")
 
 endif()
 
@@ -46,5 +46,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/magno/Documents/github/mesh_framework/mesh_framework/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

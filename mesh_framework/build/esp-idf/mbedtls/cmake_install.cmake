@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/magno/Documents/Github/framework/mesh_framework/mesh_framework/build/esp-idf/mbedtls/mbedtls/cmake_install.cmake")
+  include("/home/magno/Documents/github/mesh_framework/mesh_framework/build/esp-idf/mbedtls/mbedtls/cmake_install.cmake")
 
 endif()
 

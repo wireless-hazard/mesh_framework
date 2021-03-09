@@ -23,26 +23,6 @@
         "children": [],
         "depends_on": null,
         "help": null,
-        "id": "IDF_TARGET_ARCH_RISCV",
-        "name": "IDF_TARGET_ARCH_RISCV",
-        "range": null,
-        "title": null,
-        "type": "bool"
-    },
-    {
-        "children": [],
-        "depends_on": null,
-        "help": null,
-        "id": "IDF_TARGET_ARCH_XTENSA",
-        "name": "IDF_TARGET_ARCH_XTENSA",
-        "range": null,
-        "title": null,
-        "type": "bool"
-    },
-    {
-        "children": [],
-        "depends_on": null,
-        "help": null,
         "id": "IDF_TARGET",
         "name": "IDF_TARGET",
         "range": null,
@@ -68,36 +48,6 @@
         "range": null,
         "title": null,
         "type": "bool"
-    },
-    {
-        "children": [],
-        "depends_on": null,
-        "help": null,
-        "id": "IDF_TARGET_ESP32S3",
-        "name": "IDF_TARGET_ESP32S3",
-        "range": null,
-        "title": null,
-        "type": "bool"
-    },
-    {
-        "children": [
-            {
-                "children": [],
-                "depends_on": "<choice IDF_TARGET_ESP32S3_BETA_VERSION>",
-                "help": null,
-                "id": "IDF_TARGET_ESP32S3_BETA_VERSION_2",
-                "name": "IDF_TARGET_ESP32S3_BETA_VERSION_2",
-                "range": null,
-                "title": "ESP32-S3 beta2",
-                "type": "bool"
-            }
-        ],
-        "depends_on": "IDF_TARGET_ESP32S3",
-        "help": "Currently ESP32-S3 has several beta versions for internal use only.\nSelect the one that matches your chip model.",
-        "id": "esp32-s3-beta-version",
-        "name": "IDF_TARGET_ESP32S3_BETA_VERSION",
-        "title": "ESP32-S3 beta version",
-        "type": "choice"
     },
     {
         "children": [],
@@ -227,16 +177,6 @@
     },
     {
         "children": [
-            {
-                "children": [],
-                "depends_on": null,
-                "help": "Offset address that 2nd bootloader will be flashed to.\nThe value is determined by the ROM bootloader.\nIt's not configurable in ESP-IDF.",
-                "id": "BOOTLOADER_OFFSET_IN_FLASH",
-                "name": "BOOTLOADER_OFFSET_IN_FLASH",
-                "range": null,
-                "title": null,
-                "type": "hex"
-            },
             {
                 "children": [
                     {
@@ -656,16 +596,6 @@
             },
             {
                 "children": [],
-                "depends_on": "IDF_TARGET_ESP32S2",
-                "help": null,
-                "id": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE",
-                "name": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE",
-                "range": null,
-                "title": null,
-                "type": "bool"
-            },
-            {
-                "children": [],
                 "depends_on": "!SECURE_BOOT",
                 "help": "Require apps to be signed to verify their integrity.\n\nThis option uses the same app signature scheme as hardware secure boot, but unlike hardware secure boot it\ndoes not prevent the bootloader from being physically updated. This means that the device can be secured\nagainst remote network access, but not physical access. Compared to using hardware Secure Boot this option\nis much simpler to implement.",
                 "id": "SECURE_SIGNED_APPS_NO_SECURE_BOOT",
@@ -1047,7 +977,7 @@
             },
             {
                 "children": [],
-                "depends_on": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE && !SECURE_DISABLE_ROM_DL_MODE",
+                "depends_on": "IDF_TARGET_ESP32S2 && !SECURE_DISABLE_ROM_DL_MODE",
                 "help": "If set, during startup the app will burn an eFuse bit to permanently switch the UART ROM\nDownload Mode into a separate Secure Download mode. This option can only work if\nDownload Mode is not already disabled by eFuse.\n\nSecure Download mode limits the use of Download Mode functions to simple flash read,\nwrite and erase operations, plus a command to return a summary of currently enabled\nsecurity features.\n\nSecure Download mode is not compatible with the esptool.py flasher stub feature,\nespefuse.py, read/writing memory or registers, encrypted download, or any other\nfeatures that interact with unsupported Download Mode commands.\n\nSecure Download mode should be enabled in any application where Flash Encryption\nand/or Secure Boot is enabled. Disabling this option does not immediately cancel\nthe benefits of the security features, but it increases the potential \"attack\nsurface\" for an attacker to try and bypass them with a successful physical attack.\n\nIt is also possible to enable secure download mode at runtime by calling\nesp_efuse_enable_rom_secure_download_mode()",
                 "id": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
                 "name": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
@@ -1165,12 +1095,12 @@
             },
             {
                 "children": [],
-                "depends_on": null,
-                "help": "The flasher tool sends a precompiled download stub first by default. That stub allows things\nlike compressed downloads and more. Usually you should not need to disable that feature",
-                "id": "ESPTOOLPY_NO_STUB",
-                "name": "ESPTOOLPY_NO_STUB",
+                "depends_on": "!SECURE_ENABLE_SECURE_ROM_DL_MODE",
+                "help": null,
+                "id": "ESPTOOLPY_WITH_STUB",
+                "name": "ESPTOOLPY_WITH_STUB",
                 "range": null,
-                "title": "Disable download stub",
+                "title": null,
                 "type": "bool"
             },
             {
@@ -1459,16 +1389,6 @@
                         "children": [],
                         "depends_on": "<choice ESPTOOLPY_MONITOR_BAUD>",
                         "help": null,
-                        "id": "ESPTOOLPY_MONITOR_BAUD_CONSOLE",
-                        "name": "ESPTOOLPY_MONITOR_BAUD_CONSOLE",
-                        "range": null,
-                        "title": "Same as UART console baud rate",
-                        "type": "bool"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": "<choice ESPTOOLPY_MONITOR_BAUD>",
-                        "help": null,
                         "id": "ESPTOOLPY_MONITOR_BAUD_9600B",
                         "name": "ESPTOOLPY_MONITOR_BAUD_9600B",
                         "range": null,
@@ -1537,7 +1457,7 @@
                     }
                 ],
                 "depends_on": null,
-                "help": "Baud rate to use when running 'idf.py monitor' or 'make monitor'\nto view serial output from a running chip.\n\nIf \"Same as UART Console baud rate\" is chosen then the value will\nfollow the \"UART Console baud rate\" config item.\n\nCan override by setting the MONITORBAUD environment variable.",
+                "help": "Baud rate to use when running 'idf.py monitor' or 'make monitor'\nto view serial output from a running chip.\n\nCan override by setting the MONITORBAUD environment variable.",
                 "id": "serial-flasher-config--idf-py-monitor-baud-rate",
                 "name": "ESPTOOLPY_MONITOR_BAUD",
                 "title": "'idf.py monitor' baud rate",
@@ -1859,16 +1779,6 @@
                 "name": "COMPILER_DISABLE_GCC8_WARNINGS",
                 "range": null,
                 "title": "Disable new warnings introduced in GCC 6 - 8",
-                "type": "bool"
-            },
-            {
-                "children": [],
-                "depends_on": null,
-                "help": "If enabled, RTL files will be produced during compilation. These files\ncan be used by other tools, for example to calculate call graphs.",
-                "id": "COMPILER_DUMP_RTL_FILES",
-                "name": "COMPILER_DUMP_RTL_FILES",
-                "range": null,
-                "title": "Dump RTL files during compilation",
                 "type": "bool"
             }
         ],
@@ -2308,7 +2218,7 @@
                                     {
                                         "children": [],
                                         "depends_on": "SPIRAM && ESP32_SPIRAM_SUPPORT",
-                                        "help": "If enabled, variables with EXT_RAM_ATTR attribute will be placed in SPIRAM instead of internal DRAM.\nBSS section of `lwip`, `net80211`, `pp`, `bt` libraries will be automatically placed\nin SPIRAM. BSS sections from other object files and libraries can also be placed in SPIRAM through\nlinker fragment scheme `extram_bss`.\n\nNote that the variables placed in SPIRAM using EXT_RAM_ATTR will be zero initialized.",
+                                        "help": "If enabled the option,and add EXT_RAM_ATTR defined your variable,then your variable will be placed in\nPSRAM instead of internal memory, and placed most of variables of lwip,net802.11,pp,bluedroid library\nto external memory defaultly.",
                                         "id": "SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY",
                                         "name": "SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY",
                                         "range": null,
@@ -2898,7 +2808,7 @@
                                 "id": "ESP32_RTC_CLK_SRC_EXT_OSC",
                                 "name": "ESP32_RTC_CLK_SRC_EXT_OSC",
                                 "range": null,
-                                "title": "External 32kHz oscillator at 32K_XN pin",
+                                "title": "External 32kHz oscillator at 32K_XP pin",
                                 "type": "bool"
                             },
                             {
@@ -2913,51 +2823,21 @@
                             }
                         ],
                         "depends_on": null,
-                        "help": "Choose which clock is used as RTC clock source.\n\n- \"Internal 150kHz oscillator\" option provides lowest deep sleep current\n  consumption, and does not require extra external components. However\n  frequency stability with respect to temperature is poor, so time may\n  drift in deep/light sleep modes.\n- \"External 32kHz crystal\" provides better frequency stability, at the\n  expense of slightly higher (1uA) deep sleep current consumption.\n- \"External 32kHz oscillator\" allows using 32kHz clock generated by an\n  external circuit. In this case, external clock signal must be connected\n  to 32K_XN pin. Amplitude should be <1.2V in case of sine wave signal,\n  and <1V in case of square wave signal. Common mode voltage should be\n  0.1 < Vcm < 0.5Vamp, where Vamp is the signal amplitude.\n  Additionally, 1nF capacitor must be connected between 32K_XP pin and\n  ground. 32K_XP pin can not be used as a GPIO in this case.\n- \"Internal 8.5MHz oscillator divided by 256\" option results in higher\n  deep sleep current (by 5uA) but has better frequency stability than\n  the internal 150kHz oscillator. It does not require external components.",
+                        "help": "Choose which clock is used as RTC clock source.\n\n- \"Internal 150kHz oscillator\" option provides lowest deep sleep current\n  consumption, and does not require extra external components. However\n  frequency stability with respect to temperature is poor, so time may\n  drift in deep/light sleep modes.\n- \"External 32kHz crystal\" provides better frequency stability, at the\n  expense of slightly higher (1uA) deep sleep current consumption.\n- \"External 32kHz oscillator\" allows using 32kHz clock generated by an\n  external circuit. In this case, external clock signal must be connected\n  to 32K_XP pin. Amplitude should be <1.2V in case of sine wave signal,\n  and <1V in case of square wave signal. Common mode voltage should be\n  0.1 < Vcm < 0.5Vamp, where Vamp is the signal amplitude.\n  Additionally, 1nF capacitor must be connected between 32K_XN pin and\n  ground. 32K_XN pin can not be used as a GPIO in this case.\n- \"Internal 8.5MHz oscillator divided by 256\" option results in higher\n  deep sleep current (by 5uA) but has better frequency stability than\n  the internal 150kHz oscillator. It does not require external components.",
                         "id": "component-config-esp32-specific-rtc-clock-source",
                         "name": "ESP32_RTC_CLK_SRC",
                         "title": "RTC clock source",
                         "type": "choice"
                     },
                     {
-                        "children": [
-                            {
-                                "children": [],
-                                "depends_on": "<choice ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_METHOD>",
-                                "help": null,
-                                "id": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_NONE",
-                                "name": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_NONE",
-                                "range": null,
-                                "title": "None",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "<choice ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_METHOD>",
-                                "help": null,
-                                "id": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT",
-                                "name": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT",
-                                "range": null,
-                                "title": "Method 1",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "<choice ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_METHOD>",
-                                "help": null,
-                                "id": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_V2",
-                                "name": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_V2",
-                                "range": null,
-                                "title": "Method 2",
-                                "type": "bool"
-                            }
-                        ],
-                        "depends_on": "ESP32_RTC_CLK_SRC_EXT_CRYS && ESP32_REV_MIN <= 1",
-                        "help": "With some 32kHz crystal configurations, the X32N and X32P pins may not have enough\ndrive strength to keep the crystal oscillating. Choose the method to provide\nadditional current from touchpad 9 to the external 32kHz crystal. Note that\nthe deep sleep current is slightly high (4-5uA) and the touchpad and the\nwakeup sources of both touchpad and ULP are not available in method 1 and method 2.\n\nThis problem is fixed in ESP32 ECO 3, so this workaround is not needed. Setting the\nproject configuration to minimum revision ECO3 will disable this option, , allow\nall wakeup sources, and save some code size.\n\n- \"None\" option will not provide additional current to external crystal\n- \"Method 1\" option can't ensure 100% to solve the external 32k crystal start failed\n  issue, but the touchpad can work in this method.\n- \"Method 2\" option can solve the external 32k issue, but the touchpad can't work\n  in this method.",
-                        "id": "component-config-esp32-specific-additional-current-for-external-32khz-crystal",
-                        "name": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT_METHOD",
+                        "children": [],
+                        "depends_on": "ESP32_RTC_CLK_SRC_EXT_CRYS",
+                        "help": "Choose which additional current is used for rtc external crystal.\n\n- With some 32kHz crystal configurations, the X32N and X32P pins may not\n  have enough drive strength to keep the crystal oscillating during deep sleep.\n  If this option is enabled, additional current from touchpad 9 is provided\n  internally to drive the 32kHz crystal. If this option is enabled, deep sleep current\n  is slightly higher (4-5uA) and the touchpad and ULP wakeup sources are not available.",
+                        "id": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT",
+                        "name": "ESP32_RTC_EXT_CRYST_ADDIT_CURRENT",
+                        "range": null,
                         "title": "Additional current for external 32kHz crystal",
-                        "type": "choice"
+                        "type": "bool"
                     },
                     {
                         "children": [],
@@ -2980,6 +2860,16 @@
                         "name": "ESP32_RTC_XTAL_CAL_RETRY",
                         "range": null,
                         "title": "Number of attempts to repeat 32k XTAL calibration",
+                        "type": "int"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "ESP32_RTC_CLK_SRC_EXT_CRYS",
+                        "help": "To reduce the startup time of an external RTC crystal,\nwe bootstrap it with a 32kHz square wave for a fixed number of cycles.\nSetting 0 will disable bootstrapping (if disabled, the crystal may take\nlonger to start up or fail to oscillate under some conditions).\n\nIf this value is too high, a faulty crystal may initially start and then fail.\nIf this value is too low, an otherwise good crystal may not start.\n\nTo accurately determine if the crystal has started,\nset a larger \"Number of cycles for RTC_SLOW_CLK calibration\" (about 3000).",
+                        "id": "ESP32_RTC_XTAL_BOOTSTRAP_CYCLES",
+                        "name": "ESP32_RTC_XTAL_BOOTSTRAP_CYCLES",
+                        "range": null,
+                        "title": "Bootstrap cycles for external 32kHz crystal",
                         "type": "int"
                     },
                     {
@@ -3155,6 +3045,65 @@
             {
                 "children": [
                     {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": "PM_ENABLE",
+                                "help": "If enabled, startup code configures dynamic frequency scaling.\nMax CPU frequency is set to CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ setting,\nmin frequency is set to XTAL frequency.\nIf disabled, DFS will not be active until the application\nconfigures it using esp_pm_configure function.",
+                                "id": "PM_DFS_INIT_AUTO",
+                                "name": "PM_DFS_INIT_AUTO",
+                                "range": null,
+                                "title": "Enable dynamic frequency scaling (DFS) at startup",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "PM_ENABLE && ESP_TIMER_IMPL_FRC2 && (ESP32_TIME_SYSCALL_USE_RTC || ESP32_TIME_SYSCALL_USE_RTC_FRC1)",
+                                "help": "When APB clock frequency changes, high-resolution timer (esp_timer)\nscale and base value need to be adjusted. Each adjustment may cause\nsmall error, and over time such small errors may cause time drift.\nIf this option is enabled, RTC timer will be used as a reference to\ncompensate for the drift.\nIt is recommended that this option is only used if 32k XTAL is selected\nas RTC clock source.",
+                                "id": "PM_USE_RTC_TIMER_REF",
+                                "name": "PM_USE_RTC_TIMER_REF",
+                                "range": null,
+                                "title": "Use RTC timer to prevent time drift (EXPERIMENTAL)",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "PM_ENABLE",
+                                "help": "If enabled, esp_pm_* functions will keep track of the amount of time\neach of the power management locks has been held, and esp_pm_dump_locks\nfunction will print this information.\nThis feature can be used to analyze which locks are preventing the chip\nfrom going into a lower power state, and see what time the chip spends\nin each power saving mode. This feature does incur some run-time\noverhead, so should typically be disabled in production builds.",
+                                "id": "PM_PROFILING",
+                                "name": "PM_PROFILING",
+                                "range": null,
+                                "title": "Enable profiling counters for PM locks",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "PM_ENABLE",
+                                "help": "If enabled, some GPIOs will be used to signal events such as RTOS ticks,\nfrequency switching, entry/exit from idle state. Refer to pm_trace.c\nfile for the list of GPIOs.\nThis feature is intended to be used when analyzing/debugging behavior\nof power management implementation, and should be kept disabled in\napplications.",
+                                "id": "PM_TRACE",
+                                "name": "PM_TRACE",
+                                "range": null,
+                                "title": "Enable debug tracing of PM using GPIOs",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": null,
+                        "help": "If enabled, application is compiled with support for power management.\nThis option has run-time overhead (increased interrupt latency,\nlonger time to enter idle state), and it also reduces accuracy of\nRTOS ticks and timers used for timekeeping.\nEnable this option if application uses power management APIs.",
+                        "id": "PM_ENABLE",
+                        "name": "PM_ENABLE",
+                        "range": null,
+                        "title": "Support for power management",
+                        "type": "bool"
+                    }
+                ],
+                "depends_on": null,
+                "id": "component-config-power-management",
+                "title": "Power Management",
+                "type": "menu"
+            },
+            {
+                "children": [
+                    {
                         "children": [],
                         "depends_on": null,
                         "help": "Functions esp_err_to_name() and esp_err_to_name_r() return string representations of error codes from a\npre-generated lookup table. This option can be used to turn off the use of the look-up table in order to\nsave memory but this comes at the price of sacrificing distinguishable (meaningful) output string\nrepresentations.",
@@ -3241,51 +3190,31 @@
                             },
                             {
                                 "children": [],
-                                "depends_on": "IDF_TARGET_ESP32S2 && !USB_ENABLED && <choice ESP_CONSOLE_UART>",
-                                "help": null,
-                                "id": "ESP_CONSOLE_USB_CDC",
-                                "name": "ESP_CONSOLE_USB_CDC",
-                                "range": null,
-                                "title": "USB CDC",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
                                 "depends_on": "<choice ESP_CONSOLE_UART>",
                                 "help": null,
                                 "id": "ESP_CONSOLE_UART_CUSTOM",
                                 "name": "ESP_CONSOLE_UART_CUSTOM",
                                 "range": null,
-                                "title": "Custom UART",
+                                "title": "Custom",
                                 "type": "bool"
                             },
                             {
                                 "children": [],
                                 "depends_on": "<choice ESP_CONSOLE_UART>",
                                 "help": null,
-                                "id": "ESP_CONSOLE_NONE",
-                                "name": "ESP_CONSOLE_NONE",
+                                "id": "ESP_CONSOLE_UART_NONE",
+                                "name": "ESP_CONSOLE_UART_NONE",
                                 "range": null,
                                 "title": "None",
                                 "type": "bool"
                             }
                         ],
                         "depends_on": null,
-                        "help": "Select where to send console output (through stdout and stderr).\n\n- Default is to use UART0 on pre-defined GPIOs.\n- If \"Custom\" is selected, UART0 or UART1 can be chosen,\n  and any pins can be selected.\n- If \"None\" is selected, there will be no console output on any UART, except\n  for initial output from ROM bootloader. This ROM output can be suppressed by\n  GPIO strapping or EFUSE, refer to chip datasheet for details.\n- On chips with USB peripheral, \"USB CDC\" option redirects output to the\n  CDC port. This option uses the CDC driver in the chip ROM.\n  This option is incompatible with TinyUSB stack.",
-                        "id": "component-config-common-esp-related-channel-for-console-output",
+                        "help": "Select whether to use UART for console output (through stdout and stderr).\n\n- Default is to use UART0 on pre-defined GPIOs.\n- If \"Custom\" is selected, UART0 or UART1 can be chosen,\n  and any pins can be selected.\n- If \"None\" is selected, there will be no console output on any UART, except\n  for initial output from ROM bootloader. This output can be further suppressed by\n  bootstrapping GPIO13 pin to low logic level.",
+                        "id": "component-config-common-esp-related-uart-for-console-output",
                         "name": "ESP_CONSOLE_UART",
-                        "title": "Channel for console output",
+                        "title": "UART for console output",
                         "type": "choice"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": null,
-                        "help": null,
-                        "id": "ESP_CONSOLE_UART",
-                        "name": "ESP_CONSOLE_UART",
-                        "range": null,
-                        "title": null,
-                        "type": "bool"
                     },
                     {
                         "children": [
@@ -3311,7 +3240,7 @@
                             }
                         ],
                         "depends_on": "ESP_CONSOLE_UART_CUSTOM",
-                        "help": "This UART peripheral is used for console output from the ESP-IDF Bootloader and the app.\n\nIf the configuration is different in the Bootloader binary compared to the app binary, UART\nis reconfigured after the bootloader exits and the app starts.\n\nDue to an ESP32 ROM bug, UART2 is not supported for console output\nvia esp_rom_printf.",
+                        "help": "Due of a ROM bug, UART2 is not supported for console output\nvia ets_printf.",
                         "id": "component-config-common-esp-related-uart-peripheral-to-use-for-console-output-0-1-",
                         "name": "ESP_CONSOLE_UART_NUM",
                         "title": "UART peripheral to use for console output (0-1)",
@@ -3329,28 +3258,34 @@
                     },
                     {
                         "children": [],
-                        "depends_on": "ESP_CONSOLE_UART_CUSTOM",
-                        "help": "This GPIO is used for console UART TX output in the ESP-IDF Bootloader and the app (including\nboot log output and default standard output and standard error of the app).\n\nIf the configuration is different in the Bootloader binary compared to the app binary, UART\nis reconfigured after the bootloader exits and the app starts.",
+                        "depends_on": null,
+                        "help": null,
                         "id": "ESP_CONSOLE_UART_TX_GPIO",
                         "name": "ESP_CONSOLE_UART_TX_GPIO",
-                        "range": null,
+                        "range": [
+                            0,
+                            46
+                        ],
                         "title": "UART TX on GPIO#",
                         "type": "int"
                     },
                     {
                         "children": [],
-                        "depends_on": "ESP_CONSOLE_UART_CUSTOM",
-                        "help": "This GPIO is used for UART RX input in the ESP-IDF Bootloader and the app (including\ndefault default standard input of the app).\n\nNote: The default ESP-IDF Bootloader configures this pin but doesn't read anything from the UART.\n\nIf the configuration is different in the Bootloader binary compared to the app binary, UART\nis reconfigured after the bootloader exits and the app starts.",
+                        "depends_on": null,
+                        "help": null,
                         "id": "ESP_CONSOLE_UART_RX_GPIO",
                         "name": "ESP_CONSOLE_UART_RX_GPIO",
-                        "range": null,
+                        "range": [
+                            0,
+                            46
+                        ],
                         "title": "UART RX on GPIO#",
                         "type": "int"
                     },
                     {
                         "children": [],
-                        "depends_on": "ESP_CONSOLE_UART",
-                        "help": "This baud rate is used by both the ESP-IDF Bootloader and the app (including\nboot log output and default standard input/output/error of the app).\n\nThe app's maximum baud rate depends on the UART clock source. If Power Management is disabled,\nthe UART clock source is the APB clock and all baud rates in the available range will be sufficiently\naccurate. If Power Management is enabled, REF_TICK clock source is used so the baud rate is divided\nfrom 1MHz. Baud rates above 1Mbps are not possible and values between 500Kbps and 1Mbps may not be\naccurate.\n\nIf the configuration is different in the Bootloader binary compared to the app binary, UART\nis reconfigured after the bootloader exits and the app starts.",
+                        "depends_on": "!ESP_CONSOLE_UART_NONE",
+                        "help": null,
                         "id": "ESP_CONSOLE_UART_BAUDRATE",
                         "name": "ESP_CONSOLE_UART_BAUDRATE",
                         "range": [
@@ -3359,26 +3294,6 @@
                         ],
                         "title": "UART console baud rate",
                         "type": "int"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": "ESP_CONSOLE_USB_CDC",
-                        "help": "Set the size of USB CDC RX buffer. Increase the buffer size if your application\nis often receiving data over USB CDC.",
-                        "id": "ESP_CONSOLE_USB_CDC_RX_BUF_SIZE",
-                        "name": "ESP_CONSOLE_USB_CDC_RX_BUF_SIZE",
-                        "range": null,
-                        "title": "Size of USB CDC RX buffer",
-                        "type": "int"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": "ESP_CONSOLE_USB_CDC",
-                        "help": "If enabled, esp_rom_printf and ESP_EARLY_LOG output will also be sent over USB CDC.\nDisabling this option saves about 1kB or RAM.",
-                        "id": "ESP_CONSOLE_USB_CDC_SUPPORT_ETS_PRINTF",
-                        "name": "ESP_CONSOLE_USB_CDC_SUPPORT_ETS_PRINTF",
-                        "range": null,
-                        "title": "Enable esp_rom_printf / ESP_EARLY_LOG via USB CDC",
-                        "type": "bool"
                     },
                     {
                         "children": [
@@ -3718,7 +3633,7 @@
                     {
                         "children": [],
                         "depends_on": null,
-                        "help": "Enable this flag to use patched versions of SPI flash ROM driver functions.\nThis option should be enabled, if any one of the following is true: (1) need to write\nto flash on ESP32-D2WD; (2) main SPI flash is connected to non-default pins; (3) main\nSPI flash chip is manufactured by ISSI.",
+                        "help": "Enable this flag to use patched versions of SPI flash ROM driver functions.\nThis option is needed to write to flash on ESP32-D2WD, and any configuration\nwhere external SPI flash is connected to non-default pins.",
                         "id": "SPI_FLASH_ROM_DRIVER_PATCH",
                         "name": "SPI_FLASH_ROM_DRIVER_PATCH",
                         "range": null,
@@ -3827,39 +3742,6 @@
                         "type": "bool"
                     },
                     {
-                        "children": [],
-                        "depends_on": null,
-                        "help": "Flash write is broken down in terms of multiple (smaller) write operations.\nThis configuration options helps to set individual write chunk size, smaller\nvalue here ensures that cache (and non-IRAM resident interrupts) remains\ndisabled for shorter duration.",
-                        "id": "SPI_FLASH_WRITE_CHUNK_SIZE",
-                        "name": "SPI_FLASH_WRITE_CHUNK_SIZE",
-                        "range": [
-                            256,
-                            8192
-                        ],
-                        "title": "Flash write chunk size",
-                        "type": "int"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": null,
-                        "help": "SPI Flash driver uses the flash size configured in bootloader header by default.\nEnable this option to override flash size with latest ESPTOOLPY_FLASHSIZE value from\nthe app header if the size in the bootloader header is incorrect.",
-                        "id": "SPI_FLASH_SIZE_OVERRIDE",
-                        "name": "SPI_FLASH_SIZE_OVERRIDE",
-                        "range": null,
-                        "title": "Override flash size in bootloader header by ESPTOOLPY_FLASHSIZE",
-                        "type": "bool"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": "!SPI_FLASH_USE_LEGACY_IMPL",
-                        "help": "This option is helpful if you are using a flash chip whose timeout is quite large or unpredictable.",
-                        "id": "SPI_FLASH_CHECK_ERASE_TIMEOUT_DISABLED",
-                        "name": "SPI_FLASH_CHECK_ERASE_TIMEOUT_DISABLED",
-                        "range": null,
-                        "title": "Flash timeout checkout disabled",
-                        "type": "bool"
-                    },
-                    {
                         "children": [
                             {
                                 "children": [],
@@ -3889,16 +3771,6 @@
                                 "name": "SPI_FLASH_SUPPORT_GD_CHIP",
                                 "range": null,
                                 "title": "GigaDevice",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": null,
-                                "help": "Enable this to support auto detection of Winbond chips if chip vendor not directly\ngiven by ``chip_drv`` member of the chip struct. This adds support for variant\nchips, however will extend detecting time.",
-                                "id": "SPI_FLASH_SUPPORT_WINBOND_CHIP",
-                                "name": "SPI_FLASH_SUPPORT_WINBOND_CHIP",
-                                "range": null,
-                                "title": "Winbond",
                                 "type": "bool"
                             }
                         ],

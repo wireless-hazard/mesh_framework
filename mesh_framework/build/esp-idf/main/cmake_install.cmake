@@ -1,4 +1,4 @@
-# Install script for directory: /home/magno/Documents/Github/framework/mesh_framework/mesh_framework/main
+# Install script for directory: /home/magno/Documents/github/mesh_framework/mesh_framework/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
