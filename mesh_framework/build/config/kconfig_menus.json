@@ -1675,6 +1675,16 @@
                 "children": [],
                 "depends_on": null,
                 "help": null,
+                "id": "ROUTER_CHANNEL",
+                "name": "ROUTER_CHANNEL",
+                "range": null,
+                "title": "Channel that the router uses",
+                "type": "int"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": null,
                 "id": "MAX_CLIENTS",
                 "name": "MAX_CLIENTS",
                 "range": null,

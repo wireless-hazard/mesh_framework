@@ -9,6 +9,10 @@ config ROUTER_SSID
 config ROUTER_PASSWORD
     string "WiFi Password"
 
+config ROUTER_CHANNEL
+    int "Channel that the router uses"
+    default 1    
+
 config MAX_CLIENTS
     int "Maximum number of connect clients"
     default 5

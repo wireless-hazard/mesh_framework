@@ -44,6 +44,7 @@
 #define CONFIG_PARTITION_TABLE_MD5 1
 #define CONFIG_ROUTER_SSID "Net virtua apt 104"
 #define CONFIG_ROUTER_PASSWORD "411985350"
+#define CONFIG_ROUTER_CHANNEL 1
 #define CONFIG_MAX_CLIENTS 5
 #define CONFIG_MAX_LAYERS 5
 #define CONFIG_BROKER_URL "mqtt://test.mosquitto.org"

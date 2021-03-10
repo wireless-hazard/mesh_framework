@@ -26,10 +26,10 @@
 #include "mesh_framework.h"
 
 #define MAX_LAYERS CONFIG_MAX_LAYERS
-#define WIFI_CHANNEL 0
 #define ROUTER_SSID CONFIG_ROUTER_SSID
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
+#define ROUTER_CHANNEL CONFIG_ROUTER_CHANNEL
 
 #ifndef CONFIG_IS_TODS_ALLOWED
 	#define CONFIG_IS_TODS_ALLOWED false
@@ -680,7 +680,7 @@ void mesh_event_handler(void *arg, esp_event_base_t event_base,
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_ADDRESS\n");		
 		break;
 		case MESH_EVENT_ROOT_FIXED: //Quando a configuracao de root fixo difere entre dois nohs tentando comunicar
-			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_FIXED ISSO NAO PODE ACONTECER\n");
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_FIXED\n");
 		break;
 		case MESH_EVENT_TODS_STATE: //The node is informed of a change in the accessibility of the external DS
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_TODS_STATE\n");
@@ -715,12 +715,36 @@ void mesh_event_handler(void *arg, esp_event_base_t event_base,
 		case MESH_EVENT_ROOT_SWITCH_REQ: //The root node has received a root switch request from  a candidate root
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_SWITCH_REQ\n");
 		break;
+		case MESH_EVENT_ROOT_SWITCH_ACK: //The root node has received a root switch request from  a candidate root
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROOT_SWITCH_ACK\n");
+		break;
 		case MESH_EVENT_ROOT_ASKED_YIELD: //Another root node with a higher RSSI with the router has asked this root node to yield
 			printf("MESH_EVENT_ROOT_ASKED_YIELD\n");
 		break;
 		case MESH_EVENT_SCAN_DONE:
 			ESP_LOGW(MESH_TAG,"MESH_EVENT_SCAN_DONE");
 			xTaskCreatePinnedToCore(&scan_complete,"SCAN DONE",4096,NULL,6,NULL,1);
+		break;
+		case MESH_EVENT_NETWORK_STATE:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_NETWORK_STATE");
+		break;
+		case MESH_EVENT_STOP_RECONNECTION:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_STOP_RECONNECTION");
+		break;
+		case MESH_EVENT_FIND_NETWORK:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_FIND_NETWORK");
+		break;
+		case MESH_EVENT_ROUTER_SWITCH:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_ROUTER_SWITCH");
+		break;
+		case  MESH_EVENT_PS_PARENT_DUTY:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_PS_PARENT_DUTY");
+		break;
+		case  MESH_EVENT_PS_CHILD_DUTY:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_PS_CHILD_DUTY");
+		break;
+		case MESH_EVENT_MAX:
+			ESP_LOGW(MESH_TAG,"MESH_EVENT_MAX");
 		break;
 		default:
 			ESP_LOGW(MESH_TAG,"MESH_EVENT NOT HANDLED");
@@ -762,6 +786,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 		break;
 		case MQTT_EVENT_BEFORE_CONNECT:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_BEFORE_CONNECT");
+		break;
 		default:
             ESP_LOGI(MESH_TAG, "MQTT_EVENT NOT HANDLED, ID:%d", event->event_id);
         break;
@@ -816,7 +841,7 @@ void meshf_init(){
 	//Mesh Network Identifier (MID)
 	memcpy((uint8_t *) &config_mesh.mesh_id,MESH_ID,6);
 	
-	config_mesh.channel = WIFI_CHANNEL;
+	config_mesh.channel = ROUTER_CHANNEL;
 	config_mesh.router.ssid_len = strlen(ROUTER_SSID);
 	memcpy((uint8_t *) &config_mesh.router.ssid, ROUTER_SSID, config_mesh.router.ssid_len);
     memcpy((uint8_t *) &config_mesh.router.password, ROUTER_PASSWORD, strlen(ROUTER_PASSWORD));

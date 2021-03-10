@@ -24,7 +24,14 @@
 #include "esp_sleep.h"
 #include <cJSON.h>
 
-RTC_DATA_ATTR int num_of_wakes; 
+#define MAX_LAYERS CONFIG_MAX_LAYERS
+#define ROUTER_CHANNEL CONFIG_ROUTER_CHANNEL
+#define ROUTER_SSID CONFIG_ROUTER_SSID
+#define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
+#define MAX_CLIENTS CONFIG_MAX_CLIENTS
+
+RTC_DATA_ATTR int num_of_wakes;
+static uint8_t root_node[] = {0x80,0x7d,0x3a,0xb7,0xc8,0x19};
 
 void time_message_generator(char final_message[], int value){ //Formata a data atual do ESP para dentro do array especificado
 	char strftime_buff[64];
@@ -86,12 +93,28 @@ void use_network(char mqtt_data[], uint8_t rx_mensagem[]){
 	meshf_sleep_time(15000); //Bloqueia o ESP por 1 minuto
 }
 
+void define_root(void){
+	uint8_t self_mac[6] = {0,};
+	
+	esp_mesh_fix_root(true);
+    esp_read_mac(self_mac,ESP_MAC_WIFI_SOFTAP);
+    if(self_mac[0]==root_node[0] && self_mac[1]==root_node[1] && 
+       self_mac[2]==root_node[2] && self_mac[3]==root_node[3] && 
+       self_mac[4]==root_node[4] && self_mac[5]==root_node[5]){
+		wifi_config_t wifi_config = {0,};
+		memcpy((uint8_t *)&wifi_config.sta.ssid,ROUTER_SSID,sizeof(ROUTER_SSID));
+		memcpy((uint8_t *)&wifi_config.sta.password,ROUTER_PASSWORD,sizeof(ROUTER_PASSWORD));
+		wifi_config.sta.channel = ROUTER_CHANNEL;
+	    esp_mesh_set_parent(&wifi_config,NULL,MESH_ROOT,MESH_ROOT_LAYER);
+    }
+}
+
 void app_main(void) {
 
 	gpio_reset_pin(2);
     gpio_set_direction(2, GPIO_MODE_OUTPUT);
     gpio_set_level(2, 1); //Acende o LED interno do ESP para mostrar que o ESP esta ligado
-
+    
     char mqtt_data[150];
 
 	uint8_t rx_mensagem[180] = {0,};
@@ -100,6 +123,7 @@ void app_main(void) {
     esp_sleep_wakeup_cause_t wakeUpCause;
 
     meshf_init(); //Inicializa as configuracoes da rede MESH
+    define_root();
     wakeUpCause = esp_sleep_get_wakeup_cause();
     //Testa se o ESP acabou de sair do deepsleep ou nao
     switch (wakeUpCause){
