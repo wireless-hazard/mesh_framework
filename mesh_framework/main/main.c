@@ -131,7 +131,7 @@ void app_main(void) {
 			int64_t before,after = 0;
 			before = esp_timer_get_time();
 			num_of_wakes = change_sensor_data(num_of_wakes);
-			if(next_sleep_time(2) <= 5){
+			if((next_sleep_time(2) <= 5)){
 				use_network(mqtt_data,rx_mensagem);
 			}
 			after = esp_timer_get_time();
