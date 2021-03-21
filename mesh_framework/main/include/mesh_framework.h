@@ -1,4 +1,27 @@
+#include <string.h>
+#include "esp_system.h"
+#include "esp_log.h"
+#include "nvs_flash.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "esp_mesh.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "freertos/event_groups.h"
+
+#include <esp_system.h>
+#include <time.h>
+#include <sys/time.h>
+#include <cJSON.h>
+
+#include "lwip/sockets.h"
+#include "lwip/dns.h"
+#include "lwip/netdb.h"
+
 #include "mqtt_client.h"
+#include "esp_sntp.h"
 
 void STR2MAC(uint8_t *address,char rec_string[17]);
 uint16_t meshf_uint8_t_json_creator(uint8_t json_value[], uint8_t key[], uint16_t size_key, uint8_t value[], uint16_t size_value);
