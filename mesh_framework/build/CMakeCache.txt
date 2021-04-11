@@ -147,7 +147,7 @@ CMAKE_OBJCOPY:FILEPATH=/home/magno/.espressif/tools/xtensa-esp32-elf/esp-2020r3-
 CMAKE_OBJDUMP:FILEPATH=/home/magno/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=internal_communication
+CMAKE_PROJECT_NAME:STATIC=maquino_framework
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/home/magno/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-ranlib
@@ -455,6 +455,12 @@ internal_communication_BINARY_DIR:STATIC=/home/magno/Documents/github/mesh_frame
 
 //Value Computed by CMake
 internal_communication_SOURCE_DIR:STATIC=/home/magno/Documents/github/mesh_framework/mesh_framework
+
+//Value Computed by CMake
+maquino_framework_BINARY_DIR:STATIC=/home/magno/Documents/github/mesh_framework/mesh_framework/build
+
+//Value Computed by CMake
+maquino_framework_SOURCE_DIR:STATIC=/home/magno/Documents/github/mesh_framework/mesh_framework
 
 //Value Computed by CMake
 mbed TLS_BINARY_DIR:STATIC=/home/magno/Documents/github/mesh_framework/mesh_framework/build/esp-idf/mbedtls/mbedtls

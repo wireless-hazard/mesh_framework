@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := internal_communication
+PROJECT_NAME := maquino_framework
 
 include $(IDF_PATH)/make/project.mk

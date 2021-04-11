@@ -10,6 +10,8 @@
 	#define CONFIG_IS_TODS_ALLOWED false
 #endif
 
+RTC_DATA_ATTR bool sntp_up2date;
+
 static SemaphoreHandle_t SemaphoreParentConnected = NULL;
 static SemaphoreHandle_t SemaphoreBrokerConnected = NULL;
 static SemaphoreHandle_t SemaphoreDataReady = NULL;
@@ -328,8 +330,10 @@ void rx_connection(void *pvParameters){
 				time_t now = 0;
     			struct tm timeinfo = { 0 };
     		
-    			xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
-    			xSemaphoreGive(SemaphoreSNTPConnected);
+    			if (!sntp_up2date){
+    				xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
+    				xSemaphoreGive(SemaphoreSNTPConnected);	
+    			}
 
     			time(&now);
     			localtime_r(&now, &timeinfo);
@@ -434,9 +438,12 @@ void meshf_asktime(){
 		xTaskCreatePinnedToCore(&task_asktime,"NODE ASK SNTP",4096,NULL,5,NULL,1);
 		xSemaphoreTake(SemaphoreSNTPNODE,portMAX_DELAY);
 		xSemaphoreGive(SemaphoreSNTPNODE);
+		sntp_up2date = true;
 	}else{
-		xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
-		xSemaphoreGive(SemaphoreSNTPConnected);
+		if (!sntp_up2date){
+			xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
+			xSemaphoreGive(SemaphoreSNTPConnected);
+		}
 	}
 }
 
@@ -631,7 +638,7 @@ void mesh_event_handler(void *arg, esp_event_base_t event_base,
 		break;
 		case MESH_EVENT_NO_PARENT_FOUND:
 			ESP_LOGW(MESH_TAG,"eternamente IDLE\nESP32 ira reiniciar\n");
-			esp_restart();
+			//esp_restart();
 
 		break;
 		//
@@ -878,10 +885,13 @@ void task_start_sntp(void *pvParameters){
 	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo);
 	ESP_LOGI(MESH_TAG, "The current date/time in UNIPAMPA is: %s", strftime_buff);
 	xSemaphoreGive(SemaphoreSNTPConnected);
+	sntp_up2date = true;
 	vTaskDelete(NULL);
 }
 
 void meshf_start_sntp(){
+
+	sntp_up2date = false;
 	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
     xSemaphoreGive(SemaphoreParentConnected);
 	if (esp_mesh_is_root()){

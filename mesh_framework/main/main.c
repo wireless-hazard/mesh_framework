@@ -108,7 +108,7 @@ void app_main(void) {
     esp_sleep_wakeup_cause_t wakeUpCause;
 
     meshf_init(); //Inicializa as configuracoes da rede MESH
-    define_root();
+    define_root(); //Funcao para caso tenha o mac espeficicado, se torna o root
     wakeUpCause = esp_sleep_get_wakeup_cause();
     //Testa se o ESP acabou de sair do deepsleep ou nao
     switch (wakeUpCause){

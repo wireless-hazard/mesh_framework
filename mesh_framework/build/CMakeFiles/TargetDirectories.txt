@@ -1,5 +1,4 @@
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/install/local.dir
-/home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/list_install_components.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/gen_project_binary.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/menuconfig.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/install.dir
@@ -8,11 +7,12 @@
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/bootloader.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/flash.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/confserver.dir
+/home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/list_install_components.dir
+/home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/maquino_framework.elf.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/monitor.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/encrypted-flash.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/install/strip.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/_project_elf_src.dir
-/home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/internal_communication.elf.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/size.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/size-components.dir
 /home/magno/Documents/github/mesh_framework/mesh_framework/build/CMakeFiles/size-files.dir
