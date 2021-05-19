@@ -35,30 +35,16 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 		, self_mac[0],self_mac[1],self_mac[2],self_mac[3],self_mac[4],self_mac[5],strftime_buff,value);
 }
 
-int next_sleep_time(int fixed_gap){ //Recebe o valor em minutos e calcula em quantos segundos o ESP devera acordar, considerando o inicio em uma hora exata.
+int next_sleep_time(const struct tm timeinfo, int fixed_gap){ //Recebe o valor em minutos e calcula em quantos segundos o ESP devera acordar, considerando o inicio em uma hora exata.
 	if (fixed_gap <= 0){ //Se o valor do delay for de 0 minutos, retorna 0 minutos sem fazer nenhum calculo
 		return 0;
 	}
 
-	time_t now = 0;
-    struct tm timeinfo = { 0 };
-
-    time(&now); //Pega o tempo armazenado no RTC
-	setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
-	tzset(); //Define a time zone
-	localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
-
 	int minutes = timeinfo.tm_min; //Pega o valor dos minutos atuais do RTC
-	if (minutes < fixed_gap){ //Como o prox passo eh arredondar o valor dos minutos para um multiplo de fixed_gap,
-		minutes = fixed_gap; //caso os minutos sejam menores q o proprio fixed_gap, arredonda este para fixed_gap
-	}
 	int rouded_minutes = (minutes / fixed_gap) * fixed_gap; //Transforma o valor dos minutos atuais do RTC o multiplo anterior de fixed_gap 
 	int next_minutes = rouded_minutes + fixed_gap - 1; //Calcula qual o prox valor de minutos que seja multiplo de fixed_gap 
 	int next_seconds = 60 - timeinfo.tm_sec; //Calcula o valor de segundos até que seja o minuto exato: XX:XX:00
-	if (next_minutes >=59){ //Arredonda os minutos caso seja virada de hora
-		next_minutes -= 59;
-		return (next_minutes*60 + next_seconds);
-	}
+
 	return ((next_minutes - minutes)*60 + next_seconds); //Retorna o tempo em segundos até que o ESP tenha seu RTC a XX:AA:00 sendo AA o prox valor em minutos multiplo de fixed_gap
 }
 
@@ -106,9 +92,10 @@ void app_main(void) {
 	int resp = 0;
 	int sensor_seconds = 5;
     esp_sleep_wakeup_cause_t wakeUpCause;
-
+	time_t now = 0;
+    struct tm timeinfo = { 0 };
     meshf_init(); //Inicializa as configuracoes da rede MESH
-    define_root(); //Funcao para caso tenha o mac espeficicado, se torna o root
+    // define_root(); //Funcao para caso tenha o mac espeficicado, se torna o root
     wakeUpCause = esp_sleep_get_wakeup_cause();
     //Testa se o ESP acabou de sair do deepsleep ou nao
     switch (wakeUpCause){
@@ -116,9 +103,15 @@ void app_main(void) {
 			int64_t before,after = 0;
 			before = esp_timer_get_time();
 			num_of_wakes = change_sensor_data(num_of_wakes);
-			printf("Faltam %d segundos para a transmissao\n",next_sleep_time(2));
-			if((next_sleep_time(2) <= 10)){
-				meshf_sleep_time(next_sleep_time(2)*1000);
+
+    		time(&now); //Pega o tempo armazenado no RTC
+			setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
+			tzset(); //Define a time zone
+			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
+
+			printf("Faltam %d segundos para a transmissao\n",next_sleep_time(timeinfo,2));
+			if((next_sleep_time(timeinfo,2) <= 10)){
+				meshf_sleep_time(next_sleep_time(timeinfo,2)*1000);
 				use_network(mqtt_data,rx_mensagem);
 			}
 			after = esp_timer_get_time();
@@ -137,7 +130,12 @@ void app_main(void) {
 			time_message_generator(mqtt_data,num_of_wakes); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
 
-			int awake_until = next_sleep_time(2); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
+    		time(&now); //Pega o tempo armazenado no RTC
+			setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
+			tzset(); //Define a time zone
+			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
+
+			int awake_until = next_sleep_time(timeinfo,2); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 			printf("Vai continuar acordado por %d segundos\n",awake_until);
 			meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
 			time_message_generator(mqtt_data,num_of_wakes); //Formata a data atual do ESP para dentro do array especificado
