@@ -19,7 +19,7 @@ static SemaphoreHandle_t SemaphoreSNTPConnected = NULL;
 static SemaphoreHandle_t SemaphorePONG = NULL;
 static SemaphoreHandle_t SemaphoreSNTPNODE = NULL;
 
-static const uint8_t MESH_ID[6] = {0x05, 0x02, 0x96, 0x05, 0x02, 0x96};
+static const uint8_t MESH_ID[6] = {0x05, 0x00, 0x96, 0x05, 0x02, 0x96};
 static const char *MESH_TAG = "mesh_tagger";
 static int mesh_layer = -1;
 static mesh_addr_t mesh_parent_addr;

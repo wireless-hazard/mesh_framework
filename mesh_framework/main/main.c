@@ -3,6 +3,8 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include <ultrasonic.h>
+
 #include "mesh_framework.h"
 
 #include <driver/adc.h>
@@ -15,14 +17,20 @@
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
 
-RTC_DATA_ATTR int num_of_wakes;
-static uint8_t root_node[] = {0x80,0x7d,0x3a,0xb7,0xc8,0x19};
+#define MAX_DISTANCE_CM 500 // 5m max
+#define TRIGGER_GPIO GPIO_NUM_23
+#define ECHO_GPIO GPIO_NUM_22
+
+RTC_DATA_ATTR float num_of_wakes[10];
+static const uint8_t root_node[] = {0x80,0x7d,0x3a,0xb7,0xc8,0x19};
+static ultrasonic_sensor_t sensor;
 
 void time_message_generator(char final_message[], int value){ //Formata a data atual do ESP para dentro do array especificado
 	char strftime_buff[64];
 	time_t now = 0;
     struct tm timeinfo = { 0 }; 
-    uint8_t self_mac[6] = {0,};
+    uint8_t self_mac[6] = {0};
+    char mac_str[18] = {0};
 
     time(&now); //Pega o tempo armazenado no RTC
 	setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
@@ -31,8 +39,18 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 
 	esp_read_mac(self_mac,ESP_MAC_WIFI_SOFTAP); //Pega o MAC da interface Access Point
 	strftime(strftime_buff, sizeof(strftime_buff), "%c", &timeinfo); //Passa a struct anterior para uma string
-	sprintf(final_message, "The current date/time in %02x:%02x:%02x:%02x:%02x:%02x is: %s\n Ativacoes do sensor:%d"
-		, self_mac[0],self_mac[1],self_mac[2],self_mac[3],self_mac[4],self_mac[5],strftime_buff,value);
+	sprintf(final_message, "%s",strftime_buff);
+	sprintf(mac_str,MACSTR,MAC2STR(self_mac));
+
+	cJSON *json_mqtt = cJSON_CreateObject();
+	cJSON_AddStringToObject(json_mqtt,"mac", mac_str);
+	cJSON_AddNumberToObject(json_mqtt,"distance", value);
+	cJSON_AddStringToObject(json_mqtt,"time", final_message);
+
+	char *string2 = cJSON_Print(json_mqtt);
+	strcpy(final_message,string2);
+	free(string2);
+	free(json_mqtt);
 }
 
 int next_sleep_time(const struct tm timeinfo, int fixed_gap){ //Recebe o valor em minutos e calcula em quantos segundos o ESP devera acordar, considerando o inicio em uma hora exata.
@@ -48,16 +66,19 @@ int next_sleep_time(const struct tm timeinfo, int fixed_gap){ //Recebe o valor e
 	return ((next_minutes - minutes)*60 + next_seconds); //Retorna o tempo em segundos até que o ESP tenha seu RTC a XX:AA:00 sendo AA o prox valor em minutos multiplo de fixed_gap
 }
 
-int change_sensor_data(int input){
-	//TODO
-	return (input + 1);
+esp_err_t measure_distance(float *distance){
+	
+    esp_err_t err = ultrasonic_measure(&sensor, MAX_DISTANCE_CM, distance);
+    *distance = (*distance)*100.0;
+    return err; 
+    // return ESP_OK;   
 }
 
 void use_network(char mqtt_data[], uint8_t rx_mensagem[]){
 	meshf_start(); //Inicializa a rede MESH
 	meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
 	meshf_start_mqtt(); //Conecta-se ao servidor MQTT
-	time_message_generator(mqtt_data,num_of_wakes); //Formata a data atual do ESP para dentro do array especificado
+	time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 	printf("%s\n",mqtt_data);
 	int resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 	printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
@@ -101,17 +122,21 @@ void app_main(void) {
     switch (wakeUpCause){
 		case ESP_SLEEP_WAKEUP_TIMER:;//Caso tenha saido por causa do temporizador
 			int64_t before,after = 0;
+			sensor.trigger_pin = TRIGGER_GPIO;
+            sensor.echo_pin = ECHO_GPIO;
+    		ESP_ERROR_CHECK(ultrasonic_init(&sensor));
 			before = esp_timer_get_time();
-			num_of_wakes = change_sensor_data(num_of_wakes);
+			num_of_wakes[0] = 0;
+			ESP_LOGW("MESH_TAG","SENSOR STATUS: %s\nDISTANCE: %f\n",esp_err_to_name(measure_distance(&num_of_wakes[0])),num_of_wakes[0]);
 
     		time(&now); //Pega o tempo armazenado no RTC
 			setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
 			tzset(); //Define a time zone
 			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
-			printf("Faltam %d segundos para a transmissao\n",next_sleep_time(timeinfo,2));
-			if((next_sleep_time(timeinfo,2) <= 10)){
-				meshf_sleep_time(next_sleep_time(timeinfo,2)*1000);
+			printf("Faltam %d segundos para a transmissao\n",next_sleep_time(timeinfo,1));
+			if((next_sleep_time(timeinfo,1) <= 10)){
+				meshf_sleep_time(next_sleep_time(timeinfo,1)*1000);
 				use_network(mqtt_data,rx_mensagem);
 			}
 			after = esp_timer_get_time();
@@ -120,14 +145,14 @@ void app_main(void) {
 			esp_deep_sleep_start(); //Coloca o esp em deep sleep
 		break;
     	default: //Caso ele nao esteja saindo de um deepsleep
-    		num_of_wakes = 0;
+    		num_of_wakes[0] = 0;
     		
     		meshf_start(); //Inicializa a rede MESH
 			meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
 			meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
 			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
 			meshf_asktime(); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
-			time_message_generator(mqtt_data,num_of_wakes); //Formata a data atual do ESP para dentro do array especificado
+			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
 
     		time(&now); //Pega o tempo armazenado no RTC
@@ -135,10 +160,10 @@ void app_main(void) {
 			tzset(); //Define a time zone
 			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
-			int awake_until = next_sleep_time(timeinfo,2); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
+			int awake_until = next_sleep_time(timeinfo,1); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 			printf("Vai continuar acordado por %d segundos\n",awake_until);
 			meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
-			time_message_generator(mqtt_data,num_of_wakes); //Formata a data atual do ESP para dentro do array especificado
+			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
 			resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 			printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
