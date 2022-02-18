@@ -286,11 +286,17 @@ void rx_connection(void *pvParameters){
 			vTaskDelay(10/portTICK_PERIOD_MS);
 		}else{
 			ESP_ERROR_CHECK(esp_mesh_recv(&rx_sender,&rx_data,0,&flag,NULL,0));
-			char data_json[180] = {0,};
+			char data_json[512] = {0,};
 			
 			sprintf(data_json,"%s", rx_data.data);
 			cJSON *json = cJSON_Parse(data_json);
-			char *string1 = cJSON_Print(json);
+			char *string1 = NULL;
+			if (json != NULL){
+				string1 = cJSON_Print(json);
+			}else{
+				string1 = "ERROR PARSING THE JSON";
+				assert(false);
+			}
 			printf("%s\n",string1);
 			cJSON *json_flag_data = cJSON_GetObjectItemCaseSensitive(json, "flag");
 
@@ -454,15 +460,21 @@ int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t 
 		cJSON_AddStringToObject(json_mqtt,"topic",topic);
 		cJSON_AddStringToObject(json_mqtt,"data",data);
 		char *string = cJSON_Print(json_mqtt);
+		char temp_buff[512] = {0};
 		mesh_data_t tx_data;
 		tx_data.data = tx_buffer;
-		tx_data.size = data_size + topic_size + 48;
+		// tx_data.size = data_size + topic_size + sizeof(tx_buffer);
 		tx_data.proto = MESH_PROTO_JSON;
 		tx_data.tos = MESH_TOS_P2P;
-		for(int i = 0; i < tx_data.size-1;i++){
+		/*
+		for(int i = 0; i < tx_data.size;i++){
 			tx_data.data[i] = string[i];
-		}
+		}*/
+		sprintf(temp_buff,"%s",string);
+		memcpy(tx_data.data,temp_buff,strlen(temp_buff));
+		printf("%s\n", string);
 		printf("%s\n",tx_data.data);
+		tx_data.size = data_size + topic_size + strlen(temp_buff);
 		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,MESH_DATA_P2P,NULL,0);
 		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));
 		cJSON_Delete(json_mqtt);

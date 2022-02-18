@@ -1,4 +1,4 @@
-# Install script for directory: /home/magno/esp-idf/components/esp_http_client
+# Install script for directory: /home/magno/esp/esp-idf/components/esp_http_client
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

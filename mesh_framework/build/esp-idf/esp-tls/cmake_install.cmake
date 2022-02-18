@@ -1,4 +1,4 @@
-# Install script for directory: /home/magno/esp-idf/components/esp-tls
+# Install script for directory: /home/magno/esp/esp-idf/components/esp-tls
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

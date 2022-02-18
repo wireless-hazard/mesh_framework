@@ -1,4 +1,4 @@
-# Install script for directory: /home/magno/esp-idf/components/esp_system/port
+# Install script for directory: /home/magno/esp/esp-idf/components/esp_system/port
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/magno/Documents/github/mesh_framework/mesh_framework/build/esp-idf/esp_system/port/esp32/cmake_install.cmake")
+  include("/home/magno/Documents/github/mesh_framework/mesh_framework/build/esp-idf/esp_system/port/soc/esp32/cmake_install.cmake")
 
 endif()
 
