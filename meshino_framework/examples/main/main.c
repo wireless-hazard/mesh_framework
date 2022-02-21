@@ -31,6 +31,9 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
     struct tm timeinfo = { 0 }; 
     uint8_t self_mac[6] = {0};
     char mac_str[18] = {0};
+    char parent_mac_str[18] = {0};
+
+    wifi_ap_record_t mesh_parent;
 
     time(&now); //Pega o tempo armazenado no RTC
 	setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
@@ -42,8 +45,14 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 	sprintf(final_message, "%s",strftime_buff);
 	sprintf(mac_str,MACSTR,MAC2STR(self_mac));
 
+	esp_wifi_sta_get_ap_info(&mesh_parent);
+	sprintf(parent_mac_str,MACSTR,MAC2STR(mesh_parent.bssid));
+
+
+
 	cJSON *json_mqtt = cJSON_CreateObject();
 	cJSON_AddStringToObject(json_mqtt,"mac", mac_str);
+	cJSON_AddStringToObject(json_mqtt,"parent_mac", parent_mac_str);
 	cJSON_AddNumberToObject(json_mqtt,"distance", value);
 	cJSON_AddStringToObject(json_mqtt,"time", final_message);
 
