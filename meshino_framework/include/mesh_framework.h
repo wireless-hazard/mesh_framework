@@ -28,8 +28,8 @@ uint16_t meshf_uint8_t_json_creator(uint8_t json_value[], uint8_t key[], uint16_
 void tx_p2p(void *pvParameters);
 void meshf_tx_p2p(char mac_destination[],uint8_t transmitted_data[],uint16_t data_size);
 void meshf_tx_TODS(char ip_destination[],int port,uint8_t transmitted_data[],uint16_t data_size);
-void meshf_rx(uint8_t *array_data);
-void meshf_asktime();
+esp_err_t meshf_rx(uint8_t *array_data);
+esp_err_t meshf_asktime(TickType_t xTicksToWait);
 int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size);
 void meshf_ping(char mac_destination[]);
 void meshf_rssi_info(int8_t *rssi,char interested_mac[]);
@@ -38,7 +38,8 @@ void data_ready();
 void free_rx_buffer();
 void meshf_sleep_time(float delay);
 void meshf_init();
-void meshf_start();
+esp_err_t meshf_start(TickType_t xTicksToWait);
+esp_err_t meshf_stop(void);
 void meshf_start_mqtt();
 void meshf_start_sntp();
 

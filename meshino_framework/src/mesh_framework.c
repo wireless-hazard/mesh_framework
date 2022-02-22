@@ -57,6 +57,8 @@ static wifi_scan_config_t cfg_scan = {
 
 esp_mqtt_client_handle_t mqtt_handler;
 
+TaskHandle_t forwarding_scheme_handler = NULL;
+
 void STR2MAC(uint8_t *address,char rec_string[17]){
 	uint8_t mac[6] = {0,};
 	int j = 0;
@@ -414,8 +416,14 @@ void rx_connection(void *pvParameters){
 	}
 } 
 
-void meshf_rx(uint8_t *array_data){
-	xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,((void *)array_data),5,NULL,1);
+esp_err_t meshf_rx(uint8_t *array_data){
+	BaseType_t buffer_task = xTaskCreatePinnedToCore(&rx_connection,"P2P transmission",4096,((void *)array_data),5,&forwarding_scheme_handler,1);
+
+	if (buffer_task == pdPASS){
+		return ESP_OK;
+	}else{
+		return ESP_FAIL;
+	}
 }
 
 void task_asktime(void *pvParameters){
@@ -432,23 +440,42 @@ void task_asktime(void *pvParameters){
 		sntp_packet.data[i] = string[i];
 	}
 	esp_err_t send_error = esp_mesh_send(NULL,&sntp_packet,MESH_DATA_P2P,NULL,0);
-	ESP_LOGW("MESH_TAG","Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
+	ESP_LOGW(MESH_TAG,"Sending SNTP REQUEST = %s\n",esp_err_to_name(send_error));
+	if (send_error == ESP_OK){
+		ESP_LOGI(MESH_TAG,"%s", string);
+	}
 	free(string);
 	cJSON_Delete(json_sntp);
+	ESP_ERROR_CHECK(send_error);
 	vTaskDelete(NULL);
 	
 }
 
-void meshf_asktime(){
+esp_err_t meshf_asktime(TickType_t xTicksToWait){
+	ESP_LOGI("MESH_TAG","ASKING TIME");
 	if (!esp_mesh_is_root()){ //THIS LINE ADDS AN WEIRD BUG
-		xTaskCreatePinnedToCore(&task_asktime,"NODE ASK SNTP",4096,NULL,5,NULL,1);
-		xSemaphoreTake(SemaphoreSNTPNODE,portMAX_DELAY);
-		xSemaphoreGive(SemaphoreSNTPNODE);
-		sntp_up2date = true;
+		ESP_LOGI(MESH_TAG,"ASKING TIME NOT A ROOT");
+		xTaskCreatePinnedToCore(&task_asktime,"NODE ASK SNTP",4096,NULL,5,NULL,0);
+		BaseType_t semaphone_taken = xSemaphoreTake(SemaphoreSNTPNODE, xTicksToWait);
+		if (semaphone_taken == pdTRUE){
+			xSemaphoreGive(SemaphoreSNTPNODE);
+			sntp_up2date = true;
+			return ESP_OK;
+		}else{
+			return ESP_ERR_TIMEOUT;
+		}
 	}else{
+		ESP_LOGI(MESH_TAG,"ASKING TIME AS A ROOT");
 		if (!sntp_up2date){
-			xSemaphoreTake(SemaphoreSNTPConnected,portMAX_DELAY);
-			xSemaphoreGive(SemaphoreSNTPConnected);
+			BaseType_t semaphone_taken = xSemaphoreTake(SemaphoreSNTPConnected, xTicksToWait);
+			if (semaphone_taken == pdTRUE){
+				xSemaphoreGive(SemaphoreSNTPConnected);
+				return ESP_OK;
+			}else{
+				return ESP_ERR_TIMEOUT;
+			}
+		}else{
+			return ESP_OK;
 		}
 	}
 }
@@ -828,15 +855,26 @@ void meshf_init(){
 	ESP_ERROR_CHECK(esp_mesh_set_topology(MESH_TOPO_TREE));
 	ESP_ERROR_CHECK(esp_mesh_set_max_layer(MAX_LAYERS));//Numero maximo de niveis da rede
 	ESP_ERROR_CHECK(esp_mesh_set_vote_percentage(0.9));//Porcentagem minima para a escolha do Noh raiz
-    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(40));//Tempo sem comunicacao entre pai e filho com que fara a dissociacao do filho
+    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(10));//Tempo sem comunicacao entre pai e filho com que fara a dissociacao do filho
 	
 	mesh_cfg_t config_mesh = MESH_INIT_CONFIG_DEFAULT(); //Possui a configuracao base mesh para aplicar depois
+
+	mesh_attempts_t find_router_attempts = {
+			.scan = 10,
+			.vote = 15,
+			.fail = 10,
+			.monitor_ie = 10
+	};
+
+	ESP_ERROR_CHECK(esp_mesh_set_attempts(&find_router_attempts));
+	esp_mesh_allow_root_conflicts(false);
 	
 	//Mesh Network Identifier (MID)
 	memcpy((uint8_t *) &config_mesh.mesh_id,MESH_ID,6);
 	
 	config_mesh.channel = ROUTER_CHANNEL;
 	config_mesh.router.ssid_len = strlen(ROUTER_SSID);
+	config_mesh.router.allow_router_switch = false;
 	memcpy((uint8_t *) &config_mesh.router.ssid, ROUTER_SSID, config_mesh.router.ssid_len);
     memcpy((uint8_t *) &config_mesh.router.password, ROUTER_PASSWORD, strlen(ROUTER_PASSWORD));
 	config_mesh.mesh_ap.max_connection = MAX_CLIENTS;
@@ -862,15 +900,29 @@ void meshf_init(){
 	SemaphoreBrokerConnected = xSemaphoreCreateBinary();
 }
 
-void meshf_start(){
+esp_err_t meshf_start(TickType_t xTicksToWait){
 	/* mesh start */
-    ESP_ERROR_CHECK(esp_mesh_start());
+    if(esp_mesh_start() != ESP_OK){
+    	return ESP_FAIL;
+    }
     /*Blocks the code's flow until the ESP connects to a parent*/
     ESP_LOGE(MESH_TAG,"NOT CONNECTED TO A PARENT YET");
-    xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
-    xSemaphoreGive(SemaphoreParentConnected);
-    ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
-    
+    BaseType_t semaphone_taken = xSemaphoreTake(SemaphoreParentConnected,xTicksToWait);
+    if (semaphone_taken == pdTRUE){
+    	xSemaphoreGive(SemaphoreParentConnected);
+    	ESP_LOGI(MESH_TAG,"PARENT CONNECTED");
+    	return ESP_OK;
+    }else{
+    	return ESP_ERR_TIMEOUT;
+    }
+}
+
+esp_err_t meshf_stop(void){
+	if (forwarding_scheme_handler != NULL){
+		vTaskDelete(forwarding_scheme_handler);
+	}
+	forwarding_scheme_handler = NULL;
+	return esp_mesh_stop();
 }
 
 void task_start_sntp(void *pvParameters){
@@ -901,7 +953,7 @@ void task_start_sntp(void *pvParameters){
 	vTaskDelete(NULL);
 }
 
-void meshf_start_sntp(){
+void meshf_start_sntp(void){
 
 	sntp_up2date = false;
 	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
@@ -928,7 +980,7 @@ void task_start_mqtt(void *pvParameters){
    	vTaskDelete(NULL);
 }
 
-void meshf_start_mqtt(){
+void meshf_start_mqtt(void){
 	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
     xSemaphoreGive(SemaphoreParentConnected);
 	if (esp_mesh_is_root()){

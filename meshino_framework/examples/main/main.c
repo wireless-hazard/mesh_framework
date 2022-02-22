@@ -99,14 +99,36 @@ esp_err_t measure_distance(float *distance){
 }
 
 void use_network(char mqtt_data[], uint8_t rx_mensagem[]){
-	meshf_start(); //Inicializa a rede MESH
-	meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
+	esp_err_t mesh_on = meshf_start(45000/portTICK_PERIOD_MS); //Inicializa a rede MESH
+	if (mesh_on != ESP_OK){
+		esp_restart();
+	}
+	ESP_ERROR_CHECK(meshf_rx(rx_mensagem)); //Seta o buffer para recepcao das mensagens
 	meshf_start_mqtt(); //Conecta-se ao servidor MQTT
+
 	time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 	printf("%s\n",mqtt_data);
 	int resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 	printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
-	meshf_sleep_time(15000); //Bloqueia o ESP por 1 minuto
+
+	if(esp_mesh_is_root()){ //Routine to wait for a child to connect before going back to deepsleep (waste of time in this current implementation)
+		if(esp_mesh_get_total_node_num() <= 1){
+			ESP_LOGI("TAG","Waiting for a node to connect as a root");
+			meshf_sleep_time(20000); //Bloqueia o ESP por 1 minuto
+		}
+	}else{
+		if (esp_mesh_get_total_node_num() <= 1){
+			ESP_LOGI("TAG","Waiting for a node to connect as a commum node");
+			meshf_sleep_time(20000); //Bloqueia o ESP por 1 minuto	
+		}
+	}
+
+	if(esp_mesh_get_total_node_num() > 1){
+		ESP_LOGI("TAG","Waiting for a node to disconnect");
+		meshf_sleep_time(1000); //Bloqueia o ESP por 1 minuto
+	}
+
+	meshf_sleep_time(5000); //Bloqueia o ESP por 1 minuto
 }
 
 void define_root(void){
@@ -126,7 +148,7 @@ void define_root(void){
 }
 
 void app_main(void) {
-
+	
 	gpio_reset_pin(2);
     gpio_set_direction(2, GPIO_MODE_OUTPUT);
     gpio_set_level(2, 1); //Acende o LED interno do ESP para mostrar que o ESP esta ligado
@@ -153,12 +175,13 @@ void app_main(void) {
 			num_of_wakes[0] = 0;
 			ESP_LOGW("MESH_TAG","SENSOR STATUS: %s\nDISTANCE: %f\n",esp_err_to_name(measure_distance(&num_of_wakes[0])),num_of_wakes[0]);
 
-    		time(&now); //Pega o tempo armazenado no RTC
+			time(&now); //Pega o tempo armazenado no RTC
 			setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
 			tzset(); //Define a time zone
 			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
-
-			printf("Faltam %d segundos para a transmissao\n",next_sleep_time(timeinfo,1));
+			
+			int next_sleep = next_sleep_time(timeinfo,1);
+			printf("Faltam %d segundos para a transmissao\n",next_sleep);
 			if((next_sleep_time(timeinfo,1) <= 10)){
 				meshf_sleep_time(next_sleep_time(timeinfo,1)*1000);
 				use_network(mqtt_data,rx_mensagem);
@@ -166,16 +189,21 @@ void app_main(void) {
 			after = esp_timer_get_time();
 			ESP_LOGE("MESH_TAG","Tempo ligado %d microssegundos",(int)(after-before));
 			esp_sleep_enable_timer_wakeup(sensor_seconds*1000000);
+			meshf_stop();
 			esp_deep_sleep_start(); //Coloca o esp em deep sleep
 		break;
     	default: //Caso ele nao esteja saindo de um deepsleep
     		num_of_wakes[0] = 0;
     		
-    		meshf_start(); //Inicializa a rede MESH
+    		esp_err_t mesh_on = meshf_start(45000/portTICK_PERIOD_MS); //Inicializa a rede MESH
+    		if (mesh_on != ESP_OK){
+				esp_restart();
+			}
+
 			meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
-			meshf_rx(rx_mensagem); //Seta o buffer para recepcao das mensagens
+			ESP_ERROR_CHECK(meshf_rx(rx_mensagem)); //Seta o buffer para recepcao das mensagens
 			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
-			meshf_asktime(); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
+			ESP_ERROR_CHECK(meshf_asktime(45000/portTICK_PERIOD_MS)); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
 			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
 
@@ -185,14 +213,15 @@ void app_main(void) {
 			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
 			int awake_until = next_sleep_time(timeinfo,1); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
-			printf("Vai continuar acordado por %d segundos\n",awake_until);
+			ESP_LOGW("MESH_TAG","Vai continuar acordado por %d segundos\n",awake_until);
 			meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
 			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
 			resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 			printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
 
-			meshf_sleep_time(15000); //Bloqueia o ESP por 1 minuto
+			ESP_LOGW("MESH_TAG","Vai continuar acordado por 60 segundos\n");
+			meshf_sleep_time(60000); //Bloqueia o ESP por 1 minuto
 
 			esp_sleep_enable_timer_wakeup(sensor_seconds*1000000); //Ativa o esp para acordar depois que o tempo definido anteriormente ter passado
 			esp_wifi_stop();
