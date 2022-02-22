@@ -903,7 +903,8 @@ void meshf_init(){
 esp_err_t meshf_start(TickType_t xTicksToWait){
 	/* mesh start */
     if(esp_mesh_start() != ESP_OK){
-    	return ESP_FAIL;
+    	esp_mesh_deinit();
+    	return ESP_ERR_INVALID_STATE;
     }
     /*Blocks the code's flow until the ESP connects to a parent*/
     ESP_LOGE(MESH_TAG,"NOT CONNECTED TO A PARENT YET");
@@ -922,7 +923,21 @@ esp_err_t meshf_stop(void){
 		vTaskDelete(forwarding_scheme_handler);
 	}
 	forwarding_scheme_handler = NULL;
-	return esp_mesh_stop();
+
+	esp_netif_destroy_default_wifi(netif_sta);
+	netif_sta = NULL;
+	ESP_ERROR_CHECK(esp_event_loop_delete_default());
+
+	vSemaphoreDelete(SemaphoreParentConnected);
+	vSemaphoreDelete(SemaphoreDataReady);
+	vSemaphoreDelete(SemaphoreSNTPConnected);
+	vSemaphoreDelete(SemaphoreSNTPNODE);
+	vSemaphoreDelete(SemaphorePONG);
+	vSemaphoreDelete(SemaphoreBrokerConnected);
+
+
+	esp_mesh_stop();
+	return esp_mesh_deinit();
 }
 
 void task_start_sntp(void *pvParameters){
