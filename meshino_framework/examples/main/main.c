@@ -17,7 +17,7 @@
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
 
-#define MAX_DISTANCE_CM 500 // 5m max
+#define MAX_DISTANCE_CM 300 // 5m max
 #define TRIGGER_GPIO GPIO_NUM_23
 #define ECHO_GPIO GPIO_NUM_22
 
@@ -48,11 +48,10 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 	esp_wifi_sta_get_ap_info(&mesh_parent);
 	sprintf(parent_mac_str,MACSTR,MAC2STR(mesh_parent.bssid));
 
-
-
 	cJSON *json_mqtt = cJSON_CreateObject();
 	cJSON_AddStringToObject(json_mqtt,"mac", mac_str);
 	cJSON_AddStringToObject(json_mqtt,"parent_mac", parent_mac_str);
+	cJSON_AddNumberToObject(json_mqtt,"rssi", mesh_parent.rssi);
 	cJSON_AddNumberToObject(json_mqtt,"distance", value);
 	cJSON_AddStringToObject(json_mqtt,"time", final_message);
 
@@ -81,8 +80,7 @@ esp_err_t measure_distance(float *distance){
     esp_err_t err = ultrasonic_measure(&sensor, MAX_DISTANCE_CM, distance);
     *distance = (*distance)*100.0;
     #endif
-    esp_err_t err = ESP_OK;
-
+    #if 0
     gpio_config_t io_conf = {
         .pin_bit_mask = GPIO_NUM_4,
         .mode = GPIO_MODE_INPUT,
@@ -93,9 +91,16 @@ esp_err_t measure_distance(float *distance){
     gpio_config(&io_conf);
     printf("GPIO_NUM_4 LEVEL: %d", gpio_get_level(GPIO_NUM_4));
     *distance = gpio_get_level(GPIO_NUM_4);
-
-    return err; 
-    // return ESP_OK;   
+	#endif 
+    esp_err_t err = ESP_OK;
+    if (distance != NULL){
+    	//Generates a number between 0 MAX_DISTANCE_CM
+    	*distance = (float)(esp_random()/(UINT32_MAX/MAX_DISTANCE_CM + 1)); 
+    	return err;
+    }else{
+    	return ESP_FAIL;
+    }
+    
 }
 
 void use_network(char mqtt_data[], uint8_t rx_mensagem[]){
@@ -108,7 +113,7 @@ void use_network(char mqtt_data[], uint8_t rx_mensagem[]){
 
 	time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 	printf("%s\n",mqtt_data);
-	int resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
+	esp_err_t resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 	printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
 
 	if(esp_mesh_is_root()){ //Routine to wait for a child to connect before going back to deepsleep (waste of time in this current implementation)

@@ -5,6 +5,7 @@
 #define ROUTER_PASSWORD CONFIG_ROUTER_PASSWORD
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
 #define ROUTER_CHANNEL CONFIG_ROUTER_CHANNEL
+#define TIMEOUT 40000/portTICK_PERIOD_MS
 
 #ifndef CONFIG_IS_TODS_ALLOWED
 	#define CONFIG_IS_TODS_ALLOWED false
@@ -401,9 +402,13 @@ void rx_connection(void *pvParameters){
 				ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",json_topic->valuestring);
 				cJSON *json_published = cJSON_GetObjectItemCaseSensitive(json,"data");
 				ESP_LOGI(MESH_TAG,"Data ->%s<-\n",json_published->valuestring);
-				xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-				xSemaphoreGive(SemaphoreBrokerConnected);
-				esp_mqtt_client_publish(mqtt_handler,json_topic->valuestring,json_published->valuestring,0,0,0);
+				if (xSemaphoreTake(SemaphoreBrokerConnected,TIMEOUT) == pdTRUE){
+					xSemaphoreGive(SemaphoreBrokerConnected);
+					esp_mqtt_client_publish(mqtt_handler,json_topic->valuestring,json_published->valuestring,0,0,0);
+					ESP_LOGI(MESH_TAG,"MQTT PUBLISH REQUEST SUCCESS!");
+				}else{
+					ESP_LOGE(MESH_TAG,"MQTT PUBLISH REQUEST FAIL!");
+				}
 				free(json_topic);
 				free(json_published);
 				continue;
@@ -480,7 +485,7 @@ esp_err_t meshf_asktime(TickType_t xTicksToWait){
 	}
 }
 
-int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size){
+esp_err_t meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size){
 	if (!esp_mesh_is_root()){
 		cJSON *json_mqtt = cJSON_CreateObject();
 		cJSON_AddStringToObject(json_mqtt,"flag","MQTT");
@@ -510,13 +515,16 @@ int meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t 
 	}else{
 		ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
 		ESP_LOGI(MESH_TAG,"Data ->%s<-\n",data);
-		xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-   		xSemaphoreGive(SemaphoreBrokerConnected);
-		int send_error = esp_mqtt_client_publish(mqtt_handler,topic,data,0,0,0);
-		if (send_error != 0){ //Zero indica que não houve um erro ao tentar publicar
-			return ESP_FAIL;
+		if(xSemaphoreTake(SemaphoreBrokerConnected, TIMEOUT) == pdTRUE){
+   			xSemaphoreGive(SemaphoreBrokerConnected);
+			int send_error = esp_mqtt_client_publish(mqtt_handler,topic,data,0,0,0);
+			if (send_error != 0){ //Zero indica que não houve um erro ao tentar publicar
+				return ESP_FAIL;
+			}
+			return ESP_OK;
+		}else{
+			return ESP_ERR_TIMEOUT;
 		}
-		return ESP_OK;
 	}
 }
 
@@ -924,20 +932,7 @@ esp_err_t meshf_stop(void){
 	}
 	forwarding_scheme_handler = NULL;
 
-	esp_netif_destroy_default_wifi(netif_sta);
-	netif_sta = NULL;
-	ESP_ERROR_CHECK(esp_event_loop_delete_default());
-
-	vSemaphoreDelete(SemaphoreParentConnected);
-	vSemaphoreDelete(SemaphoreDataReady);
-	vSemaphoreDelete(SemaphoreSNTPConnected);
-	vSemaphoreDelete(SemaphoreSNTPNODE);
-	vSemaphoreDelete(SemaphorePONG);
-	vSemaphoreDelete(SemaphoreBrokerConnected);
-
-
-	esp_mesh_stop();
-	return esp_mesh_deinit();
+	return esp_mesh_stop();
 }
 
 void task_start_sntp(void *pvParameters){
@@ -984,14 +979,21 @@ void task_start_mqtt(void *pvParameters){
     	.event_handle = mqtt_event_handler,
     };
 
-   	xSemaphoreTake(SemaphoreParentConnected,portMAX_DELAY);
-   	xSemaphoreGive(SemaphoreParentConnected);
+   	if (xSemaphoreTake(SemaphoreParentConnected,TIMEOUT) == pdTRUE){
+   		xSemaphoreGive(SemaphoreParentConnected);
 
-   	esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
-   	esp_mqtt_client_start(mqtt_handler);
+   		esp_mqtt_client_handle_t mqtt_handler = esp_mqtt_client_init(&mqtt_cfg);
+   		ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt_handler));
 
-   	xSemaphoreTake(SemaphoreBrokerConnected,portMAX_DELAY);
-   	xSemaphoreGive(SemaphoreBrokerConnected);
+    	ESP_LOGW(MESH_TAG,"Trying to connect to MQTT Broker");
+
+   		if(xSemaphoreTake(SemaphoreBrokerConnected,TIMEOUT) == pdTRUE){
+   			xSemaphoreGive(SemaphoreBrokerConnected);
+   			ESP_LOGW(MESH_TAG,"Connected to MQTT Broker");
+   		}else{
+   			ESP_LOGE(MESH_TAG,"Couldn't connect to MQTT Broker");
+   		}
+   	}
    	vTaskDelete(NULL);
 }
 
