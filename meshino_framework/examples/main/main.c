@@ -3,7 +3,21 @@
 #include <time.h>
 #include <sys/time.h>
 
-// #include <ultrasonic.h>
+#define DHT 1
+#define ULTRASONIC 1
+#define GPS 1
+
+#if ULTRASONIC
+#include <ultrasonic.h>
+#endif
+
+#if DHT
+#include "DHT.h"
+#endif //DHT
+
+#if GPS
+#include "aos_gps_c.h"
+#endif //GPS
 
 #include "mesh_framework.h"
 
@@ -23,7 +37,9 @@
 
 RTC_DATA_ATTR float num_of_wakes[10];
 static const uint8_t root_node[] = {0x80,0x7d,0x3a,0xb7,0xc8,0x19};
-// static ultrasonic_sensor_t sensor;
+#if ULTRASONIC
+static ultrasonic_sensor_t sensor;
+#endif
 
 void time_message_generator(char final_message[], int value){ //Formata a data atual do ESP para dentro do array especificado
 	char strftime_buff[64];
@@ -55,6 +71,30 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 	cJSON_AddNumberToObject(json_mqtt,"distance", value);
 	cJSON_AddStringToObject(json_mqtt,"time", final_message);
 
+	#if DHT
+
+	setDHTgpio(GPIO_NUM_4);
+    ESP_LOGI("TAG", "Starting DHT Task\n\n");
+
+    ESP_LOGI("TAG", "=== Reading DHT ===\n");
+    
+    int ret = readDHT();
+
+    errorHandler(ret);
+
+    cJSON_AddNumberToObject(json_mqtt, "humidity", getHumidity());  
+	cJSON_AddNumberToObject(json_mqtt, "temeprature", getTemperature());
+
+	#endif //DHT
+
+	#if GPS
+	uBloxGPS_t *gps = init_Gps(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16);
+	cJSON_AddNumberToObject(json_mqtt,"lat", gps_GetLat(gps));
+	cJSON_AddNumberToObject(json_mqtt,"lon", gps_GetLng(gps));
+	destroy_Gps(gps);
+
+	#endif //GPS
+
 	char *string2 = cJSON_Print(json_mqtt);
 	strcpy(final_message,string2);
 	free(string2);
@@ -75,12 +115,12 @@ int next_sleep_time(const struct tm timeinfo, int fixed_gap){ //Recebe o valor e
 }
 
 esp_err_t measure_distance(float *distance){
+	assert(distance != NULL);
 	
-    #if 0 
+    #if ULTRASONIC 
+
     esp_err_t err = ultrasonic_measure(&sensor, MAX_DISTANCE_CM, distance);
     *distance = (*distance)*100.0;
-    #endif
-    #if 0
     gpio_config_t io_conf = {
         .pin_bit_mask = GPIO_NUM_4,
         .mode = GPIO_MODE_INPUT,
@@ -91,15 +131,17 @@ esp_err_t measure_distance(float *distance){
     gpio_config(&io_conf);
     printf("GPIO_NUM_4 LEVEL: %d", gpio_get_level(GPIO_NUM_4));
     *distance = gpio_get_level(GPIO_NUM_4);
-	#endif 
+
+	#else
+
     esp_err_t err = ESP_OK;
-    if (distance != NULL){
-    	//Generates a number between 0 MAX_DISTANCE_CM
-    	*distance = (float)(esp_random()/(UINT32_MAX/MAX_DISTANCE_CM + 1)); 
-    	return err;
-    }else{
-    	return ESP_FAIL;
-    }
+    //Generates a number between 0 MAX_DISTANCE_CM
+    *distance = (float)(esp_random()/(UINT32_MAX/MAX_DISTANCE_CM + 1)); 
+
+    #endif
+    
+    return err;
+    
     
 }
 
@@ -173,9 +215,11 @@ void app_main(void) {
     switch (wakeUpCause){
 		case ESP_SLEEP_WAKEUP_TIMER:;//Caso tenha saido por causa do temporizador
 			int64_t before,after = 0;
-			// sensor.trigger_pin = TRIGGER_GPIO;
-            // sensor.echo_pin = ECHO_GPIO;
-    		// ESP_ERROR_CHECK(ultrasonic_init(&sensor));
+			#if ULTRASONIC
+			sensor.trigger_pin = TRIGGER_GPIO;
+            sensor.echo_pin = ECHO_GPIO;
+    		ESP_ERROR_CHECK(ultrasonic_init(&sensor));
+    		#endif
 			before = esp_timer_get_time();
 			num_of_wakes[0] = 0;
 			ESP_LOGW("MESH_TAG","SENSOR STATUS: %s\nDISTANCE: %f\n",esp_err_to_name(measure_distance(&num_of_wakes[0])),num_of_wakes[0]);

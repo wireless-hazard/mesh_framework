@@ -1,5 +1,8 @@
-set(COMPONENT_SRCS
-    "src/mesh_framework.c")
+cmake_minimum_required(VERSION 3.5)
+
+set(EXTRA_COMPONENT_DIRS ${PWD}/components)
+
+set(COMPONENT_SRCS "src/mesh_framework.c")
 
 set(COMPONENT_ADD_INCLUDEDIRS "include")
 
