@@ -3,13 +3,15 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define DHT 1
-#define ULTRASONIC 1
-#define GPS 1
+
+//Define the following macro to 1 if the sensor is going to be used
+#define DHT 0
+#define ULTRASONIC 0
+#define GPS 0
 
 #if ULTRASONIC
 #include <ultrasonic.h>
-#endif
+#endif //ULTRASONIC
 
 #if DHT
 #include "DHT.h"
@@ -39,6 +41,9 @@ RTC_DATA_ATTR float num_of_wakes[10];
 static const uint8_t root_node[] = {0x80,0x7d,0x3a,0xb7,0xc8,0x19};
 #if ULTRASONIC
 static ultrasonic_sensor_t sensor;
+#endif
+#if GPS
+static uBloxGPS_t *gps = NULL;
 #endif
 
 void time_message_generator(char final_message[], int value){ //Formata a data atual do ESP para dentro do array especificado
@@ -83,15 +88,13 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
     errorHandler(ret);
 
     cJSON_AddNumberToObject(json_mqtt, "humidity", getHumidity());  
-	cJSON_AddNumberToObject(json_mqtt, "temeprature", getTemperature());
+	cJSON_AddNumberToObject(json_mqtt, "temperature", getTemperature());
 
 	#endif //DHT
 
 	#if GPS
-	uBloxGPS_t *gps = init_Gps(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16);
-	cJSON_AddNumberToObject(json_mqtt,"lat", gps_GetLat(gps));
-	cJSON_AddNumberToObject(json_mqtt,"lon", gps_GetLng(gps));
-	destroy_Gps(gps);
+	cJSON_AddNumberToObject(json_mqtt,"lat", (-1)*gps_GetLat(gps));
+	cJSON_AddNumberToObject(json_mqtt,"lon", (-1)*gps_GetLng(gps));
 
 	#endif //GPS
 
@@ -121,16 +124,6 @@ esp_err_t measure_distance(float *distance){
 
     esp_err_t err = ultrasonic_measure(&sensor, MAX_DISTANCE_CM, distance);
     *distance = (*distance)*100.0;
-    gpio_config_t io_conf = {
-        .pin_bit_mask = GPIO_NUM_4,
-        .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_ENABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE
-    };
-    gpio_config(&io_conf);
-    printf("GPIO_NUM_4 LEVEL: %d", gpio_get_level(GPIO_NUM_4));
-    *distance = gpio_get_level(GPIO_NUM_4);
 
 	#else
 
@@ -261,14 +254,25 @@ void app_main(void) {
 			tzset(); //Define a time zone
 			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
+			#if GPS
+			gps = init_Gps(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16);
+
+			while(true)
+			{
+			#endif //GPS
+
 			int awake_until = next_sleep_time(timeinfo,1); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
 			ESP_LOGW("MESH_TAG","Vai continuar acordado por %d segundos\n",awake_until);
 			meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
+			measure_distance(&num_of_wakes[0]);
 			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
 			resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
 			printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
 
+			#if GPS
+			} //ending Bracket of while(true) in case of GPS is 1s
+			#endif
 			ESP_LOGW("MESH_TAG","Vai continuar acordado por 60 segundos\n");
 			meshf_sleep_time(60000); //Bloqueia o ESP por 1 minuto
 
