@@ -412,6 +412,16 @@ void rx_connection(void *pvParameters){
 				free(json_topic);
 				free(json_published);
 				continue;
+			}else if(strcmp(json_flag_data->valuestring,"MQTT_SUB") == 0){
+				cJSON *json_subed = cJSON_GetObjectItem(json,"data");
+				char *mqtt_sub_strc = cJSON_Print(json_subed);
+
+				ESP_LOGI(MESH_TAG, "%s", mqtt_sub_strc);
+
+				//TODO Custom handler for the received string
+				free(mqtt_sub_strc);
+				cJSON_Delete(json);
+				continue;
 			}
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
@@ -526,6 +536,17 @@ esp_err_t meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uin
 			return ESP_ERR_TIMEOUT;
 		}
 	}
+}
+
+esp_err_t meshf_mqtt_subscribe(const char *topic, int qos){
+	esp_err_t err = ESP_FAIL;
+	if(esp_mesh_is_root()){
+		int error = esp_mqtt_client_subscribe(mqtt_handler, topic, qos);
+		err = (error == -1) ? ESP_FAIL : ESP_OK;
+	}else{
+		err = ESP_OK;
+	}
+	return err;
 }
 
 void pinging(void *pvParameters){
@@ -809,6 +830,48 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_DATA");
 			printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
             printf("DATA=%.*s\r\n", event->data_len, event->data);
+            cJSON *mqtt_json = cJSON_Parse(event->data); //Tries to parse the data received as a JSON
+            if (mqtt_json != NULL){
+            	cJSON *mac_parameter = cJSON_GetObjectItem(mqtt_json, "mac"); //Gets the field mac, the packet final destination
+            	if (mac_parameter != NULL){
+            		char *mac_str = cJSON_GetStringValue(mac_parameter);
+            		cJSON *data_parameter = cJSON_GetObjectItem(mqtt_json, "data"); //Gets the actual data to be sent
+            		if (data_parameter != NULL){
+            			char *data_str = cJSON_GetStringValue(data_parameter);
+            			
+            			cJSON *mqtt_out_json = cJSON_CreateObject();
+
+            			cJSON_AddStringToObject(mqtt_out_json, "flag", "MQTT_SUB");
+            			cJSON_AddStringToObject(mqtt_out_json, "data", data_str);//Add the data to another JSON formatted packet
+
+            			char *mqtt_out_str = cJSON_Print(mqtt_out_json);
+
+            			mesh_addr_t to;
+
+            			STR2MAC(to.addr, mac_str); //Converts the string addr into a uint8_t buffer
+
+            			mesh_data_t data;
+
+            			memcpy(&data.data, mqtt_out_str, strlen(mqtt_out_str));
+
+            			ESP_LOGI(MESH_TAG, "%s\n", data.data);
+
+            			data.size = strlen(mqtt_out_str);
+            			data.proto = MESH_PROTO_BIN;
+            			data.tos = MESH_TOS_P2P;
+
+            			esp_mesh_send(&to, &data, MESH_DATA_FROMDS, NULL, 0); //sends the packet using esp_mesh network
+
+            			free(mqtt_out_str);
+
+            			cJSON_Delete(mqtt_out_json);
+
+            			free(data_str)	;
+            		}
+            		free(mac_str);
+            	}
+            }
+            cJSON_Delete(mqtt_json);
 		break;
 		case MQTT_EVENT_ERROR:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_ERROR");
