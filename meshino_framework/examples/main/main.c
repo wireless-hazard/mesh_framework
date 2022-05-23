@@ -245,6 +245,7 @@ void app_main(void) {
 			meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
 			ESP_ERROR_CHECK(meshf_rx(rx_mensagem)); //Seta o buffer para recepcao das mensagens
 			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
+			ESP_ERROR_CHECK(meshf_mqtt_subscribe("/data/esp32/downstream", 0));
 			ESP_ERROR_CHECK(meshf_asktime(45000/portTICK_PERIOD_MS)); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
 			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
 			printf("%s\n",mqtt_data);
