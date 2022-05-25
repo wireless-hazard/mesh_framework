@@ -6,6 +6,13 @@
 //Define the following macro to 1 if the sensor is going to be used
 #define ULTRASONIC 0
 #define GPS 0
+#define TEMP 0
+#define SCREEN 1
+
+#if TEMP
+#include "MLX90614_SMBus_Driver.h"
+#include "MLX90614_API.h"
+#endif
 
 #if ULTRASONIC
 #include <ultrasonic.h>
@@ -14,6 +21,12 @@
 #if GPS
 #include "aos_gps_c.h"
 #endif //GPS
+
+#if SCREEN
+#include "ssd1306.h"
+
+#include "font8x8_basic.h"
+#endif
 
 #include "mesh_framework.h"
 
@@ -31,10 +44,18 @@
 #define TRIGGER_GPIO GPIO_NUM_23
 #define ECHO_GPIO GPIO_NUM_22
 
+#if TEMP
+#define SDA GPIO_NUM_25
+#define SCL GPIO_NUM_33
+#endif
+
 RTC_DATA_ATTR float num_of_wakes[10];
 static const uint8_t root_node[] = {0x80,0x7d,0x3a,0xb7,0xc8,0x19};
 #if ULTRASONIC
 static ultrasonic_sensor_t sensor;
+#endif
+#if SCREEN
+static SSD1306_t dev;
 #endif
 #if GPS
 static uBloxGPS_t *gps = NULL;
@@ -47,7 +68,12 @@ void custom_callback(char *parameter, size_t lenght){
 	}else if (strcmp(parameter, "OFF") == 0){
 		gpio_set_level(2, 0);
 	}
-
+	#if SCREEN
+	ssd1306_clear_screen(&dev, false);
+	ssd1306_contrast(&dev, 0xff);
+  	ssd1306_display_text(&dev, 0, parameter, lenght, false);
+  	vTaskDelay(3000 / portTICK_PERIOD_MS);
+	#endif
 	return;
 }
 
@@ -86,6 +112,12 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 	cJSON_AddNumberToObject(json_mqtt,"lon", (-1)*gps_GetLng(gps));
 
 	#endif //GPS
+
+	#if TEMP
+	float temp = 0;
+	MLX90614_GetTa(I2C_NUM_0, 0x3, &temp);
+	cJSON_AddNumberToObject(json_mqtt,"temp", temp);
+	#endif
 
 	char *string2 = cJSON_Print(json_mqtt);
 	strcpy(final_message,string2);
@@ -211,8 +243,19 @@ void app_main(void) {
 	ESP_ERROR_CHECK(meshf_asktime(45000/portTICK_PERIOD_MS)); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
 	ESP_ERROR_CHECK(meshf_mqtt_subscribe("/data/esp32/downstream", 0, &custom_callback));
 
+	#if TEMP
+	MLX90614_SMBusInit(I2C_NUM_0, SDA, SCL, 10000);
+	#endif
+
 	#if GPS
 	gps = init_Gps(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16);
+	#endif
+
+	#if SCREEN
+	i2c_master_init(&dev, CONFIG_SDA_GPIO, CONFIG_SCL_GPIO, CONFIG_RESET_GPIO);
+	ESP_LOGI("tag", "Panel is 128x64");
+	ssd1306_init(&dev, 128, 64);
+
 	#endif
 	while(true)
 	{
