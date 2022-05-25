@@ -3,19 +3,13 @@
 #include <time.h>
 #include <sys/time.h>
 
-
 //Define the following macro to 1 if the sensor is going to be used
-#define DHT 0
 #define ULTRASONIC 0
 #define GPS 0
 
 #if ULTRASONIC
 #include <ultrasonic.h>
 #endif //ULTRASONIC
-
-#if DHT
-#include "DHT.h"
-#endif //DHT
 
 #if GPS
 #include "aos_gps_c.h"
@@ -46,6 +40,17 @@ static ultrasonic_sensor_t sensor;
 static uBloxGPS_t *gps = NULL;
 #endif
 
+void custom_callback(char *parameter, size_t lenght){
+
+	if (strcmp(parameter, "ON") == 0){
+		gpio_set_level(2, 1);
+	}else if (strcmp(parameter, "OFF") == 0){
+		gpio_set_level(2, 0);
+	}
+
+	return;
+}
+
 void time_message_generator(char final_message[], int value){ //Formata a data atual do ESP para dentro do array especificado
 	char strftime_buff[64];
 	time_t now = 0;
@@ -75,22 +80,6 @@ void time_message_generator(char final_message[], int value){ //Formata a data a
 	cJSON_AddNumberToObject(json_mqtt,"rssi", mesh_parent.rssi);
 	cJSON_AddNumberToObject(json_mqtt,"distance", value);
 	cJSON_AddStringToObject(json_mqtt,"time", final_message);
-
-	#if DHT
-
-	setDHTgpio(GPIO_NUM_4);
-    ESP_LOGI("TAG", "Starting DHT Task\n\n");
-
-    ESP_LOGI("TAG", "=== Reading DHT ===\n");
-    
-    int ret = readDHT();
-
-    errorHandler(ret);
-
-    cJSON_AddNumberToObject(json_mqtt, "humidity", getHumidity());  
-	cJSON_AddNumberToObject(json_mqtt, "temperature", getTemperature());
-
-	#endif //DHT
 
 	#if GPS
 	cJSON_AddNumberToObject(json_mqtt,"lat", (-1)*gps_GetLat(gps));
@@ -196,90 +185,52 @@ void app_main(void) {
     char mqtt_data[150];
 
 	uint8_t rx_mensagem[180] = {0,};
-	int resp = 0;
-	int sensor_seconds = 5;
-    esp_sleep_wakeup_cause_t wakeUpCause;
 	time_t now = 0;
     struct tm timeinfo = { 0 };
     meshf_init(); //Inicializa as configuracoes da rede MESH
-    // define_root(); //Funcao para caso tenha o mac espeficicado, se torna o root
-    wakeUpCause = esp_sleep_get_wakeup_cause();
-    //Testa se o ESP acabou de sair do deepsleep ou nao
-    switch (wakeUpCause){
-		case ESP_SLEEP_WAKEUP_TIMER:;//Caso tenha saido por causa do temporizador
-			int64_t before,after = 0;
-			#if ULTRASONIC
-			sensor.trigger_pin = TRIGGER_GPIO;
-            sensor.echo_pin = ECHO_GPIO;
-    		ESP_ERROR_CHECK(ultrasonic_init(&sensor));
-    		#endif
-			before = esp_timer_get_time();
-			num_of_wakes[0] = 0;
-			ESP_LOGW("MESH_TAG","SENSOR STATUS: %s\nDISTANCE: %f\n",esp_err_to_name(measure_distance(&num_of_wakes[0])),num_of_wakes[0]);
+    
+	#if ULTRASONIC
+	sensor.trigger_pin = TRIGGER_GPIO;
+    sensor.echo_pin = ECHO_GPIO;
+    ESP_ERROR_CHECK(ultrasonic_init(&sensor));
+    #endif
 
-			time(&now); //Pega o tempo armazenado no RTC
-			setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
-			tzset(); //Define a time zone
-			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
-			
-			int next_sleep = next_sleep_time(timeinfo,1);
-			printf("Faltam %d segundos para a transmissao\n",next_sleep);
-			if((next_sleep_time(timeinfo,1) <= 10)){
-				meshf_sleep_time(next_sleep_time(timeinfo,1)*1000);
-				use_network(mqtt_data,rx_mensagem);
-			}
-			after = esp_timer_get_time();
-			ESP_LOGE("MESH_TAG","Tempo ligado %d microssegundos",(int)(after-before));
-			esp_sleep_enable_timer_wakeup(sensor_seconds*1000000);
-			meshf_stop();
-			esp_deep_sleep_start(); //Coloca o esp em deep sleep
-		break;
-    	default: //Caso ele nao esteja saindo de um deepsleep
-    		num_of_wakes[0] = 0;
+	num_of_wakes[0] = 0;
+	ESP_LOGW("MESH_TAG","SENSOR STATUS: %s\nDISTANCE: %f\n",esp_err_to_name(measure_distance(&num_of_wakes[0])),num_of_wakes[0]);
+				
+    num_of_wakes[0] = 0;
     		
-    		esp_err_t mesh_on = meshf_start(45000/portTICK_PERIOD_MS); //Inicializa a rede MESH
-    		if (mesh_on != ESP_OK){
-				esp_restart();
-			}
+    esp_err_t mesh_on = meshf_start(45000/portTICK_PERIOD_MS); //Inicializa a rede MESH
+    if (mesh_on != ESP_OK){
+		esp_restart();
+	}
 
-			meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
-			ESP_ERROR_CHECK(meshf_rx(rx_mensagem)); //Seta o buffer para recepcao das mensagens
-			meshf_start_mqtt(); //Conecta-se ao servidor MQTT
-			ESP_ERROR_CHECK(meshf_mqtt_subscribe("/data/esp32/downstream", 0));
-			ESP_ERROR_CHECK(meshf_asktime(45000/portTICK_PERIOD_MS)); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
-			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
-			printf("%s\n",mqtt_data);
+	meshf_start_sntp(); //Se conecta ao server SNTP e atualiza o seu relogio RTC (caso seja root)
+	ESP_ERROR_CHECK(meshf_rx(rx_mensagem)); //Seta o buffer para recepcao das mensagens
+	meshf_start_mqtt(); //Conecta-se ao servidor MQTT
+	ESP_ERROR_CHECK(meshf_asktime(45000/portTICK_PERIOD_MS)); //Pede ao noh root pelo horario atual que foi recebido pelo SNTP (caso nao seja root)
+	ESP_ERROR_CHECK(meshf_mqtt_subscribe("/data/esp32/downstream", 0, &custom_callback));
 
-    		time(&now); //Pega o tempo armazenado no RTC
-			setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
-			tzset(); //Define a time zone
-			localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
+	#if GPS
+	gps = init_Gps(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16);
+	#endif
+	while(true)
+	{
+		time(&now); //Pega o tempo armazenado no RTC
+		setenv("TZ", "UTC+3", 1); //Configura variaveis de ambiente com esse time zona
+		tzset(); //Define a time zone
+		localtime_r(&now, &timeinfo); //Reformata o horario pego do RTC
 
-			#if GPS
-			gps = init_Gps(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16);
+		measure_distance(&num_of_wakes[0]);
+		time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
+		printf("%s\n",mqtt_data);
+		esp_err_t resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
+		printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
 
-			while(true)
-			{
-			#endif //GPS
-
-			int awake_until = next_sleep_time(timeinfo,1); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
-			ESP_LOGW("MESH_TAG","Vai continuar acordado por %d segundos\n",awake_until);
-			meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
-			measure_distance(&num_of_wakes[0]);
-			time_message_generator(mqtt_data,num_of_wakes[0]); //Formata a data atual do ESP para dentro do array especificado
-			printf("%s\n",mqtt_data);
-			resp = meshf_mqtt_publish("/data/esp32",strlen("/data/esp32"),mqtt_data,strlen(mqtt_data)); //Publica a data atual no topico /data/esp32
-			printf("PUBLICACAO MQTT = %s\n",esp_err_to_name(resp));
-
-			#if GPS
-			} //ending Bracket of while(true) in case of GPS is 1s
-			#endif
-			ESP_LOGW("MESH_TAG","Vai continuar acordado por 60 segundos\n");
-			meshf_sleep_time(60000); //Bloqueia o ESP por 1 minuto
-
-			esp_sleep_enable_timer_wakeup(sensor_seconds*1000000); //Ativa o esp para acordar depois que o tempo definido anteriormente ter passado
-			esp_wifi_stop();
-			esp_deep_sleep_start(); //Coloca o esp em deep sleep
-		break;
+    	int awake_until = next_sleep_time(timeinfo,1); //Calcula até quanto tempo para XX:AA:00. Sendo AA os minutos multiplos de 5 mais prox.
+		ESP_LOGW("MESH_TAG","Vai continuar acordado por %d segundos\n",awake_until);
+		ESP_LOGI("TAG","Free Heap memory: %d",esp_get_free_heap_size());
+		ESP_LOGI("TAG","Free Heap memory: %d",heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+		meshf_sleep_time(awake_until*1000); //Bloqueia o fluxo do codigo até que o horario estipulado anteriormente seja atingido
 	}
 }

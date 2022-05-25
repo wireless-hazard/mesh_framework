@@ -60,22 +60,23 @@ esp_mqtt_client_handle_t mqtt_handler;
 
 TaskHandle_t forwarding_scheme_handler = NULL;
 
+void (*static_custom_callback_function)(char *parameter, size_t param_lenght) = NULL;
+
 void STR2MAC(uint8_t *address,char rec_string[17]){
-	uint8_t mac[6] = {0,};
+	char mac_unit[5] = {0};
+	uint8_t mac[6] = {0};
+
 	int j = 0;
-	for (int i = 0;i<=17;i+=3){
-		if((uint8_t)rec_string[i] <= 58){
-			mac[j] = (((uint8_t)rec_string[i]-48) * 16);
-		}else{
-			mac[j] = (((uint8_t)rec_string[i]-55) * 16);
-		}
-		if((uint8_t)rec_string[i+1] <= 58){
-			mac[j] += ((uint8_t)rec_string[i+1]-48);	
-		}else{
-			mac[j] += ((uint8_t)rec_string[i+1]-55);
-		}
+	for (int i = 0; i < 17; i+=3)
+	{
+		mac_unit[0] = '0';
+		mac_unit[1] = 'x';
+		memcpy(&mac_unit[2], &rec_string[i], 2);
+		mac_unit[4] = '\0';
+		mac[j] = (uint8_t)strtol(mac_unit, NULL, 16);
 		j++;
 	}
+
 	memcpy(address,&mac,sizeof(uint8_t)*6);
 }
 
@@ -417,7 +418,9 @@ void rx_connection(void *pvParameters){
 				char *mqtt_sub_strc = cJSON_Print(json_subed);
 
 				ESP_LOGI(MESH_TAG, "%s", mqtt_sub_strc);
-
+				if (static_custom_callback_function != NULL){
+					(*static_custom_callback_function)(mqtt_sub_strc, strlen(mqtt_sub_strc)); //Calls custom handler
+				}
 				//TODO Custom handler for the received string
 				free(mqtt_sub_strc);
 				cJSON_Delete(json);
@@ -538,8 +541,9 @@ esp_err_t meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uin
 	}
 }
 
-esp_err_t meshf_mqtt_subscribe(const char *topic, int qos){
+esp_err_t meshf_mqtt_subscribe(const char *topic, int qos, void (*custom_callback_function)(char *parameter, size_t param_lenght)){
 	esp_err_t err = ESP_FAIL;
+	static_custom_callback_function = custom_callback_function;
 	if(esp_mesh_is_root()){
 		int error = esp_mqtt_client_subscribe(mqtt_handler, topic, qos);
 		err = (error == -1) ? ESP_FAIL : ESP_OK;
@@ -829,10 +833,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
 		case MQTT_EVENT_DATA:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_DATA");
 			printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-            char *mqtt_event_data = (char *)malloc(event->data_len);
-			sprintf(mqtt_event_data,"%.*s", event->data_len, event->data);
-			ESP_LOGW(MESH_TAG, "%s\n", mqtt_event_data);
-            cJSON *mqtt_json = cJSON_Parse(mqtt_event_data); //Tries to parse the data received as a JSON
+            cJSON *mqtt_json = cJSON_Parse(event->data); //Tries to parse the data received as a JSON
             if (mqtt_json != NULL){
             	cJSON *mac_parameter = cJSON_GetObjectItem(mqtt_json, "mac"); //Gets the field mac, the packet final destination
             	if (mac_parameter != NULL){
@@ -852,6 +853,19 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
             			mesh_addr_t to;
 
             			STR2MAC(to.addr, mac_str); //Converts the string addr into a uint8_t buffer
+
+            			uint8_t self_mac[6] = {0};
+
+						esp_wifi_get_mac(ESP_IF_WIFI_AP,&self_mac);
+
+						if(self_mac[0]==to.addr[0] && self_mac[1]==to.addr[1] && self_mac[2]==to.addr[2]&& self_mac[3]==to.addr[3] 
+							&& self_mac[4]==to.addr[4] && self_mac[5]==to.addr[5])
+						{
+							if (static_custom_callback_function != NULL)
+							{
+								(*static_custom_callback_function)(data_str, strlen(data_str)); //Calls custom handler
+							}
+						}
 						
             			mesh_data_t data;
 
@@ -877,7 +891,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event){
             	}
            		cJSON_Delete(mqtt_json);
             }
-            free(mqtt_event_data);
+            // free(mqtt_event_data);
 		break;
 		case MQTT_EVENT_ERROR:
 			ESP_LOGW(MESH_TAG,"MQTT_EVENT_ERROR");
@@ -1015,7 +1029,7 @@ void task_start_sntp(void *pvParameters){
 	time_t now = 0;
   	struct tm timeinfo = { 0 };
   	int retry = 0;
-   	const int retry_count = 10;
+   	const int retry_count = 20;
    	while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
    	   	ESP_LOGI(MESH_TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
        	vTaskDelay(2000 / portTICK_PERIOD_MS);
