@@ -23,6 +23,10 @@
 #include "mqtt_client.h"
 #include "esp_sntp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void STR2MAC(uint8_t *address,char rec_string[17]);
 uint16_t meshf_uint8_t_json_creator(uint8_t json_value[], uint8_t key[], uint16_t size_key, uint8_t value[], uint16_t size_value);
 void tx_p2p(void *pvParameters);
@@ -46,3 +50,7 @@ void meshf_start_sntp();
 
 extern esp_mqtt_client_handle_t mqtt_handler;
 extern mesh_data_t rx_data;
+
+#ifdef __cplusplus
+}
+#endif
