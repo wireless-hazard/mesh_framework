@@ -320,6 +320,7 @@ void rx_connection(void *pvParameters){
 				}
 
 				free(string2);
+				cJSON_Delete(json_pong);
 
 				printf("%s\n",pong_packet.data);
 				esp_err_t send_error;
@@ -426,6 +427,7 @@ void rx_connection(void *pvParameters){
 				cJSON_Delete(json_subed);
 				continue;
 			}
+			free(string)
 			cJSON_Delete(json);
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
