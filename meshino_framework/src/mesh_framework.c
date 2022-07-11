@@ -427,7 +427,7 @@ void rx_connection(void *pvParameters){
 				cJSON_Delete(json_subed);
 				continue;
 			}
-			free(string)
+			free(string);
 			cJSON_Delete(json);
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
