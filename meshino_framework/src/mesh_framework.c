@@ -526,7 +526,7 @@ esp_err_t meshf_mqtt_publish(const char *topic, uint16_t topic_size, const char 
 		esp_err_t send_error = esp_mesh_send(NULL,&tx_data,MESH_DATA_P2P,NULL,0);
 		ESP_LOGE(MESH_TAG,"Erro :%s na publicacao MQTT p2p\n",esp_err_to_name(send_error));
 		cJSON_Delete(json_mqtt);
-		free(string);
+		free(string1);
 		return send_error;
 	}else{
 		ESP_LOGI(MESH_TAG,"Topic ->%s<-\n",topic);
