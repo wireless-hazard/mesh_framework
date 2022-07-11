@@ -423,9 +423,10 @@ void rx_connection(void *pvParameters){
 				}
 				//TODO Custom handler for the received string
 				free(mqtt_sub_strc);
-				cJSON_Delete(json);
+				cJSON_Delete(json_subed);
 				continue;
 			}
+			cJSON_Delete(json);
 			memcpy(array_data,rx_data.data,rx_data.size);
 			is_buffer_free = false;
 			xSemaphoreGive(SemaphoreDataReady);
@@ -498,7 +499,7 @@ esp_err_t meshf_asktime(TickType_t xTicksToWait){
 	}
 }
 
-esp_err_t meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size){
+esp_err_t meshf_mqtt_publish(const char *topic, uint16_t topic_size, const char *data, uint16_t data_size){
 	if (!esp_mesh_is_root()){
 		cJSON *json_mqtt = cJSON_CreateObject();
 		cJSON_AddStringToObject(json_mqtt,"flag","MQTT");

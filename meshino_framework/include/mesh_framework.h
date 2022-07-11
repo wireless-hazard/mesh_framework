@@ -34,7 +34,7 @@ void meshf_tx_p2p(char mac_destination[],uint8_t transmitted_data[],uint16_t dat
 void meshf_tx_TODS(char ip_destination[],int port,uint8_t transmitted_data[],uint16_t data_size);
 esp_err_t meshf_rx(uint8_t *array_data);
 esp_err_t meshf_asktime(TickType_t xTicksToWait);
-esp_err_t meshf_mqtt_publish(char topic[], uint16_t topic_size, char data[], uint16_t data_size);
+esp_err_t meshf_mqtt_publish(const char *topic, uint16_t topic_size, const char *data, uint16_t data_size);
 esp_err_t meshf_mqtt_subscribe(const char *topic, int qos, void (*custom_callback_function)(char *parameter, size_t param_lenght));
 void meshf_ping(char mac_destination[]);
 void meshf_rssi_info(int8_t *rssi,char interested_mac[]);
